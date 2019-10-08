@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+import "./IRToken.sol";
 
 contract HoodieToken {
   string public name = "Flex Dapps Hoodie Token";
