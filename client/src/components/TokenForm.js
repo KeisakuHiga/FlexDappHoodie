@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 
 class TokenForm extends Component {
   state = {
+    hoodieInstance: this.props.hoodieInstance,
+    accounts: this.props.accounts,
+    from: '',
     to: '',
     value: 0,
   }
