@@ -1,11 +1,22 @@
 import React, { Component } from "react";
-import SimpleStorageContract from "./contracts/SimpleStorage.json";
+import HoodieToken from "./contracts/HoodieToken.json";
 import getWeb3 from "./utils/getWeb3";
 
+import TokenForm from "./components/TokenForm";
 import "./App.css";
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null };
+  state = {
+    web3: null,
+    accounts: null,
+    hoodieInstance: null,
+
+    name: '',
+    symbol: '',
+    standard: '',
+    totalSupply: 0,
+    balanceOf: 0
+  };
 
   componentDidMount = async () => {
     try {
@@ -17,15 +28,15 @@ class App extends Component {
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-      const deployedNetwork = SimpleStorageContract.networks[networkId];
-      const instance = new web3.eth.Contract(
-        SimpleStorageContract.abi,
-        deployedNetwork && deployedNetwork.address,
+      const HoodieDeployedNetwork = HoodieToken.networks[networkId];
+      const hoodieInstance = new web3.eth.Contract(
+        HoodieToken.abi,
+        HoodieDeployedNetwork && HoodieDeployedNetwork.address,
       );
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
+      this.setState({ web3, accounts, hoodieInstance }, this.getBasicInfo);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -35,36 +46,30 @@ class App extends Component {
     }
   };
 
-  runExample = async () => {
-    const { accounts, contract } = this.state;
+  getBasicInfo = async () => {
+    const { accounts, hoodieInstance } = this.state;
 
-    // Stores a given value, 5 by default.
-    await contract.methods.set(5).send({ from: accounts[0] });
+    const name = await hoodieInstance.methods.name().call();
+    const symbol = await hoodieInstance.methods.symbol().call();
+    const totalSupply = await hoodieInstance.methods.totalSupply().call();
+    const balanceOf = await hoodieInstance.methods.balanceOf(accounts[0]).call();
 
-    // Get the value from the contract to prove it worked.
-    const response = await contract.methods.get().call();
-
-    // Update state with the result.
-    this.setState({ storageValue: response });
+    this.setState({ name, symbol, totalSupply, balanceOf });
   };
 
   render() {
-    if (!this.state.web3) {
+    const { web3, accounts, hoodieInstance, name, symbol, totalSupply, balanceOf } = this.state
+    if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
     return (
       <div className="App">
-        <h1>Good to Go!</h1>
-        <p>Your Truffle Box is installed and ready.</p>
-        <h2>Smart Contract Example</h2>
-        <p>
-          If your contracts compiled and migrated successfully, below will show
-          a stored value of 5 (by default).
-        </p>
-        <p>
-          Try changing the value stored on <strong>line 40</strong> of App.js.
-        </p>
-        <div>The stored value is: {this.state.storageValue}</div>
+        <div>
+          <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
+          <h3>Hoodie token's total supply is {totalSupply}</h3>
+          <h3>You have {balanceOf} HDH now</h3>
+        </div>
+          <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} />
       </div>
     );
   }
