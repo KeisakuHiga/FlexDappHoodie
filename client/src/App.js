@@ -58,7 +58,7 @@ class App extends Component {
   };
 
   render() {
-    const { web3, name, symbol, totalSupply, balanceOf } = this.state
+    const { web3, accounts, hoodieInstance, name, symbol, totalSupply, balanceOf } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -69,7 +69,7 @@ class App extends Component {
           <h3>Hoodie token's total supply is {totalSupply}</h3>
           <h3>You have {balanceOf} HDH now</h3>
         </div>
-          <TokenForm />
+          <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} />
       </div>
     );
   }
