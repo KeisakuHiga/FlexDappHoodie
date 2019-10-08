@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import HoodieToken from "./contracts/HoodieToken.json";
 import getWeb3 from "./utils/getWeb3";
 
+import TokenForm from "./components/TokenForm";
 import "./App.css";
 
 class App extends Component {
@@ -67,8 +68,8 @@ class App extends Component {
           <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
           <h3>Hoodie token's total supply is {totalSupply}</h3>
           <h3>You have {balanceOf} HDH now</h3>
-
         </div>
+          <TokenForm />
       </div>
     );
   }
