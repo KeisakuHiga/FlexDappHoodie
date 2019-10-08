@@ -47,8 +47,7 @@ contract HoodieToken {
 
   function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
     require(_value <= balanceOf[_from], "The value should be smaller than or equal to the owner's balance");
-    require(_value <= allowance[_from][msg.sender], "The value should be smaller than or equal to the balance that the owner allowed");    
-
+    require(_value <= allowance[_from][msg.sender], "The value should be smaller than or equal to the balance that the owner allowed");
     balanceOf[_from] -= _value;
     balanceOf[_to] += _value;
 

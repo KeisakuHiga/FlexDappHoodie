@@ -1,11 +1,19 @@
 import React, { Component } from "react";
 import SimpleStorageContract from "./contracts/SimpleStorage.json";
+import HoodieToken from "./contracts/HoodieToken.json";
 import getWeb3 from "./utils/getWeb3";
 
 import "./App.css";
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null };
+  state = {
+    storageValue: 0,
+    totalSupply: 0,
+    web3: null,
+    accounts: null,
+    contract: null,
+    hoodieInstance: null
+  };
 
   componentDidMount = async () => {
     try {
@@ -22,10 +30,15 @@ class App extends Component {
         SimpleStorageContract.abi,
         deployedNetwork && deployedNetwork.address,
       );
+      const HoodieDeployedNetwork = HoodieToken.networks[networkId];
+      const hoodieInstance = new web3.eth.Contract(
+        HoodieToken.abi,
+        HoodieDeployedNetwork && HoodieDeployedNetwork.address,
+      );
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
+      this.setState({ web3, accounts, contract: instance, hoodieInstance }, this.runExample);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -36,16 +49,16 @@ class App extends Component {
   };
 
   runExample = async () => {
-    const { accounts, contract } = this.state;
+    const { accounts, contract, hoodieInstance } = this.state;
 
     // Stores a given value, 5 by default.
     await contract.methods.set(5).send({ from: accounts[0] });
 
     // Get the value from the contract to prove it worked.
     const response = await contract.methods.get().call();
-
+    const totalSupply = await hoodieInstance.methods.totalSupply().call();
     // Update state with the result.
-    this.setState({ storageValue: response });
+    this.setState({ storageValue: response, totalSupply });
   };
 
   render() {
@@ -65,6 +78,15 @@ class App extends Component {
           Try changing the value stored on <strong>line 40</strong> of App.js.
         </p>
         <div>The stored value is: {this.state.storageValue}</div>
+
+        <div>
+          h1  
+          Hoodie token's total supply is {this.state.totalSupply}
+        </div>
+
+
+
+
       </div>
     );
   }
