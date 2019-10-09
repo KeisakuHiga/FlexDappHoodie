@@ -5,7 +5,7 @@ import {RTokenStorage} from './RTokenStorage.sol';
 import {RTokenStructs} from './RTokenStructs.sol';
 import {Proxiable} from './Proxiable.sol';
 import {LibraryLock} from './LibraryLock.sol';
-import {SafeMath} from 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {Ownable} from './Ownable.sol';
 import {ReentrancyGuard} from './ReentrancyGuard.sol';
 import {IERC20, IRToken} from './IRToken.sol';

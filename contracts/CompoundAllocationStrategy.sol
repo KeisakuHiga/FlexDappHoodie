@@ -1,8 +1,8 @@
 pragma solidity ^0.5.8;
 
 import {IAllocationStrategy} from "./IAllocationStrategy.sol";
-import {Ownable} from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import {IERC20} from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/ownership/Ownable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {CErc20Interface} from "../compound/contracts/CErc20Interface.sol";
 
 contract CompoundAllocationStrategy is IAllocationStrategy, Ownable {
@@ -15,7 +15,7 @@ contract CompoundAllocationStrategy is IAllocationStrategy, Ownable {
         token = IERC20(cToken.underlying());
     }
 
-    /// @dev ISavingStrategy.underlying implementation
+    // @dev ISavingStrategy.underlying implementation
     function underlying() external view returns (address) {
         return cToken.underlying();
     }
