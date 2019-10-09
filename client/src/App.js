@@ -15,7 +15,8 @@ class App extends Component {
     symbol: '',
     standard: '',
     totalSupply: 0,
-    balanceOf: 0
+    balanceOf: 0,
+    owner: ''
   };
 
   componentDidMount = async () => {
@@ -25,7 +26,7 @@ class App extends Component {
 
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
-
+      console.log(accounts[0])
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
       const HoodieDeployedNetwork = HoodieToken.networks[networkId];
@@ -33,6 +34,8 @@ class App extends Component {
         HoodieToken.abi,
         HoodieDeployedNetwork && HoodieDeployedNetwork.address,
       );
+
+      console.log(hoodieInstance.options.address)
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
@@ -49,6 +52,7 @@ class App extends Component {
   getBasicInfo = async () => {
     const { accounts, hoodieInstance } = this.state;
 
+    // const owner = await hoodieInstance.methods.getOwnerAddress().call();
     const name = await hoodieInstance.methods.name().call();
     const symbol = await hoodieInstance.methods.symbol().call();
     const totalSupply = await hoodieInstance.methods.totalSupply().call();
@@ -58,7 +62,7 @@ class App extends Component {
   };
 
   render() {
-    const { web3, accounts, hoodieInstance, name, symbol, totalSupply, balanceOf } = this.state
+    const { web3, accounts, hoodieInstance, name, symbol, totalSupply, balanceOf, owner } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -67,7 +71,8 @@ class App extends Component {
         <div>
           <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
           <h3>Hoodie token's total supply is {totalSupply}</h3>
-          <h3>You have {balanceOf} HDH now</h3>
+          <h3>You have {balanceOf} FDH now</h3>
+          <p>owner address: {owner}</p>
         </div>
           <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} />
       </div>

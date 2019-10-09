@@ -3,8 +3,8 @@ import "./IRToken.sol";
 
 contract HoodieToken {
   // RToken address on rinkeby
-  address RTokenAddress = 0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578;
-  IRToken rTokenContract = IRToken(RTokenAddress);
+  // address RTokenAddress = 0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578;
+  // IRToken rTokenContract = IRToken(RTokenAddress);
 
   // Basic set up for FDH
   string public name = "Flex Dapps Hoodie Token";
@@ -31,6 +31,11 @@ contract HoodieToken {
     balanceOf[msg.sender] = _initialSupply;
     totalSupply = _initialSupply;
   }
+
+  // function getOwnerAddress() public view returns(address) {
+  //   return rTokenContract.owner();
+  // }
+
 
   function transfer(address _to, uint _value) public returns (bool success) {
     require(balanceOf[msg.sender] >= _value, "The value should be smaller than or equal to the balance");

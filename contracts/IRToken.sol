@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import {RTokenStructs} from './RTokenStructs.sol';
-import {IERC20} from 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {IAllocationStrategy} from './IAllocationStrategy.sol';
 
 /*
@@ -11,6 +11,12 @@ import {IAllocationStrategy} from './IAllocationStrategy.sol';
  *      addresses and pay earned interest in new _rTokens_.
  */
 contract IRToken is RTokenStructs, IERC20 {
+    // //my test
+    // address public owner;
+    // constructor() public {
+    //     owner = msg.sender;
+    // }
+    // // end test
     ////////////////////////////////////////////////////////////////////////////
     // For external transactions
     ////////////////////////////////////////////////////////////////////////////
