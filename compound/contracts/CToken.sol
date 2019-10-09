@@ -7,108 +7,108 @@ import "./ReentrancyGuard.sol";
 import "./ComptrollerInterface.sol";
 import "./InterestRateModel.sol";
 
-/**
+/*
  * @title Compound's CToken Contract
  * @notice Abstract base for CTokens
  * @author Compound
  */
 contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGuard {
-    /**
+    /*
      * @notice Indicator that this is a CToken contract (for inspection)
      */
     bool public constant isCToken = true;
 
-    /**
+    /*
      * @notice EIP-20 token name for this token
      */
     string public name;
 
-    /**
+    /*
      * @notice EIP-20 token symbol for this token
      */
     string public symbol;
 
-    /**
+    /*
      * @notice EIP-20 token decimals for this token
      */
     uint256 public decimals;
 
-    /**
+    /*
      * @notice Maximum borrow rate that can ever be applied (.0005% / block)
      */
     uint256 constant borrowRateMaxMantissa = 5e14;
 
-    /**
+    /*
      * @notice Maximum fraction of interest that can be set aside for reserves
      */
     uint256 constant reserveFactorMaxMantissa = 1e18;
 
-    /**
+    /*
      * @notice Administrator for this contract
      */
     address payable public admin;
 
-    /**
+    /*
      * @notice Pending administrator for this contract
      */
     address payable public pendingAdmin;
 
-    /**
+    /*
      * @notice Contract which oversees inter-cToken operations
      */
     ComptrollerInterface public comptroller;
 
-    /**
+    /*
      * @notice Model which tells what the current interest rate should be
      */
     InterestRateModel public interestRateModel;
 
-    /**
+    /*
      * @notice Initial exchange rate used when minting the first CTokens (used when totalSupply = 0)
      */
     uint256 public initialExchangeRateMantissa;
 
-    /**
+    /*
      * @notice Fraction of interest currently set aside for reserves
      */
     uint256 public reserveFactorMantissa;
 
-    /**
+    /*
      * @notice Block number that interest was last accrued at
      */
     uint256 public accrualBlockNumber;
 
-    /**
+    /*
      * @notice Accumulator of total earned interest since the opening of the market
      */
     uint256 public borrowIndex;
 
-    /**
+    /*
      * @notice Total amount of outstanding borrows of the underlying in this market
      */
     uint256 public totalBorrows;
 
-    /**
+    /*
      * @notice Total amount of reserves of the underlying held in this market
      */
     uint256 public totalReserves;
 
-    /**
+    /*
      * @notice Total number of tokens in circulation
      */
     uint256 public totalSupply;
 
-    /**
+    /*
      * @notice Official record of token balances for each account
      */
     mapping(address => uint256) accountTokens;
 
-    /**
+    /*
      * @notice Approved token transfer amounts on behalf of others
      */
     mapping(address => mapping(address => uint256)) transferAllowances;
 
-    /**
+    /*
      * @notice Container for borrow balance information
      * @member principal Total balance (with accrued interest), after applying the most recent balance-changing action
      * @member interestIndex Global borrowIndex as of the most recent balance-changing action
@@ -118,34 +118,34 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         uint256 interestIndex;
     }
 
-    /**
+    /*
      * @notice Mapping of account addresses to outstanding borrow balances
      */
     mapping(address => BorrowSnapshot) accountBorrows;
 
     /*** Market Events ***/
 
-    /**
+    /*
      * @notice Event emitted when interest is accrued
      */
     event AccrueInterest(uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
 
-    /**
+    /*
      * @notice Event emitted when tokens are minted
      */
     event Mint(address minter, uint256 mintAmount, uint256 mintTokens);
 
-    /**
+    /*
      * @notice Event emitted when tokens are redeemed
      */
     event Redeem(address redeemer, uint256 redeemAmount, uint256 redeemTokens);
 
-    /**
+    /*
      * @notice Event emitted when underlying is borrowed
      */
     event Borrow(address borrower, uint256 borrowAmount, uint256 accountBorrows, uint256 totalBorrows);
 
-    /**
+    /*
      * @notice Event emitted when a borrow is repaid
      */
     event RepayBorrow(
@@ -156,7 +156,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         uint256 totalBorrows
     );
 
-    /**
+    /*
      * @notice Event emitted when a borrow is liquidated
      */
     event LiquidateBorrow(
@@ -169,37 +169,37 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
 
     /*** Admin Events ***/
 
-    /**
+    /*
      * @notice Event emitted when pendingAdmin is changed
      */
     event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
 
-    /**
+    /*
      * @notice Event emitted when pendingAdmin is accepted, which means admin is updated
      */
     event NewAdmin(address oldAdmin, address newAdmin);
 
-    /**
+    /*
      * @notice Event emitted when comptroller is changed
      */
     event NewComptroller(ComptrollerInterface oldComptroller, ComptrollerInterface newComptroller);
 
-    /**
+    /*
      * @notice Event emitted when interestRateModel is changed
      */
     event NewMarketInterestRateModel(InterestRateModel oldInterestRateModel, InterestRateModel newInterestRateModel);
 
-    /**
+    /*
      * @notice Event emitted when the reserve factor is changed
      */
     event NewReserveFactor(uint256 oldReserveFactorMantissa, uint256 newReserveFactorMantissa);
 
-    /**
+    /*
      * @notice Event emitted when the reserves are reduced
      */
     event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
 
-    /**
+    /*
      * @notice Construct a new money market
      * @param comptroller_ The address of the Comptroller
      * @param interestRateModel_ The address of the interest rate model
@@ -240,7 +240,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         decimals = decimals_;
     }
 
-    /**
+    /*
      * @notice Transfer `tokens` tokens from `src` to `dst` by `spender`
      * @dev Called by both `transfer` and `transferFrom` internally
      * @param spender The address of the account performing the transfer
@@ -311,7 +311,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice Transfer `amount` tokens from `msg.sender` to `dst`
      * @param dst The address of the destination account
      * @param amount The number of tokens to transfer
@@ -321,7 +321,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return transferTokens(msg.sender, msg.sender, dst, amount) == uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice Transfer `amount` tokens from `src` to `dst`
      * @param src The address of the source account
      * @param dst The address of the destination account
@@ -332,7 +332,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return transferTokens(msg.sender, src, dst, amount) == uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice Approve `spender` to transfer up to `amount` from `src`
      * @dev This will overwrite the approval amount for `spender`
      *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
@@ -347,7 +347,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return true;
     }
 
-    /**
+    /*
      * @notice Get the current allowance from `owner` for `spender`
      * @param owner The address of the account which owns the tokens to be spent
      * @param spender The address of the account which may transfer tokens
@@ -357,7 +357,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return transferAllowances[owner][spender];
     }
 
-    /**
+    /*
      * @notice Get the token balance of the `owner`
      * @param owner The address of the account to query
      * @return The number of tokens owned by `owner`
@@ -366,7 +366,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return accountTokens[owner];
     }
 
-    /**
+    /*
      * @notice Get the underlying balance of the `owner`
      * @dev This also accrues interest in a transaction
      * @param owner The address of the account to query
@@ -379,7 +379,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return balance;
     }
 
-    /**
+    /*
      * @notice Get a snapshot of the account's balances, and the cached exchange rate
      * @dev This is used by comptroller to more efficiently perform liquidity checks.
      * @param account Address of the account to snapshot
@@ -405,7 +405,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return (uint256(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
     }
 
-    /**
+    /*
      * @dev Function to simply retrieve block number
      *  This exists mainly for inheriting test contracts to stub this result.
      */
@@ -413,7 +413,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return block.number;
     }
 
-    /**
+    /*
      * @notice Returns the current per-block borrow interest rate for this cToken
      * @return The borrow interest rate per block, scaled by 1e18
      */
@@ -427,7 +427,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return borrowRateMantissa;
     }
 
-    /**
+    /*
      * @notice Returns the current per-block supply interest rate for this cToken
      * @return The supply interest rate per block, scaled by 1e18
      */
@@ -468,7 +468,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return supplyRate.mantissa;
     }
 
-    /**
+    /*
      * @notice Returns the current total borrows plus accrued interest
      * @return The total borrows with interest
      */
@@ -477,7 +477,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return totalBorrows;
     }
 
-    /**
+    /*
      * @notice Accrue interest to updated borrowIndex and then calculate account's borrow balance using the updated borrowIndex
      * @param account The address whose balance should be calculated after updating borrowIndex
      * @return The calculated balance
@@ -487,7 +487,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return borrowBalanceStored(account);
     }
 
-    /**
+    /*
      * @notice Return the borrow balance of account based on stored data
      * @param account The address whose balance should be calculated
      * @return The calculated balance
@@ -498,7 +498,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return result;
     }
 
-    /**
+    /*
      * @notice Return the borrow balance of account based on stored data
      * @param account The address whose balance should be calculated
      * @return (error code, the calculated balance or 0 if error code is non-zero)
@@ -535,7 +535,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return (MathError.NO_ERROR, result);
     }
 
-    /**
+    /*
      * @notice Accrue interest then return the up-to-date exchange rate
      * @return Calculated exchange rate scaled by 1e18
      */
@@ -544,7 +544,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return exchangeRateStored();
     }
 
-    /**
+    /*
      * @notice Calculates the exchange rate from the underlying to the CToken
      * @dev This function does not accrue interest before calculating the exchange rate
      * @return Calculated exchange rate scaled by 1e18
@@ -555,7 +555,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return result;
     }
 
-    /**
+    /*
      * @notice Calculates the exchange rate from the underlying to the CToken
      * @dev This function does not accrue interest before calculating the exchange rate
      * @return (error code, calculated exchange rate scaled by 1e18)
@@ -591,7 +591,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         }
     }
 
-    /**
+    /*
      * @notice Get cash balance of this cToken in the underlying asset
      * @return The quantity of underlying asset owned by this contract
      */
@@ -612,7 +612,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         uint256 borrowIndexNew;
     }
 
-    /**
+    /*
       * @notice Applies accrued interest to total borrows and reserves.
       * @dev This calculates interest accrued from the last checkpointed block
       *      up to the current block and writes new checkpoint to storage.
@@ -728,7 +728,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice Sender supplies assets into the market and receives cTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param mintAmount The amount of the underlying asset to supply
@@ -753,7 +753,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         uint256 accountTokensNew;
     }
 
-    /**
+    /*
      * @notice User supplies assets into the market and receives cTokens in exchange
      * @dev Assumes interest has already been accrued up to the current block
      * @param minter The address of the account which is supplying the assets
@@ -852,7 +852,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice Sender redeems cTokens in exchange for the underlying asset
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param redeemTokens The number of cTokens to redeem into underlying
@@ -868,7 +868,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return redeemFresh(msg.sender, redeemTokens, 0);
     }
 
-    /**
+    /*
      * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param redeemAmount The amount of underlying to redeem
@@ -894,7 +894,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         uint256 accountTokensNew;
     }
 
-    /**
+    /*
      * @notice User redeems cTokens in exchange for the underlying asset
      * @dev Assumes interest has already been accrued up to the current block
      * @param redeemer The address of the account which is redeeming the tokens
@@ -1029,7 +1029,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
       * @notice Sender borrows assets from the protocol to their own address
       * @param borrowAmount The amount of the underlying asset to borrow
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1052,7 +1052,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         uint256 totalBorrowsNew;
     }
 
-    /**
+    /*
       * @notice Users borrow assets from the protocol to their own address
       * @param borrowAmount The amount of the underlying asset to borrow
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1139,7 +1139,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice Sender repays their own borrow
      * @param repayAmount The amount to repay
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1154,7 +1154,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return repayBorrowFresh(msg.sender, msg.sender, repayAmount);
     }
 
-    /**
+    /*
      * @notice Sender repays a borrow belonging to borrower
      * @param borrower the account with the debt being payed off
      * @param repayAmount The amount to repay
@@ -1180,7 +1180,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         uint256 totalBorrowsNew;
     }
 
-    /**
+    /*
      * @notice Borrows are repaid by another user (possibly the borrower).
      * @param payer the account paying off the borrow
      * @param borrower the account with the debt being payed off
@@ -1281,7 +1281,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice The sender liquidates the borrowers collateral.
      *  The collateral seized is transferred to the liquidator.
      * @param borrower The borrower of this cToken to be liquidated
@@ -1310,7 +1310,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return liquidateBorrowFresh(msg.sender, borrower, repayAmount, cTokenCollateral);
     }
 
-    /**
+    /*
      * @notice The liquidator liquidates the borrowers collateral.
      *  The collateral seized is transferred to the liquidator.
      * @param borrower The borrower of this cToken to be liquidated
@@ -1406,7 +1406,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice Transfers collateral tokens (this market) to the liquidator.
      * @dev Will fail unless called by another cToken during the process of liquidation.
      *  Its absolutely critical to use msg.sender as the borrowed cToken and not a parameter.
@@ -1465,7 +1465,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
 
     /*** Admin Functions ***/
 
-    /**
+    /*
       * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
       * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
       * @param newPendingAdmin New pending admin.
@@ -1491,7 +1491,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
       * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
       * @dev Admin function for pending admin to accept role and update admin
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1518,7 +1518,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
       * @notice Sets a new comptroller for the market
       * @dev Admin function to set a new comptroller
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1542,7 +1542,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
       * @notice accrues interest and sets a new reserve factor for the protocol using _setReserveFactorFresh
       * @dev Admin function to accrue interest and set a new reserve factor
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1557,7 +1557,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return _setReserveFactorFresh(newReserveFactorMantissa);
     }
 
-    /**
+    /*
       * @notice Sets a new reserve factor for the protocol (*requires fresh interest accrual)
       * @dev Admin function to set a new reserve factor
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1587,7 +1587,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice Accrues interest and reduces reserves by transferring to admin
      * @param reduceAmount Amount of reduction to reserves
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1602,7 +1602,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return _reduceReservesFresh(reduceAmount);
     }
 
-    /**
+    /*
      * @notice Reduces reserves by transferring to admin
      * @dev Requires fresh interest accrual
      * @param reduceAmount Amount of reduction to reserves
@@ -1656,7 +1656,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @notice accrues interest and updates the interest rate model using _setInterestRateModelFresh
      * @dev Admin function to accrue interest and update the interest rate model
      * @param newInterestRateModel the new interest rate model to use
@@ -1672,7 +1672,7 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
         return _setInterestRateModelFresh(newInterestRateModel);
     }
 
-    /**
+    /*
      * @notice updates the interest rate model (*requires fresh interest accrual)
      * @dev Admin function to update the interest rate model
      * @param newInterestRateModel the new interest rate model to use
@@ -1710,27 +1710,27 @@ contract CToken is EIP20Interface, Exponential, TokenErrorReporter, ReentrancyGu
 
     /*** Safe Token ***/
 
-    /**
+    /*
      * @notice Gets balance of this contract in terms of the underlying
      * @dev This excludes the value of the current message, if any
      * @return The quantity of underlying owned by this contract
      */
     function getCashPrior() internal view returns (uint256);
 
-    /**
+    /*
      * @dev Checks whether or not there is sufficient allowance for this contract to move amount from `from` and
      *      whether or not `from` has a balance of at least `amount`. Does NOT do a transfer.
      */
     function checkTransferIn(address from, uint256 amount) internal view returns (Error);
 
-    /**
+    /*
      * @dev Performs a transfer in, ideally returning an explanatory error code upon failure rather than reverting.
      *  If caller has not called `checkTransferIn`, this may revert due to insufficient balance or insufficient allowance.
      *  If caller has called `checkTransferIn` successfully, this should not revert in normal conditions.
      */
     function doTransferIn(address from, uint256 amount) internal returns (Error);
 
-    /**
+    /*
      * @dev Performs a transfer out, ideally returning an explanatory error code upon failure tather than reverting.
      *  If caller has not called checked protocol's balance, may revert due to insufficient cash held in the contract.
      *  If caller has checked protocol's balance, and verified it is >= amount, this should not revert in normal conditions.

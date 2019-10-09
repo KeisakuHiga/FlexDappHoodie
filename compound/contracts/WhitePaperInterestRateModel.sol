@@ -3,28 +3,28 @@ pragma solidity ^0.5.8;
 import "./InterestRateModel.sol";
 import "./Exponential.sol";
 
-/**
+/*
   * @title The Compound Standard Interest Rate Model with pluggable constants
   * @author Compound
   * @notice See Section 2.4 of the Compound Whitepaper
   */
 contract WhitePaperInterestRateModel is InterestRateModel, Exponential {
-    /**
+    /*
      * @notice Indicator that this is an InterestRateModel contract (for inspection)
      */
     bool public constant isInterestRateModel = true;
 
-    /**
+    /*
      * @notice The multiplier of utilization rate that gives the slope of the interest rate
      */
     uint256 public multiplier;
 
-    /**
+    /*
      * @notice The base interest rate which is the y-intercept when utilization rate is 0
      */
     uint256 public baseRate;
 
-    /**
+    /*
      * @notice The approximate number of blocks per year that is assumed by the interest rate model
      */
     uint256 public constant blocksPerYear = 2102400;
@@ -106,7 +106,7 @@ contract WhitePaperInterestRateModel is InterestRateModel, Exponential {
         return (IRError.NO_ERROR, utilizationRate, annualBorrowRate);
     }
 
-    /**
+    /*
       * @notice Gets the current borrow interest rate based on the given asset, total cash, total borrows
       *         and total reserves.
       * @dev The return value should be scaled by 1e18, thus a return value of

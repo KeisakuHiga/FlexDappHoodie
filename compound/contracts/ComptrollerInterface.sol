@@ -1,7 +1,7 @@
 pragma solidity ^0.5.8;
 
 interface ComptrollerInterface {
-    /**
+    /*
      * @notice Marker function used for light validation when updating the comptroller of a market
      * @dev Implementations should simply return true.
      * @return true

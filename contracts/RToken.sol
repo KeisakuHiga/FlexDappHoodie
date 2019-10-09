@@ -11,7 +11,7 @@ import {ReentrancyGuard} from './ReentrancyGuard.sol';
 import {IERC20, IRToken} from './IRToken.sol';
 import {IAllocationStrategy} from './IAllocationStrategy.sol';
 
-/**
+/*
  * @notice RToken an ERC20 token that is 1:1 redeemable to its underlying ERC20 token.
  */
 contract RToken is
@@ -28,7 +28,7 @@ contract RToken is
     uint256 public constant SELF_HAT_ID = uint256(int256(-1));
     uint32 public constant PROPORTION_BASE = 0xFFFFFFFF;
 
-    /**
+    /*
      * @notice Create rToken linked with cToken at `cToken_`
      */
     function initialize(IAllocationStrategy allocationStrategy) external {
@@ -50,14 +50,14 @@ contract RToken is
     // ERC20 Interface
     //
 
-    /**
+    /*
      * @notice Returns the amount of tokens owned by `account`.
      */
     function balanceOf(address owner) external view returns (uint256) {
         return accounts[owner].rAmount;
     }
 
-    /**
+    /*
      * @notice Returns the remaining number of tokens that `spender` will be
      * allowed to spend on behalf of `owner` through `transferFrom`. This is
      * zero by default.
@@ -72,7 +72,7 @@ contract RToken is
         return transferAllowances[owner][spender];
     }
 
-    /**
+    /*
      * @notice Sets `amount` as the allowance of `spender` over the caller's tokens.
      *
      * Returns a boolean value indicating whether the operation succeeded.
@@ -93,7 +93,7 @@ contract RToken is
         return true;
     }
 
-    /**
+    /*
      * @notice Moves `amount` tokens from the caller's account to `dst`.
      *
      * Returns a boolean value indicating whether the operation succeeded.
@@ -109,14 +109,14 @@ contract RToken is
         return transferInternal(msg.sender, msg.sender, dst, amount);
     }
 
-    /// @dev IRToken.transferAll implementation
+    // @dev IRToken.transferAll implementation
     function transferAll(address dst) external nonReentrant returns (bool) {
         address src = msg.sender;
         payInterestInternal(src);
         return transferInternal(src, src, dst, accounts[src].rAmount);
     }
 
-    /// @dev IRToken.transferAllFrom implementation
+    // @dev IRToken.transferAllFrom implementation
     function transferAllFrom(address src, address dst)
         external
         nonReentrant
@@ -127,7 +127,7 @@ contract RToken is
         return transferInternal(msg.sender, src, dst, accounts[src].rAmount);
     }
 
-    /**
+    /*
      * @notice Moves `amount` tokens from `sender` to `recipient` using the
      * allowance mechanism. `amount` is then deducted from the caller's
      * allowance.
@@ -148,13 +148,13 @@ contract RToken is
     // rToken interface
     //
 
-    /// @dev IRToken.mint implementation
+    // @dev IRToken.mint implementation
     function mint(uint256 mintAmount) external nonReentrant returns (bool) {
         mintInternal(mintAmount);
         return true;
     }
 
-    /// @dev IRToken.mintWithSelectedHat implementation
+    // @dev IRToken.mintWithSelectedHat implementation
     function mintWithSelectedHat(uint256 mintAmount, uint256 hatID)
         external
         nonReentrant
@@ -166,7 +166,7 @@ contract RToken is
         return true;
     }
 
-    /**
+    /*
      * @dev IRToken.mintWithNewHat implementation
      */
     function mintWithNewHat(
@@ -182,7 +182,7 @@ contract RToken is
         return true;
     }
 
-    /**
+    /*
      * @dev IRToken.redeem implementation
      *      It withdraws equal amount of initially supplied underlying assets
      */
@@ -193,7 +193,7 @@ contract RToken is
         return true;
     }
 
-    /// @dev IRToken.redeemAll implementation
+    // @dev IRToken.redeemAll implementation
     function redeemAll() external nonReentrant returns (bool) {
         address src = msg.sender;
         payInterestInternal(src);
@@ -201,7 +201,7 @@ contract RToken is
         return true;
     }
 
-    /// @dev IRToken.redeemAndTransfer implementation
+    // @dev IRToken.redeemAndTransfer implementation
     function redeemAndTransfer(address redeemTo, uint256 redeemTokens)
         external
         nonReentrant
@@ -213,7 +213,7 @@ contract RToken is
         return true;
     }
 
-    /// @dev IRToken.redeemAndTransferAll implementation
+    // @dev IRToken.redeemAndTransferAll implementation
     function redeemAndTransferAll(address redeemTo)
         external
         nonReentrant
@@ -225,7 +225,7 @@ contract RToken is
         return true;
     }
 
-    /// @dev IRToken.createHat implementation
+    // @dev IRToken.createHat implementation
     function createHat(
         address[] calldata recipients,
         uint32[] calldata proportions,
@@ -237,18 +237,18 @@ contract RToken is
         }
     }
 
-    /// @dev IRToken.changeHat implementation
+    // @dev IRToken.changeHat implementation
     function changeHat(uint256 hatID) external nonReentrant returns (bool) {
         changeHatInternal(msg.sender, hatID);
         return true;
     }
 
-    /// @dev IRToken.getMaximumHatID implementation
+    // @dev IRToken.getMaximumHatID implementation
     function getMaximumHatID() external view returns (uint256 hatID) {
         return hats.length - 1;
     }
 
-    /// @dev IRToken.getHatByAddress implementation
+    // @dev IRToken.getHatByAddress implementation
     function getHatByAddress(address owner)
         external
         view
@@ -269,7 +269,7 @@ contract RToken is
         }
     }
 
-    /// @dev IRToken.getHatByID implementation
+    // @dev IRToken.getHatByID implementation
     function getHatByID(uint256 hatID)
         external
         view
@@ -285,7 +285,7 @@ contract RToken is
         }
     }
 
-    /// @dev IRToken.receivedSavingsOf implementation
+    // @dev IRToken.receivedSavingsOf implementation
     function receivedSavingsOf(address owner)
         external
         view
@@ -299,7 +299,7 @@ contract RToken is
         return rGross;
     }
 
-    /// @dev IRToken.receivedLoanOf implementation
+    // @dev IRToken.receivedLoanOf implementation
     function receivedLoanOf(address owner)
         external
         view
@@ -309,7 +309,7 @@ contract RToken is
         return account.lDebt;
     }
 
-    /// @dev IRToken.interestPayableOf implementation
+    // @dev IRToken.interestPayableOf implementation
     function interestPayableOf(address owner)
         external
         view
@@ -319,13 +319,13 @@ contract RToken is
         return getInterestPayableOf(account);
     }
 
-    /// @dev IRToken.payInterest implementation
+    // @dev IRToken.payInterest implementation
     function payInterest(address owner) external nonReentrant returns (bool) {
         payInterestInternal(owner);
         return true;
     }
 
-    /// @dev IRToken.getAccountStats implementation!1
+    // @dev IRToken.getAccountStats implementation!1
     function getGlobalStats() external view returns (GlobalStats memory) {
         uint256 totalSavingsAmount;
         totalSavingsAmount += savingAssetOrignalAmount
@@ -338,7 +338,7 @@ contract RToken is
             });
     }
 
-    /// @dev IRToken.getAccountStats implementation
+    // @dev IRToken.getAccountStats implementation
     function getAccountStats(address owner)
         external
         view
@@ -348,12 +348,12 @@ contract RToken is
         return account.stats;
     }
 
-    /// @dev IRToken.getCurrentSavingStrategy implementation
+    // @dev IRToken.getCurrentSavingStrategy implementation
     function getCurrentSavingStrategy() external view returns (address) {
         return address(ias);
     }
 
-    /// @dev IRToken.getSavingAssetBalance implementation
+    // @dev IRToken.getSavingAssetBalance implementation
     function getSavingAssetBalance()
         external
         view
@@ -363,7 +363,7 @@ contract RToken is
         nAmount = sAmount.mul(ias.exchangeRateStored()).div(10**18);
     }
 
-    /// @dev IRToken.changeAllocationStrategy implementation
+    // @dev IRToken.changeAllocationStrategy implementation
     function changeAllocationStrategy(IAllocationStrategy allocationStrategy)
         external
         nonReentrant
@@ -389,12 +389,12 @@ contract RToken is
         );
     }
 
-    /// @dev Update the rToken logic contract code
+    // @dev Update the rToken logic contract code
     function updateCode(address newCode) external onlyOwner delegatedOnly {
         updateCodeAddress(newCode);
     }
 
-    /**
+    /*
      * @dev Transfer `tokens` tokens from `src` to `dst` by `spender`
             Called by both `transfer` and `transferFrom` internally
      * @param spender The address of the account performing the transfer
@@ -471,7 +471,7 @@ contract RToken is
         return true;
     }
 
-    /**
+    /*
      * @dev Sender supplies assets into the market and receives rTokens in exchange
      * @dev Invest into underlying assets immediately
      * @param mintAmount The amount of the underlying asset to supply
@@ -506,7 +506,7 @@ contract RToken is
         emit Transfer(address(this), msg.sender, mintAmount);
     }
 
-    /**
+    /*
      * @notice Sender redeems rTokens in exchange for the underlying asset
      * @dev Withdraw equal amount of initially supplied underlying assets
      * @param redeemTo Destination address to send the redeemed tokens to
@@ -546,7 +546,7 @@ contract RToken is
         emit Redeem(msg.sender, redeemTo, redeemAmount);
     }
 
-    /**
+    /*
      * @dev Create a new Hat
      * @param recipients List of beneficial recipients
      * @param proportions Relative proportions of benefits received by the recipients
@@ -583,7 +583,7 @@ contract RToken is
         emit HatCreated(hatID);
     }
 
-    /**
+    /*
      * @dev Change the hat for `owner`
      * @param owner Account owner
      * @param hatID The id of the Hat
@@ -603,7 +603,7 @@ contract RToken is
         emit HatChanged(owner, hatID);
     }
 
-    /**
+    /*
      * @dev Get interest payable of the account
      */
     function getInterestPayableOf(Account storage account)
@@ -623,7 +623,7 @@ contract RToken is
         }
     }
 
-    /**
+    /*
      * @dev Distribute the incoming tokens to the recipients as loans.
      *      The tokens are immediately invested into the saving strategy and
      *      add to the sAmount of the recipient account.
@@ -698,7 +698,7 @@ contract RToken is
         }
     }
 
-    /**
+    /*
      * @dev Recollect loans from the recipients for further distribution
      *      without actually redeeming the saving assets
      * @param owner Owner account address
@@ -722,7 +722,7 @@ contract RToken is
         recollectLoans(account, hat, rAmount, sInternalAmount);
     }
 
-    /**
+    /*
      * @dev Recollect loans from the recipients for further distribution
      *      by redeeming the saving assets in `rAmount`
      * @param owner Owner account address
@@ -745,7 +745,7 @@ contract RToken is
         recollectLoans(account, hat, rAmount, sInternalBurned);
     }
 
-    /**
+    /*
      * @dev Recollect loan from the recipients
      * @param account Owner account
      * @param hat     Owner's hat
@@ -816,7 +816,7 @@ contract RToken is
         }
     }
 
-    /**
+    /*
      * @dev pay interest to the owner
      * @param owner Account owner address
      */

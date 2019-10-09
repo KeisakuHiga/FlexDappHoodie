@@ -20,17 +20,17 @@ contract CompoundAllocationStrategy is IAllocationStrategy, Ownable {
         return cToken.underlying();
     }
 
-    /// @dev ISavingStrategy.exchangeRateStored implementation
+    // @dev ISavingStrategy.exchangeRateStored implementation
     function exchangeRateStored() external view returns (uint256) {
         return cToken.exchangeRateStored();
     }
 
-    /// @dev ISavingStrategy.accrueInterest implementation
+    // @dev ISavingStrategy.accrueInterest implementation
     function accrueInterest() external returns (bool) {
         return cToken.accrueInterest() == 0;
     }
 
-    /// @dev ISavingStrategy.investUnderlying implementation
+    // @dev ISavingStrategy.investUnderlying implementation
     function investUnderlying(uint256 investAmount) external onlyOwner returns (uint256) {
         token.transferFrom(msg.sender, address(this), investAmount);
         token.approve(address(cToken), investAmount);
@@ -45,7 +45,7 @@ contract CompoundAllocationStrategy is IAllocationStrategy, Ownable {
         return cCreatedAmount;
     }
 
-    /// @dev ISavingStrategy.redeemUnderlying implementation
+    // @dev ISavingStrategy.redeemUnderlying implementation
     function redeemUnderlying(uint256 redeemAmount) external onlyOwner returns (uint256) {
         uint256 cTotalBefore = cToken.totalSupply();
         // TODO should we handle redeem failure?

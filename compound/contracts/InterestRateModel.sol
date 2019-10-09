@@ -1,6 +1,6 @@
 pragma solidity ^0.5.8;
 
-/**
+/*
   * @title The Compound InterestRateModel Interface
   * @author Compound
   * @notice Any interest rate model should derive from this contract.
@@ -8,7 +8,7 @@ pragma solidity ^0.5.8;
   *      contract may read from storage variables.
   */
 interface InterestRateModel {
-    /**
+    /*
       * @notice Gets the current borrow interest rate based on the given asset, total cash, total borrows
       *         and total reserves.
       * @dev The return value should be scaled by 1e18, thus a return value of
@@ -20,7 +20,7 @@ interface InterestRateModel {
       */
     function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves) external view returns (uint256, uint256);
 
-    /**
+    /*
       * @notice Marker function used for light validation when updating the interest rate model of a market
       * @dev Marker function used for light validation when updating the interest rate model of a market. Implementations should simply return true.
       * @return Success or failure

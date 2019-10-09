@@ -1,13 +1,13 @@
 pragma solidity ^0.5.8;
 
-/**
+/*
  * @title Helps contracts guard against reentrancy attacks.
  * @author Remco Bloemen <remco@2π.com>, Eenae <alexey@mixbytes.io>
  * @dev If you mark a function `nonReentrant`, you should also
  * mark it `external`.
  */
 contract ReentrancyGuard {
-    /// @dev counter to allow mutex lock with only one SSTORE operation
+    // @dev counter to allow mutex lock with only one SSTORE operation
     uint256 private _guardCounter;
 
     constructor() internal {
@@ -16,7 +16,7 @@ contract ReentrancyGuard {
         _guardCounter = 1;
     }
 
-    /**
+    /*
      * @dev Prevents a contract from calling itself, directly or indirectly.
      * Calling a `nonReentrant` function from another `nonReentrant`
      * function is not supported. It is possible to prevent this from happening

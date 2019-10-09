@@ -8,7 +8,7 @@ contract Ownable is RTokenStorage {
         address indexed newOwner
     );
 
-    /**
+    /*
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
     constructor() internal {
@@ -16,14 +16,14 @@ contract Ownable is RTokenStorage {
         emit OwnershipTransferred(address(0), _owner);
     }
 
-    /**
+    /*
      * @dev Returns the address of the current owner.
      */
     function owner() public view returns (address) {
         return _owner;
     }
 
-    /**
+    /*
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
@@ -31,14 +31,14 @@ contract Ownable is RTokenStorage {
         _;
     }
 
-    /**
+    /*
      * @dev Returns true if the caller is the current owner.
      */
     function isOwner() public view returns (bool) {
         return msg.sender == _owner;
     }
 
-    /**
+    /*
      * @dev Leaves the contract without owner. It will not be possible to call
      * `onlyOwner` functions anymore. Can only be called by the current owner.
      *
@@ -50,7 +50,7 @@ contract Ownable is RTokenStorage {
         _owner = address(0);
     }
 
-    /**
+    /*
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
      */
@@ -58,7 +58,7 @@ contract Ownable is RTokenStorage {
         _transferOwnership(newOwner);
     }
 
-    /**
+    /*
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      */
     function _transferOwnership(address newOwner) internal {

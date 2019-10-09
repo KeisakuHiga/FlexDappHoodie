@@ -3,7 +3,7 @@ pragma solidity ^0.5.8;
 import {RTokenStorage} from './RTokenStorage.sol';
 
 contract ReentrancyGuard is RTokenStorage {
-    /**
+    /*
      * @dev Prevents a contract from calling itself, directly or indirectly.
      * Calling a `nonReentrant` function from another `nonReentrant`
      * function is not supported. It is possible to prevent this from happening

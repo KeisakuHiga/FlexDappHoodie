@@ -3,29 +3,29 @@ pragma solidity ^0.5.8;
 import "./ComptrollerStorage.sol";
 import "./ErrorReporter.sol";
 
-/**
+/*
  * @title ComptrollerCore
  * @dev storage for the comptroller will be at this address, and
  * cTokens should reference this contract rather than a deployed implementation if
  *
  */
 contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
-    /**
+    /*
       * @notice Emitted when pendingComptrollerImplementation is changed
       */
     event NewPendingImplementation(address oldPendingImplementation, address newPendingImplementation);
 
-    /**
+    /*
       * @notice Emitted when pendingComptrollerImplementation is accepted, which means comptroller implementation is updated
       */
     event NewImplementation(address oldImplementation, address newImplementation);
 
-    /**
+    /*
       * @notice Emitted when pendingAdmin is changed
       */
     event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
 
-    /**
+    /*
       * @notice Emitted when pendingAdmin is accepted, which means admin is updated
       */
     event NewAdmin(address oldAdmin, address newAdmin);
@@ -50,7 +50,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
     * @notice Accepts new implementation of comptroller. msg.sender must be pendingImplementation
     * @dev Admin function for new implementation to accept it's role as implementation
     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -75,7 +75,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
       * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
       * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
       * @param newPendingAdmin New pending admin.
@@ -101,7 +101,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
       * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
       * @dev Admin function for pending admin to accept role and update admin
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -128,7 +128,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
         return uint256(Error.NO_ERROR);
     }
 
-    /**
+    /*
      * @dev Delegates execution to an implementation contract.
      * It returns to the external caller whatever the implementation returns
      * or forwards reverts.

@@ -3,18 +3,18 @@ pragma solidity ^0.5.8;
 import "./EIP20NonStandardInterface.sol";
 import "./CToken.sol";
 
-/**
+/*
  * @title Compound's CErc20 Contract
  * @notice CTokens which wrap an EIP-20 underlying
  * @author Compound
  */
 contract CErc20 is CToken {
-    /**
+    /*
      * @notice Underlying asset for this CToken
      */
     address public underlying;
 
-    /**
+    /*
      * @notice Construct a new money market
      * @param underlying_ The address of the underlying asset
      * @param comptroller_ The address of the Comptroller
@@ -40,7 +40,7 @@ contract CErc20 is CToken {
 
     /*** User Interface ***/
 
-    /**
+    /*
      * @notice Sender supplies assets into the market and receives cTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param mintAmount The amount of the underlying asset to supply
@@ -50,7 +50,7 @@ contract CErc20 is CToken {
         return mintInternal(mintAmount);
     }
 
-    /**
+    /*
      * @notice Sender redeems cTokens in exchange for the underlying asset
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param redeemTokens The number of cTokens to redeem into underlying
@@ -60,7 +60,7 @@ contract CErc20 is CToken {
         return redeemInternal(redeemTokens);
     }
 
-    /**
+    /*
      * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param redeemAmount The amount of underlying to redeem
@@ -70,7 +70,7 @@ contract CErc20 is CToken {
         return redeemUnderlyingInternal(redeemAmount);
     }
 
-    /**
+    /*
       * @notice Sender borrows assets from the protocol to their own address
       * @param borrowAmount The amount of the underlying asset to borrow
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -79,7 +79,7 @@ contract CErc20 is CToken {
         return borrowInternal(borrowAmount);
     }
 
-    /**
+    /*
      * @notice Sender repays their own borrow
      * @param repayAmount The amount to repay
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -88,7 +88,7 @@ contract CErc20 is CToken {
         return repayBorrowInternal(repayAmount);
     }
 
-    /**
+    /*
      * @notice Sender repays a borrow belonging to borrower
      * @param borrower the account with the debt being payed off
      * @param repayAmount The amount to repay
@@ -98,7 +98,7 @@ contract CErc20 is CToken {
         return repayBorrowBehalfInternal(borrower, repayAmount);
     }
 
-    /**
+    /*
      * @notice The sender liquidates the borrowers collateral.
      *  The collateral seized is transferred to the liquidator.
      * @param borrower The borrower of this cToken to be liquidated
@@ -115,7 +115,7 @@ contract CErc20 is CToken {
 
     /*** Safe Token ***/
 
-    /**
+    /*
      * @notice Gets balance of this contract in terms of the underlying
      * @dev This excludes the value of the current message, if any
      * @return The quantity of underlying tokens owned by this contract
@@ -125,7 +125,7 @@ contract CErc20 is CToken {
         return token.balanceOf(address(this));
     }
 
-    /**
+    /*
      * @dev Checks whether or not there is sufficient allowance for this contract to move amount from `from` and
      *      whether or not `from` has a balance of at least `amount`. Does NOT do a transfer.
      */
@@ -143,7 +143,7 @@ contract CErc20 is CToken {
         return Error.NO_ERROR;
     }
 
-    /**
+    /*
      * @dev Similar to EIP20 transfer, except it handles a False result from `transferFrom` and returns an explanatory
      *      error code rather than reverting.  If caller has not called `checkTransferIn`, this may revert due to
      *      insufficient balance or insufficient allowance. If caller has called `checkTransferIn` prior to this call,
@@ -183,7 +183,7 @@ contract CErc20 is CToken {
         return Error.NO_ERROR;
     }
 
-    /**
+    /*
      * @dev Similar to EIP20 transfer, except it handles a False result from `transfer` and returns an explanatory
      *      error code rather than reverting. If caller has not called checked protocol's balance, this may revert due to
      *      insufficient cash held in this contract. If caller has checked protocol's balance prior to this call, and verified

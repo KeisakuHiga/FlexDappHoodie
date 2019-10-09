@@ -32,11 +32,6 @@ contract HoodieToken {
     totalSupply = _initialSupply;
   }
 
-  // function getOwnerAddress() public view returns(address) {
-  //   return rTokenContract.owner();
-  // }
-
-
   function transfer(address _to, uint _value) public returns (bool success) {
     require(balanceOf[msg.sender] >= _value, "The value should be smaller than or equal to the balance");
 

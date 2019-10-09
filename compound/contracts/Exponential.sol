@@ -2,7 +2,7 @@ pragma solidity ^0.5.8;
 
 import "./CarefulMath.sol";
 
-/**
+/*
  * @title Exponential module for storing fixed-decision decimals
  * @author Compound
  * @notice Exp is a struct which stores decimals with a fixed precision of 18 decimal places.
@@ -18,7 +18,7 @@ contract Exponential is CarefulMath {
         uint256 mantissa;
     }
 
-    /**
+    /*
      * @dev Creates an exponential from numerator and denominator values.
      *      Note: Returns an error if (`num` * 10e18) > MAX_INT,
      *            or if `denom` is zero.
@@ -37,7 +37,7 @@ contract Exponential is CarefulMath {
         return (MathError.NO_ERROR, Exp({mantissa: rational}));
     }
 
-    /**
+    /*
      * @dev Adds two exponentials, returning a new exponential.
      */
     function addExp(Exp memory a, Exp memory b) internal pure returns (MathError, Exp memory) {
@@ -46,7 +46,7 @@ contract Exponential is CarefulMath {
         return (error, Exp({mantissa: result}));
     }
 
-    /**
+    /*
      * @dev Subtracts two exponentials, returning a new exponential.
      */
     function subExp(Exp memory a, Exp memory b) internal pure returns (MathError, Exp memory) {
@@ -55,7 +55,7 @@ contract Exponential is CarefulMath {
         return (error, Exp({mantissa: result}));
     }
 
-    /**
+    /*
      * @dev Multiply an Exp by a scalar, returning a new Exp.
      */
     function mulScalar(Exp memory a, uint256 scalar) internal pure returns (MathError, Exp memory) {
@@ -67,7 +67,7 @@ contract Exponential is CarefulMath {
         return (MathError.NO_ERROR, Exp({mantissa: scaledMantissa}));
     }
 
-    /**
+    /*
      * @dev Multiply an Exp by a scalar, then truncate to return an unsigned integer.
      */
     function mulScalarTruncate(Exp memory a, uint256 scalar) internal pure returns (MathError, uint256) {
@@ -79,7 +79,7 @@ contract Exponential is CarefulMath {
         return (MathError.NO_ERROR, truncate(product));
     }
 
-    /**
+    /*
      * @dev Multiply an Exp by a scalar, truncate, then add an to an unsigned integer, returning an unsigned integer.
      */
     function mulScalarTruncateAddUInt(Exp memory a, uint256 scalar, uint256 addend)
@@ -95,7 +95,7 @@ contract Exponential is CarefulMath {
         return addUInt(truncate(product), addend);
     }
 
-    /**
+    /*
      * @dev Divide an Exp by a scalar, returning a new Exp.
      */
     function divScalar(Exp memory a, uint256 scalar) internal pure returns (MathError, Exp memory) {
@@ -107,17 +107,17 @@ contract Exponential is CarefulMath {
         return (MathError.NO_ERROR, Exp({mantissa: descaledMantissa}));
     }
 
-    /**
+    /*
      * @dev Divide a scalar by an Exp, returning a new Exp.
      */
     function divScalarByExp(uint256 scalar, Exp memory divisor) internal pure returns (MathError, Exp memory) {
         /*
-          We are doing this as:
-          getExp(mulUInt(expScale, scalar), divisor.mantissa)
+            We are doing this as:
+            getExp(mulUInt(expScale, scalar), divisor.mantissa)
 
-          How it works:
-          Exp = a / b;
-          Scalar = s;
+            How it works:
+            Exp = a / b;
+            Scalar = s;
           `s / (a / b)` = `b * s / a` and since for an Exp `a = mantissa, b = expScale`
         */
         (MathError err0, uint256 numerator) = mulUInt(expScale, scalar);
@@ -127,7 +127,7 @@ contract Exponential is CarefulMath {
         return getExp(numerator, divisor.mantissa);
     }
 
-    /**
+    /*
      * @dev Divide a scalar by an Exp, then truncate to return an unsigned integer.
      */
     function divScalarByExpTruncate(uint256 scalar, Exp memory divisor) internal pure returns (MathError, uint256) {
@@ -139,7 +139,7 @@ contract Exponential is CarefulMath {
         return (MathError.NO_ERROR, truncate(fraction));
     }
 
-    /**
+    /*
      * @dev Multiplies two exponentials, returning a new exponential.
      */
     function mulExp(Exp memory a, Exp memory b) internal pure returns (MathError, Exp memory) {
@@ -163,14 +163,14 @@ contract Exponential is CarefulMath {
         return (MathError.NO_ERROR, Exp({mantissa: product}));
     }
 
-    /**
+    /*
      * @dev Multiplies two exponentials given their mantissas, returning a new exponential.
      */
     function mulExp(uint256 a, uint256 b) internal pure returns (MathError, Exp memory) {
         return mulExp(Exp({mantissa: a}), Exp({mantissa: b}));
     }
 
-    /**
+    /*
      * @dev Multiplies three exponentials, returning a new exponential.
      */
     function mulExp3(Exp memory a, Exp memory b, Exp memory c) internal pure returns (MathError, Exp memory) {
@@ -181,7 +181,7 @@ contract Exponential is CarefulMath {
         return mulExp(ab, c);
     }
 
-    /**
+    /*
      * @dev Divides two exponentials, returning a new exponential.
      *     (a/scale) / (b/scale) = (a/scale) * (scale/b) = a/b,
      *  which we can scale as an Exp by calling getExp(a.mantissa, b.mantissa)
@@ -190,7 +190,7 @@ contract Exponential is CarefulMath {
         return getExp(a.mantissa, b.mantissa);
     }
 
-    /**
+    /*
      * @dev Truncates the given exp to a whole number value.
      *      For example, truncate(Exp{mantissa: 15 * expScale}) = 15
      */
@@ -199,21 +199,21 @@ contract Exponential is CarefulMath {
         return exp.mantissa / expScale;
     }
 
-    /**
+    /*
      * @dev Checks if first Exp is less than second Exp.
      */
     function lessThanExp(Exp memory left, Exp memory right) internal pure returns (bool) {
         return left.mantissa < right.mantissa; //TODO: Add some simple tests and this in another PR yo.
     }
 
-    /**
+    /*
      * @dev Checks if left Exp <= right Exp.
      */
     function lessThanOrEqualExp(Exp memory left, Exp memory right) internal pure returns (bool) {
         return left.mantissa <= right.mantissa;
     }
 
-    /**
+    /*
      * @dev returns true if Exp is exactly zero
      */
     function isZeroExp(Exp memory value) internal pure returns (bool) {
