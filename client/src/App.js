@@ -3,6 +3,7 @@ import HoodieToken from "./contracts/HoodieToken.json";
 import getWeb3 from "./utils/getWeb3";
 
 import TokenForm from "./components/TokenForm";
+import MintForm from "./components/MintForm";
 import "./App.css";
 
 class App extends Component {
@@ -33,6 +34,7 @@ class App extends Component {
         HoodieToken.abi,
         HoodieDeployedNetwork && HoodieDeployedNetwork.address,
       );
+      console.log(hoodieInstance)
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
@@ -67,9 +69,10 @@ class App extends Component {
         <div>
           <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
           <h3>Hoodie token's total supply is {totalSupply}</h3>
-          <h3>You have {balanceOf} HDH now</h3>
+          <h3>You have {balanceOf} FDH now</h3>
         </div>
-          <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} />
+          {/* <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} /> */}
+          <MintForm hoodieInstance={hoodieInstance} accounts={accounts} />
       </div>
     );
   }
