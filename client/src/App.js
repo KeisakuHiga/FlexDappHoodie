@@ -16,7 +16,9 @@ class App extends Component {
     symbol: '',
     standard: '',
     initalSupply: 0,
-    balanceOf: 0
+    balanceOf: 0,
+    owner: null,
+    hatID: null
   };
 
   componentDidMount = async () => {
@@ -52,16 +54,17 @@ class App extends Component {
     const { accounts, hoodieInstance } = this.state;
     const contract = hoodieInstance.methods;
     const name = await contract.name().call();
+    const owner = await contract.owner().call();
     const symbol = await contract.symbol().call();
     const totalSupply = await contract.initalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
 
-    this.setState({ name, symbol, totalSupply, balanceOf, hatID });
+    this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID });
   };
 
   render() {
-    const { web3, accounts, hoodieInstance, name, symbol, initalSupply, balanceOf, hatID } = this.state
+    const { web3, accounts, hoodieInstance, name, owner, symbol, initalSupply, balanceOf, hatID } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -71,6 +74,7 @@ class App extends Component {
           <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
           <h3>Hoodie token's total supply is {initalSupply}</h3>
           <h3>You have {balanceOf} FDH now</h3>
+          <p>Owner is {owner}</p>
           <p>Hat ID is {hatID}</p>
         </div>
           {/* <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} /> */}
