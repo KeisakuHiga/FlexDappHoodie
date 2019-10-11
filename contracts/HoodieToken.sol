@@ -8,8 +8,7 @@ contract HoodieToken {
   string public name = "Flex Dapps Hoodie Token";
   string public symbol = "FDH";
   string public standard = "FDH Token v1.0";
-  uint public initalSupply = 1000;
-  uint public decimals = 18;
+  uint public totalSupply;
   address public owner;
 
   // Instantiate cDAIContract with cDAI address on rinkeby
@@ -37,8 +36,10 @@ contract HoodieToken {
   uint32[] public proportions = [proportion];
   bool public doChangeHat = false;
 
-  constructor() public {
-    balanceOf[owner] = initalSupply;
+  constructor(uint _initialSupply) public {
+    owner = msg.sender;
+    totalSupply = _initialSupply;
+    balanceOf[msg.sender] = _initialSupply;
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
@@ -65,4 +66,6 @@ contract HoodieToken {
     emit Transfer(_from, _to, _value);
     return true;
   }
+
+  
 }

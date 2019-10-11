@@ -15,7 +15,7 @@ class App extends Component {
     name: '',
     symbol: '',
     standard: '',
-    initalSupply: 0,
+    totalSupply: 0,
     balanceOf: 0,
     owner: null,
     hatID: null
@@ -56,7 +56,7 @@ class App extends Component {
     const name = await contract.name().call();
     const owner = await contract.owner().call();
     const symbol = await contract.symbol().call();
-    const totalSupply = await contract.initalSupply().call();
+    const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
 
@@ -64,7 +64,7 @@ class App extends Component {
   };
 
   render() {
-    const { web3, accounts, hoodieInstance, name, owner, symbol, initalSupply, balanceOf, hatID } = this.state
+    const { web3, accounts, hoodieInstance, name, owner, symbol, totalSupply, balanceOf, hatID } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -72,7 +72,7 @@ class App extends Component {
       <div className="App">
         <div>
           <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
-          <h3>Hoodie token's total supply is {initalSupply}</h3>
+          <h3>Hoodie token's total supply is {totalSupply}</h3>
           <h3>You have {balanceOf} FDH now</h3>
           <p>Owner is {owner}</p>
           <p>Hat ID is {hatID}</p>

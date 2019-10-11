@@ -1,8 +1,10 @@
 const path = require("path");
 const HDWalletProvider = require("truffle-hdwallet-provider");
 
+// SHOULD USE .env
 // This mnemonic is from $ ganache-cli
-const mnemonic = "monitor script cloud bounce forward sight hope before actual panel hazard consider";
+// accounts[0] = 0x2471e35F51CF54265B20cCFAc3857c2DceEf7349;
+const mnemonic = "ghost industry evidence issue arrive sustain attend claim oven often limb work";
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
