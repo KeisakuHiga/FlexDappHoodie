@@ -3,7 +3,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./ICErc20.sol";
 import "./IRToken.sol";
 
-contract HoodieToken is IERC20 {
+contract HoodieToken {
   // Basic set up for FDH
   string public name = "Flex Dapps Hoodie Token";
   string public symbol = "FDH";
@@ -20,33 +20,26 @@ contract HoodieToken is IERC20 {
   address rDAIAddress = 0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578;
   IRToken rDAIContract = IRToken(rDAIAddress);
 
-
   // events
   event Transfer(address indexed _from, address indexed _to, uint _value);
   event Approval(address indexed _owner, address indexed _spender, uint _value);
-  event Deposited(address indexed sender, uint256 amount);
-  event Redeemed(address indexed sender, uint256 amount);
 
   // number of FDH
   mapping(address => uint) public balanceOf;
-
   mapping(address => mapping(address => uint)) public allowance;
   mapping(address => uint256) depositedAmount;
 
-  struct Hat {
-    // put my address for development purpose
-    address[] flexDappsAddress;
-    uint32[] proportions;
-    bool doChangeHat;
-  }
+  // Hat variables
+  uint256 public hatID;
+  address public recipient = 0x2471e35F51CF54265B20cCFAc3857c2DceEf7349;
+  uint32 public proportion = 100;
+  address[] public recipients = [recipient];
+  uint32[] public proportions = [proportion];
+  bool public doChangeHat = false;
 
   constructor() public {
     balanceOf[owner] = initalSupply;
-    Hat memory hat;
-    hat.flexDappsAddress[0] = 0x2471e35F51CF54265B20cCFAc3857c2DceEf7349;
-    hat.proportions[0] = 100;
-    hat.doChangeHat = false;
-    createHat();
+    hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
   function transfer(address _to, uint _value) public returns (bool success) {
@@ -71,27 +64,5 @@ contract HoodieToken is IERC20 {
     allowance[_from][msg.sender] -= _value;
     emit Transfer(_from, _to, _value);
     return true;
-  }
-
-  function mint(uint256 mintAmount) public returns (bool) {
-    return rDAIContract.mint(mintAmount);
-  }
-
-  function redeem(uint256 redeemTokens) public returns (bool) {
-    return rDAIContract.redeem(redeemTokens);
-  }
-
-  function payInterest(address owner) public returns (bool) {
-    // Flex Dapps will receive the generated interest
-    return true;
-  }
-
-  function createHat() public returns (uint256) {
-    Hat memory hat;
-    rDAIContract.createHat(
-      hat.flexDappsAddress,
-      hat.proportions,
-      hat.doChangeHat
-    );
   }
 }

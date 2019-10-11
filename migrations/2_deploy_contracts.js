@@ -1,5 +1,5 @@
-var HoodieToken = artifacts.require("./HoodieToken.sol");
+const HoodieToken = artifacts.require("./HoodieToken.sol");
 
 module.exports = function(deployer, network, accounts) {
-  deployer.deploy(HoodieToken, 100, { from: accounts[0]});
+  deployer.deploy(HoodieToken, { from: accounts[0]});
 };
