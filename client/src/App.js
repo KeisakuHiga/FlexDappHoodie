@@ -17,7 +17,8 @@ class App extends Component {
     totalSupply: 0,
     balanceOf: 0,
     owner: null,
-    hatID: null
+    hatID: null,
+    balanceOfDai: 0
   };
 
   componentDidMount = async () => {
@@ -58,12 +59,13 @@ class App extends Component {
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
+    const balanceOfDai = await contract.balanceOfDai().call();
 
-    this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID });
+    this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai });
   };
 
   render() {
-    const { web3, accounts, hoodieInstance, name, owner, symbol, totalSupply, balanceOf, hatID } = this.state
+    const { web3, accounts, hoodieInstance, name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -75,9 +77,13 @@ class App extends Component {
           <h3>You have {balanceOf} FDH now</h3>
           <p>Owner is {owner}</p>
           <p>Hat ID is {hatID}</p>
+          <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
         </div>
           {/* <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} /> */}
-          <DepositForm hoodieInstance={hoodieInstance} accounts={accounts} />
+          <DepositForm 
+            web3={web3}
+            hoodieInstance={hoodieInstance}
+            accounts={accounts} />
       </div>
     );
   }

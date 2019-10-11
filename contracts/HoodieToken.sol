@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "./ICErc20.sol";
+import "./IDai.sol"; 
+import "./ICErc20.sol"; 
 import "./IRToken.sol";
 
 contract HoodieToken {
@@ -10,7 +11,12 @@ contract HoodieToken {
   string public standard = "FDH Token v1.0";
   uint public totalSupply;
   address public owner;
+  uint256 public balanceOfDai;
 
+  // Instantiate DAIContract with DAI address on rinkeby
+  address DAIAddress = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
+  IDai DAIContract = IDai(DAIAddress);
+  
   // Instantiate cDAIContract with cDAI address on rinkeby
   address cDAIAddress = 0x6D7F0754FFeb405d23C51CE938289d4835bE3b14;
   ICErc20 cDAIContract = ICErc20(cDAIAddress);
@@ -40,6 +46,7 @@ contract HoodieToken {
     owner = msg.sender;
     totalSupply = _initialSupply;
     balanceOf[msg.sender] = _initialSupply;
+    balanceOfDai = DAIContract.balanceOf(msg.sender);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
@@ -67,7 +74,8 @@ contract HoodieToken {
     return true;
   }
 
-  // function deposit(uint depositAmount) public returns (bool success) {
-  //   require(depositAmount <= DAIContract.balance)
-  // }
+  function deposit(uint depositAmount) public returns (bool success) {
+    require(depositAmount <= DAIContract.balance);
+    DAIContract.approve(rDAIContract.address, depositAmount);
+  }
 }

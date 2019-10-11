@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 class DepositForm extends Component {
   state = {
+    web3: null,
     hoodieInstance: this.props.hoodieInstance,
     accounts: this.props.accounts,
     from: '',
@@ -9,10 +10,14 @@ class DepositForm extends Component {
     depositAmount: 0,
   }
 
+  componentDidMount = () => {
+    const { hoodieInstance, accounts, web3 } = this.props
+    this.setState({ hoodieInstance, accounts, web3 });
+  }
+
   handleSubmit = async (e) => {
     e.preventDefault()
-    const { depositAmount }  = this.state
-    const { hoodieInstance, accounts } = this.props
+    const { hoodieInstance, depositAmount, accounts }  = this.state
     const result = await hoodieInstance.methods.deposit(depositAmount).send({ from: accounts[0]});
     console.log(result)
   }
@@ -27,16 +32,8 @@ class DepositForm extends Component {
             className="form-control"
             id="inputDAI"
             placeholder="DAI"
-            onChange={e => this.setState({ mintAmount: e.target.value })}
+            onChange={e => this.setState({ depositAmount: e.target.value })}
           />
-          {/* <label>Who do you want transfer to?</label>
-          <input 
-            type="text"
-            className="form-control"
-            id="inputAddressTo"
-            placeholder="Input recipient's address"
-            onChange={e => this.setState({ to: e.target.value })}
-          /> */}
         </div>
         <button type="submit" className="btn btn-primary">Submit</button>
       </form>
