@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/KeisakuHiga/FlexDappHoodie#readme",
   "dependencies": {
+    "dotenv": "^8.1.0",
     "openzeppelin-solidity": "^2.3.0"
   }
 }

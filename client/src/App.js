@@ -2,8 +2,7 @@ import React, { Component } from "react";
 import HoodieToken from "./contracts/HoodieToken.json";
 import getWeb3 from "./utils/getWeb3";
 
-import TokenForm from "./components/TokenForm";
-import MintForm from "./components/MintForm";
+import DepositForm from "./components/DepositForm";
 import "./App.css";
 
 class App extends Component {
@@ -78,7 +77,7 @@ class App extends Component {
           <p>Hat ID is {hatID}</p>
         </div>
           {/* <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} /> */}
-          <MintForm hoodieInstance={hoodieInstance} accounts={accounts} />
+          <DepositForm hoodieInstance={hoodieInstance} accounts={accounts} />
       </div>
     );
   }

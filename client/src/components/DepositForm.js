@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
 
-class TokenForm extends Component {
+class DepositForm extends Component {
   state = {
     hoodieInstance: this.props.hoodieInstance,
     accounts: this.props.accounts,
     from: '',
     to: '',
-    mintAmount: 0,
+    depositAmount: 0,
   }
 
   handleSubmit = async (e) => {
     e.preventDefault()
-    const { mintAmount }  = this.state
+    const { depositAmount }  = this.state
     const { hoodieInstance, accounts } = this.props
-    const result = await hoodieInstance.methods.mintRDAI(mintAmount).send({ from: accounts[0]});
+    const result = await hoodieInstance.methods.deposit(depositAmount).send({ from: accounts[0]});
     console.log(result)
   }
 
@@ -44,4 +44,4 @@ class TokenForm extends Component {
   }
 }
 
-export default TokenForm;
+export default DepositForm;

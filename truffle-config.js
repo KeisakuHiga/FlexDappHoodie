@@ -1,10 +1,11 @@
 const path = require("path");
 const HDWalletProvider = require("truffle-hdwallet-provider");
+require('dotenv').config()
 
-// SHOULD USE .env
 // This mnemonic is from $ ganache-cli
 // accounts[0] = 0x2471e35F51CF54265B20cCFAc3857c2DceEf7349;
-const mnemonic = "ghost industry evidence issue arrive sustain attend claim oven often limb work";
+const mnemonic = process.env.MNEMONIC;
+const rinkebyAPI = process.env.RINKEBY_API;
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -23,7 +24,7 @@ module.exports = {
     },
     rinkeby: {
       provider: function() { 
-        return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/38d8affd8ee14505a8485d2725bcd6df");
+        return new HDWalletProvider(mnemonic, `https://rinkeby.infura.io/v3/${rinkebyAPI}`);
       },
       network_id: 4,
       gas: 4500000,

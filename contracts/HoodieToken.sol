@@ -67,5 +67,7 @@ contract HoodieToken {
     return true;
   }
 
-  
+  // function deposit(uint depositAmount) public returns (bool success) {
+  //   require(depositAmount <= DAIContract.balance)
+  // }
 }
