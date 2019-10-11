@@ -15,7 +15,7 @@ class App extends Component {
     name: '',
     symbol: '',
     standard: '',
-    totalSupply: 0,
+    initalSupply: 0,
     balanceOf: 0
   };
 
@@ -50,17 +50,18 @@ class App extends Component {
 
   getBasicInfo = async () => {
     const { accounts, hoodieInstance } = this.state;
+    const contract = hoodieInstance.methods;
+    const name = await contract.name().call();
+    const symbol = await contract.symbol().call();
+    const totalSupply = await contract.initalSupply().call();
+    const balanceOf = await contract.balanceOf(accounts[0]).call();
+    const hatID = await contract.hatID().call();
 
-    const name = await hoodieInstance.methods.name().call();
-    const symbol = await hoodieInstance.methods.symbol().call();
-    const totalSupply = await hoodieInstance.methods.totalSupply().call();
-    const balanceOf = await hoodieInstance.methods.balanceOf(accounts[0]).call();
-
-    this.setState({ name, symbol, totalSupply, balanceOf });
+    this.setState({ name, symbol, totalSupply, balanceOf, hatID });
   };
 
   render() {
-    const { web3, accounts, hoodieInstance, name, symbol, totalSupply, balanceOf } = this.state
+    const { web3, accounts, hoodieInstance, name, symbol, initalSupply, balanceOf, hatID } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -68,8 +69,9 @@ class App extends Component {
       <div className="App">
         <div>
           <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
-          <h3>Hoodie token's total supply is {totalSupply}</h3>
+          <h3>Hoodie token's total supply is {initalSupply}</h3>
           <h3>You have {balanceOf} FDH now</h3>
+          <p>Hat ID is {hatID}</p>
         </div>
           {/* <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} /> */}
           <MintForm hoodieInstance={hoodieInstance} accounts={accounts} />
