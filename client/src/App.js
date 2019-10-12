@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import HoodieToken from "./contracts/HoodieToken.json";
 import getWeb3 from "./utils/getWeb3";
-
 import DepositForm from "./components/DepositForm";
 import "./App.css";
 
@@ -79,11 +78,10 @@ class App extends Component {
           <p>Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
         </div>
-          {/* <TokenForm hoodieInstance={hoodieInstance} accounts={accounts} /> */}
-          <DepositForm 
-            web3={web3}
-            hoodieInstance={hoodieInstance}
-            accounts={accounts} />
+        <DepositForm 
+          web3={web3}
+          hoodieInstance={hoodieInstance}
+          accounts={accounts} />
       </div>
     );
   }

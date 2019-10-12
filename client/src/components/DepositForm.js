@@ -18,15 +18,23 @@ class DepositForm extends Component {
   handleSubmit = async (e) => {
     e.preventDefault()
     const { hoodieInstance, depositAmount, accounts }  = this.state
-    const result = await hoodieInstance.methods.deposit(depositAmount).send({ from: accounts[0]});
-    console.log(result)
+    const depositAmountNumber = parseInt(depositAmount, 10);
+    try {
+      const result = await hoodieInstance.methods.deposit(depositAmountNumber).send({ from: accounts[0] });
+      console.log(result)
+      
+    } catch (err) {
+      console.log(err.message);
+    }
   }
 
-  render() { 
+  render() {
+    const { depositAmount } = this.state;
+    console.log(typeof parseInt(depositAmount, 10));
     return (
       <form onSubmit={this.handleSubmit}>
         <div className="form-group">
-          <label>How much DAI will you invest</label>
+          <label>How much DAI will you invest?</label>
           <input 
             type="number"
             className="form-control"

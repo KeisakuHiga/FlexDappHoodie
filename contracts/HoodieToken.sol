@@ -9,7 +9,7 @@ contract HoodieToken {
   string public name = "Flex Dapps Hoodie Token";
   string public symbol = "FDH";
   string public standard = "FDH Token v1.0";
-  uint public totalSupply;
+  uint256 public totalSupply;
   address public owner;
   uint256 public balanceOfDai;
 
@@ -26,12 +26,13 @@ contract HoodieToken {
   IRToken rDAIContract = IRToken(rDAIAddress);
 
   // events
-  event Transfer(address indexed _from, address indexed _to, uint _value);
-  event Approval(address indexed _owner, address indexed _spender, uint _value);
+  event Transfer(address indexed _from, address indexed _to, uint256 _value);
+  event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+  event Depositted(address indexed sender, uint256 depositedAmount);
 
   // number of FDH
-  mapping(address => uint) public balanceOf;
-  mapping(address => mapping(address => uint)) public allowance;
+  mapping(address => uint256) public balanceOf;
+  mapping(address => mapping(address => uint256)) public allowance;
   mapping(address => uint256) depositedAmount;
 
   // Hat variables
@@ -42,7 +43,7 @@ contract HoodieToken {
   uint32[] public proportions = [proportion];
   bool public doChangeHat = false;
 
-  constructor(uint _initialSupply) public {
+  constructor(uint256 _initialSupply) public {
     owner = msg.sender;
     totalSupply = _initialSupply;
     balanceOf[msg.sender] = _initialSupply;
@@ -50,7 +51,7 @@ contract HoodieToken {
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
-  function transfer(address _to, uint _value) public returns (bool success) {
+  function transfer(address _to, uint256 _value) public payable returns (bool success) {
     require(balanceOf[msg.sender] >= _value, "The value should be smaller than or equal to the balance");
     balanceOf[msg.sender] -= _value;
     balanceOf[_to] += _value;
@@ -58,13 +59,13 @@ contract HoodieToken {
     return true;
   }
 
-  function approve(address _spender, uint _value) public returns (bool success) {
+  function approve(address _spender, uint256 _value) public returns (bool success) {
     allowance[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
     return true;
   }
 
-  function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+  function transferFrom(address _from, address _to, uint256 _value) public payable returns (bool success) {
     require(_value <= balanceOf[_from], "The value should be smaller than or equal to the owner's balance");
     require(_value <= allowance[_from][msg.sender], "The value should be smaller than or equal to the balance that the owner allowed");
     balanceOf[_from] -= _value;
@@ -74,8 +75,18 @@ contract HoodieToken {
     return true;
   }
 
-  function deposit(uint depositAmount) public returns (bool success) {
-    require(depositAmount <= DAIContract.balance);
-    DAIContract.approve(rDAIContract.address, depositAmount);
+  function deposit(uint256 depositAmount) public payable returns (bool) {
+    require(depositAmount > 0, "deposit amount should be greater than zero");
+    // require(depositAmount <= DAIContract.balanceOf(msg.sender), "Insufficient amount of DAI");
+
+    // transfer DAI to rDAIContract from user
+    require(DAIContract.transferFrom(msg.sender, address(this), depositAmount), "DAI was not sent to DApp properly");
+
+    // deposit DAI into Compound by rDAIContract
+    require(DAIContract.approve(address(rDAIContract), depositAmount), "Could not approve to allow the rDAI contract to manage it");
+    require(rDAIContract.mintWithSelectedHat(depositAmount, hatID), "Could not supply DAI to Compound");
+
+    emit Depositted(msg.sender, depositAmount);
+    return true;
   }
 }
