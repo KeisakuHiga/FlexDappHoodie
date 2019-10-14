@@ -78,14 +78,14 @@ contract HoodieToken {
   function deposit(uint256 depositAmount) public payable returns (bool) {
 
     require(depositAmount > 0, "deposit amount should be greater than zero");
-    require(depositAmount <= DAIContract.balanceOf(msg.sender), "Insufficient amount of DAI");
+    require(depositAmount <= DAIContract.allowance(msg.sender, address(this)), "Insufficient amount of DAI");
 
     // transfer DAI to rDAIContract from user
-    require(DAIContract.transferFrom(msg.sender, address(rDAIContract), depositAmount), "DAI was not sent to DApp properly");
+    // require(DAIContract.transferFrom(msg.sender, address(rDAIContract), depositAmount), "DAI was not sent to DApp properly");
 
     // deposit DAI into Compound by rDAIContract
-    require(DAIContract.approve(address(rDAIContract), depositAmount), "Could not approve to allow the rDAI contract to manage it");
-    require(rDAIContract.mintWithSelectedHat(depositAmount, hatID), "Could not supply DAI to Compound");
+    // require(DAIContract.approve(address(rDAIContract), depositAmount), "Could not approve to allow the rDAI contract to manage it");
+    // require(rDAIContract.mintWithSelectedHat(depositAmount, hatID), "Could not supply DAI to Compound");
 
     emit Depositted(msg.sender, depositAmount);
     return true;
