@@ -11,16 +11,30 @@ class DepositForm extends Component {
   }
 
   componentDidMount = () => {
-    const { hoodieInstance, accounts, web3 } = this.props
+    const { hoodieInstance, accounts, web3 } = this.props;
+    web3.eth.getBlock("latest", false, (error, result) => {
+      if(error) {
+        console.log(error.message);
+      }
+      console.log(result.gasLimit)
+    });
     this.setState({ hoodieInstance, accounts, web3 });
   }
 
   handleSubmit = async (e) => {
     e.preventDefault()
     const { hoodieInstance, depositAmount, accounts }  = this.state
-    const depositAmountNumber = parseInt(depositAmount, 10);
+    // const depositAmountNumber = parseInt(depositAmount, 10);
+    const depositAmountNumber = depositAmount;
     try {
-      const result = await hoodieInstance.methods.deposit(depositAmountNumber).send({ from: accounts[0] });
+      const result = await hoodieInstance.methods
+                      .deposit(depositAmountNumber)
+                      .send(
+                        {
+                          from: accounts[0],
+                          gasLimit: "7000000"
+                        }
+                      );
       console.log(result)
       
     } catch (err) {
@@ -30,7 +44,7 @@ class DepositForm extends Component {
 
   render() {
     const { depositAmount } = this.state;
-    console.log(typeof parseInt(depositAmount, 10));
+    console.log(typeof depositAmount);
     return (
       <form onSubmit={this.handleSubmit}>
         <div className="form-group">

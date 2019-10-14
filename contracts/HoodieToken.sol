@@ -15,15 +15,15 @@ contract HoodieToken {
 
   // Instantiate DAIContract with DAI address on rinkeby
   address DAIAddress = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
-  IDai DAIContract = IDai(DAIAddress);
+  IDai public DAIContract = IDai(DAIAddress);
   
   // Instantiate cDAIContract with cDAI address on rinkeby
   address cDAIAddress = 0x6D7F0754FFeb405d23C51CE938289d4835bE3b14;
-  ICErc20 cDAIContract = ICErc20(cDAIAddress);
+  ICErc20 public cDAIContract = ICErc20(cDAIAddress);
 
   //  Instantiate rDAIContract with rDAI address on rinkeby
   address rDAIAddress = 0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578;
-  IRToken rDAIContract = IRToken(rDAIAddress);
+  IRToken public rDAIContract = IRToken(rDAIAddress);
 
   // events
   event Transfer(address indexed _from, address indexed _to, uint256 _value);
@@ -76,11 +76,12 @@ contract HoodieToken {
   }
 
   function deposit(uint256 depositAmount) public payable returns (bool) {
+
     require(depositAmount > 0, "deposit amount should be greater than zero");
-    // require(depositAmount <= DAIContract.balanceOf(msg.sender), "Insufficient amount of DAI");
+    require(depositAmount <= DAIContract.balanceOf(msg.sender), "Insufficient amount of DAI");
 
     // transfer DAI to rDAIContract from user
-    require(DAIContract.transferFrom(msg.sender, address(this), depositAmount), "DAI was not sent to DApp properly");
+    require(DAIContract.transferFrom(msg.sender, address(rDAIContract), depositAmount), "DAI was not sent to DApp properly");
 
     // deposit DAI into Compound by rDAIContract
     require(DAIContract.approve(address(rDAIContract), depositAmount), "Could not approve to allow the rDAI contract to manage it");
