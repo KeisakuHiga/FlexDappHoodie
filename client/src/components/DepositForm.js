@@ -32,7 +32,7 @@ class DepositForm extends Component {
                       .send(
                         {
                           from: accounts[0],
-                          gasLimit: "7000000"
+                          gasLimit: "7100000"
                         }
                       );
       console.log(result)
