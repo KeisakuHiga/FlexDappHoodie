@@ -22,7 +22,7 @@ contract HoodieToken {
   ICErc20 public cDAIContract = ICErc20(cDAIAddress);
 
   //  Instantiate rDAIContract with rDAI address on rinkeby
-  address rDAIAddress = 0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578;
+  address rDAIAddress = 0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A;
   IRToken public rDAIContract = IRToken(rDAIAddress);
 
   // events
@@ -72,22 +72,6 @@ contract HoodieToken {
     balanceOf[_to] += _value;
     allowance[_from][msg.sender] -= _value;
     emit Transfer(_from, _to, _value);
-    return true;
-  }
-
-  function deposit(uint256 depositAmount) public payable returns (bool) {
-
-    require(depositAmount > 0, "deposit amount should be greater than zero");
-    require(depositAmount <= DAIContract.allowance(msg.sender, address(this)), "Insufficient amount of DAI");
-
-    // transfer DAI to rDAIContract from user
-    // require(DAIContract.transferFrom(msg.sender, address(rDAIContract), depositAmount), "DAI was not sent to DApp properly");
-
-    // deposit DAI into Compound by rDAIContract
-    // require(DAIContract.approve(address(rDAIContract), depositAmount), "Could not approve to allow the rDAI contract to manage it");
-    // require(rDAIContract.mintWithSelectedHat(depositAmount, hatID), "Could not supply DAI to Compound");
-
-    emit Depositted(msg.sender, depositAmount);
     return true;
   }
 }

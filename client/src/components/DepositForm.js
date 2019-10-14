@@ -3,40 +3,59 @@ import React, { Component } from 'react';
 class DepositForm extends Component {
   state = {
     web3: null,
-    hoodieInstance: this.props.hoodieInstance,
+    rDaiInstance: this.props.rDaiInstance,
     accounts: this.props.accounts,
+    hatID: this.props.hatID,
     from: '',
     to: '',
     depositAmount: 0,
   }
 
-  componentDidMount = () => {
-    const { hoodieInstance, accounts, web3 } = this.props;
-    web3.eth.getBlock("latest", false, (error, result) => {
-      if(error) {
-        console.log(error.message);
-      }
-      console.log(result.gasLimit)
-    });
-    this.setState({ hoodieInstance, accounts, web3 });
-  }
+  // componentDidMount = () => {
+  //   const { hoodieInstance, accounts, web3 } = this.props;
+  //   web3.eth.getBlock("latest", false, (error, result) => {
+  //     if(error) {
+  //       console.log(error.message);
+  //     }
+  //     console.log(result.gasLimit)
+  //   });
+  //   this.setState({ hoodieInstance, accounts, web3 });
+  // }
 
-  handleSubmit = async (e) => {
+  handleMintRDai = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, depositAmount, accounts }  = this.state
-    // const depositAmountNumber = parseInt(depositAmount, 10);
-    const depositAmountNumber = depositAmount;
+    const { addressOfRDaiContract, daiInstance } = this.props
+    const { rDaiInstance, depositAmount, accounts, hatID }  = this.state
     try {
-      const result = await hoodieInstance.methods
-                      .deposit(depositAmountNumber)
-                      .send(
-                        {
-                          from: accounts[0],
-                          gasLimit: "7100000"
-                        }
-                      );
-      console.log(result)
-      
+      console.log('start to transfer DAI from user to rDai contract')
+      console.log(addressOfRDaiContract)
+      console.log(depositAmount)
+      await daiInstance.methods.transfer(addressOfRDaiContract, depositAmount).send({ from: accounts[0] })
+        .on('transactionHash', hash => {
+          console.log('H: ' + hash)
+        })
+        .on('confirmation', (confirmationNumber, receipt) => {
+          console.log('CN: ' + confirmationNumber)
+          console.log('R: ' + receipt)
+        })
+        .on('receipt', receipt => {
+          console.log('R: ' + receipt)
+        })
+
+      console.log('start to mint rDai')
+      console.log(depositAmount)
+      console.log(hatID)
+      await rDaiInstance.methods.mintWithSelectedHat(depositAmount, hatID).send({ from: accounts[0] } )
+        .on('transactionHash', hash => {
+          console.log('H: ' + hash)
+        })
+        .on('confirmation', (confirmationNumber, receipt) => {
+          console.log('CN: ' + confirmationNumber)
+          console.log('R: ' + receipt)
+        })
+        .on('receipt', receipt => {
+          console.log('R: ' + receipt)
+        })
     } catch (err) {
       console.log(err.message);
     }
@@ -46,7 +65,7 @@ class DepositForm extends Component {
     const { depositAmount } = this.state;
     console.log(typeof depositAmount);
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form onSubmit={this.handleMintRDai}>
         <div className="form-group">
           <label>How much DAI will you invest?</label>
           <input 
@@ -57,7 +76,7 @@ class DepositForm extends Component {
             onChange={e => this.setState({ depositAmount: e.target.value })}
           />
         </div>
-        <button type="submit" className="btn btn-primary">Submit</button>
+        <button type="submit" className="btn btn-primary">Mint rDAI</button>
       </form>
     );
   }
