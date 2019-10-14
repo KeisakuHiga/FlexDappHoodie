@@ -4,6 +4,8 @@ import DaiAbi from "./contracts/DaiAbi.json";
 import RDaiAbi from "./contracts/RDaiAbi.json";
 import getWeb3 from "./utils/getWeb3";
 import DepositForm from "./components/DepositForm";
+import RedeemForm from "./components/RedeemForm";
+import TransferRDaiForm from "./components/TransferRDaiForm";
 import ApproveRDai from "./components/ApproveRDai";
 import "./App.css";
 import BigNumber from "big-number";
@@ -24,7 +26,7 @@ class App extends Component {
     owner: null,
     hatID: null,
     balanceOfDai: 0,
-    amountOfRDai: 0,
+    balanceOfRDai: 0,
     addressOfRDaiContract: null,
 
     userApprovedRDai: null,
@@ -46,7 +48,6 @@ class App extends Component {
         HoodieToken.abi,
         HoodieDeployedNetwork && HoodieDeployedNetwork.address,
         );
-        console.log(hoodieInstance)
         
       // Create DAI contract instance.
       const daiABI = DaiAbi;
@@ -70,7 +71,7 @@ class App extends Component {
   };
 
   getBasicInfo = async () => {
-    const { web3, accounts, hoodieInstance, daiInstance, rDaiInstance } = this.state;
+    const { accounts, hoodieInstance, daiInstance, rDaiInstance } = this.state;
     const contract = hoodieInstance.methods;
     const dai = daiInstance.methods;
     const rDai = rDaiInstance.methods;
@@ -80,11 +81,9 @@ class App extends Component {
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
-    // const balanceOfDai = await web3.utils.fromWei(`${await dai.balanceOf(accounts[0]).call()}`, 'Ether');
-    // const balanceOfRDai = await web3.utils.fromWei(`${await rDai.balanceOf(accounts[0]).call()}`, 'Ether');
     const balanceOfDai = await dai.balanceOf(accounts[0]).call();
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
-    console.log(balanceOfRDai)
+
     this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, balanceOfRDai, });
   };
 
@@ -104,7 +103,7 @@ class App extends Component {
   }
 
   render() {
-    const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, userApprovedRDai, rDaiInstance, addressOfRDaiContract } = this.state
+    const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, balanceOfRDai, userApprovedRDai, rDaiInstance, addressOfRDaiContract } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -116,25 +115,46 @@ class App extends Component {
           <h3>You have {balanceOf} FDH now</h3>
           <p>Owner is {owner}</p>
           <p>Hat ID is {hatID}</p>
-          <p>Your DAI balance is {balanceOfDai}</p>
+          <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
+          <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
 
         </div>
-        {userApprovedRDai ? 
+
           <DepositForm 
             web3={web3}
             daiInstance={daiInstance}
             rDaiInstance={rDaiInstance}
             addressOfRDaiContract={addressOfRDaiContract}
             accounts={accounts}
-            hatID={hatID} /> :
+            hatID={hatID}
+          />
+
+          <br />
+
           <ApproveRDai 
             web3={web3}
             daiInstance={daiInstance}
             hoodieInstance={hoodieInstance}
             accounts={accounts}
             userApprovedRDai={userApprovedRDai}
-            handleApprove={this.handleApprove} />
-        }
+            handleApprove={this.handleApprove}
+          />
+
+          <br />
+          <RedeemForm
+            web3={web3}
+            rDaiInstance={rDaiInstance}
+            accounts={accounts}
+          />
+
+          <br />
+          <TransferRDaiForm
+            web3={web3}
+            rDaiInstance={rDaiInstance}
+            accounts={accounts}
+          />
+
+
       </div>
     );
   }

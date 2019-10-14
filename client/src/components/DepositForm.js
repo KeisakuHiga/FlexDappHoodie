@@ -11,17 +11,6 @@ class DepositForm extends Component {
     depositAmount: 0,
   }
 
-  // componentDidMount = () => {
-  //   const { hoodieInstance, accounts, web3 } = this.props;
-  //   web3.eth.getBlock("latest", false, (error, result) => {
-  //     if(error) {
-  //       console.log(error.message);
-  //     }
-  //     console.log(result.gasLimit)
-  //   });
-  //   this.setState({ hoodieInstance, accounts, web3 });
-  // }
-
   handleMintRDai = async (e) => {
     e.preventDefault()
     const { addressOfRDaiContract, daiInstance } = this.props
@@ -62,8 +51,6 @@ class DepositForm extends Component {
   }
 
   render() {
-    const { depositAmount } = this.state;
-    console.log(typeof depositAmount);
     return (
       <form onSubmit={this.handleMintRDai}>
         <div className="form-group">
