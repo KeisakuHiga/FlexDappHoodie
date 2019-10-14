@@ -1,9 +1,12 @@
 import React, { Component } from "react";
 import HoodieToken from "./contracts/HoodieToken.json";
+import DaiAbi from "./contracts/DaiAbi.json";
+import RDaiAbi from "./contracts/RDaiAbi.json";
 import getWeb3 from "./utils/getWeb3";
 import DepositForm from "./components/DepositForm";
-import ApproveDai from "./components/ApproveDai";
+import ApproveRDai from "./components/ApproveRDai";
 import "./App.css";
+import BN from "big-number";
 
 class App extends Component {
   state = {
@@ -11,6 +14,7 @@ class App extends Component {
     accounts: null,
     hoodieInstance: null,
     daiInstance: null,
+    rDaiInstance: null,
 
     name: '',
     symbol: '',
@@ -19,9 +23,11 @@ class App extends Component {
     balanceOf: 0,
     owner: null,
     hatID: null,
-    amountOfDaiInEther: 0,
+    balanceOfDai: 0,
+    amountOfRDai: 0,
+    addressOfRDaiContract: null,
 
-    userApprovedDai: null,
+    userApprovedRDai: null,
     spender: null,
   };
 
@@ -43,15 +49,18 @@ class App extends Component {
         console.log(hoodieInstance)
         
       // Create DAI contract instance.
-      const daiABI = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"stop","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"guy","type":"address"},{"name":"wad","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"owner_","type":"address"}],"name":"setOwner","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"dst","type":"address"},{"name":"wad","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"guy","type":"address"},{"name":"wad","type":"uint256"}],"name":"mint","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"wad","type":"uint256"}],"name":"burn","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"name_","type":"bytes32"}],"name":"setName","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"src","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"stopped","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"authority_","type":"address"}],"name":"setAuthority","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"guy","type":"address"},{"name":"wad","type":"uint256"}],"name":"burn","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"wad","type":"uint256"}],"name":"mint","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"dst","type":"address"},{"name":"wad","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"dst","type":"address"},{"name":"wad","type":"uint256"}],"name":"push","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"dst","type":"address"},{"name":"wad","type":"uint256"}],"name":"move","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"start","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"authority","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"guy","type":"address"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"src","type":"address"},{"name":"guy","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"wad","type":"uint256"}],"name":"pull","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"symbol_","type":"bytes32"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"guy","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Mint","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"guy","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Burn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"authority","type":"address"}],"name":"LogSetAuthority","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"}],"name":"LogSetOwner","type":"event"},{"anonymous":true,"inputs":[{"indexed":true,"name":"sig","type":"bytes4"},{"indexed":true,"name":"guy","type":"address"},{"indexed":true,"name":"foo","type":"bytes32"},{"indexed":true,"name":"bar","type":"bytes32"},{"indexed":false,"name":"wad","type":"uint256"},{"indexed":false,"name":"fax","type":"bytes"}],"name":"LogNote","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"src","type":"address"},{"indexed":true,"name":"guy","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"src","type":"address"},{"indexed":true,"name":"dst","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Transfer","type":"event"}];
+      const daiABI = DaiAbi;
       const addressOfDaiContract = '0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa';
-      const daiInstance = new web3.eth.Contract(
-        daiABI, addressOfDaiContract,
-        );
+      const daiInstance = new web3.eth.Contract(daiABI, addressOfDaiContract);
+        
+      // Create DAI contract instance.
+      const rDaiABI = RDaiAbi;
+      const addressOfRDaiContract = '0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578';
+      const rDaiInstance = new web3.eth.Contract(rDaiABI, addressOfRDaiContract);
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, hoodieInstance, daiInstance }, this.getBasicInfo);
+      this.setState({ web3, accounts, hoodieInstance, daiInstance, rDaiInstance, addressOfRDaiContract }, this.getBasicInfo);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -62,37 +71,36 @@ class App extends Component {
   };
 
   getBasicInfo = async () => {
-    const { web3, accounts, hoodieInstance, daiInstance } = this.state;
+    const { web3, accounts, hoodieInstance, daiInstance, rDaiInstance } = this.state;
     const contract = hoodieInstance.methods;
     const dai = daiInstance.methods;
+    const rDai = rDaiInstance.methods;
     const name = await contract.name().call();
     const owner = await contract.owner().call();
     const symbol = await contract.symbol().call();
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
-    const balanceOfDai = await dai.balanceOf(accounts[0]).call();
+    const balanceOfDai = await web3.utils.fromWei(`${await dai.balanceOf(accounts[0]).call()}`, 'Ether');
+    const balanceOfRDai = await web3.utils.fromWei(`${await rDai.balanceOf(accounts[0]).call()}`, 'Ether');
 
-    const amountOfDaiInEther = await web3.utils.fromWei(`${balanceOfDai}`, 'Ether');
-    const spender = await hoodieInstance.options.address
-    console.log(spender)
-
-    this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, amountOfDaiInEther, spender });
+    this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, balanceOfRDai, });
   };
 
   handleApprove = async (e) => {
     e.preventDefault()
-    const { daiInstance, accounts, spender, amountOfDaiInEther }  = this.state
+    const { daiInstance, accounts, balanceOfDai, addressOfRDaiContract }  = this.state
+    const BNMax = new BN(2).pow(256).minus(1)
     try {
-      await daiInstance.methods.approve(spender, amountOfDaiInEther).send({ from: accounts[0] });
-      this.setState({ userApprovedDai: true })
+      await daiInstance.methods.approve(addressOfRDaiContract, BNMax).send({ from: accounts[0] });
+      this.setState({ userApprovedRDai: true })
     } catch (err) {
       console.log(err.message)
     }
   }
 
   render() {
-    const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply, balanceOf, hatID, amountOfDaiInEther, userApprovedDai } = this.state
+    const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, userApprovedRDai } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -104,20 +112,20 @@ class App extends Component {
           <h3>You have {balanceOf} FDH now</h3>
           <p>Owner is {owner}</p>
           <p>Hat ID is {hatID}</p>
-          <p>Your DAI balance is {amountOfDaiInEther}</p>
+          <p>Your DAI balance is {balanceOfDai}</p>
 
         </div>
-        {userApprovedDai ? 
+        {userApprovedRDai ? 
           <DepositForm 
             web3={web3}
             hoodieInstance={hoodieInstance}
             accounts={accounts} /> :
-          <ApproveDai 
+          <ApproveRDai 
             web3={web3}
             daiInstance={daiInstance}
             hoodieInstance={hoodieInstance}
             accounts={accounts}
-            userApprovedDai={userApprovedDai}
+            userApprovedRDai={userApprovedRDai}
             handleApprove={this.handleApprove} />
         }
       </div>
