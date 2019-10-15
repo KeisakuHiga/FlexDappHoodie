@@ -7,6 +7,7 @@ import DepositForm from "./components/DepositForm";
 import RedeemForm from "./components/RedeemForm";
 import TransferRDaiForm from "./components/TransferRDaiForm";
 import ApproveRDai from "./components/ApproveRDai";
+import PayInterest from "./components/PayInterest";
 import "./App.css";
 import BigNumber from "big-number";
 
@@ -107,6 +108,7 @@ class App extends Component {
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
+
     return (
       <div className="App">
         <div>
@@ -117,44 +119,51 @@ class App extends Component {
           <p>Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
-
         </div>
 
-          <DepositForm 
-            web3={web3}
-            daiInstance={daiInstance}
-            rDaiInstance={rDaiInstance}
-            addressOfRDaiContract={addressOfRDaiContract}
-            accounts={accounts}
-            hatID={hatID}
-          />
+        <ApproveRDai 
+          web3={web3}
+          daiInstance={daiInstance}
+          hoodieInstance={hoodieInstance}
+          accounts={accounts}
+          userApprovedRDai={userApprovedRDai}
+          handleApprove={this.handleApprove}
+        />
 
-          <br />
+        <br />
 
-          <ApproveRDai 
-            web3={web3}
-            daiInstance={daiInstance}
-            hoodieInstance={hoodieInstance}
-            accounts={accounts}
-            userApprovedRDai={userApprovedRDai}
-            handleApprove={this.handleApprove}
-          />
+        <DepositForm 
+          web3={web3}
+          daiInstance={daiInstance}
+          rDaiInstance={rDaiInstance}
+          addressOfRDaiContract={addressOfRDaiContract}
+          accounts={accounts}
+          hatID={hatID}
+        />
 
-          <br />
-          <RedeemForm
-            web3={web3}
-            rDaiInstance={rDaiInstance}
-            accounts={accounts}
-          />
+        <br />
 
-          <br />
-          <TransferRDaiForm
-            web3={web3}
-            rDaiInstance={rDaiInstance}
-            accounts={accounts}
-          />
+        <RedeemForm
+          web3={web3}
+          rDaiInstance={rDaiInstance}
+          accounts={accounts}
+        />
 
+        <br />
+        
+        <TransferRDaiForm
+          web3={web3}
+          rDaiInstance={rDaiInstance}
+          accounts={accounts}
+        />
 
+        <br />
+        
+        <PayInterest
+          web3={web3}
+          rDaiInstance={rDaiInstance}
+          accounts={accounts}
+        />
       </div>
     );
   }
