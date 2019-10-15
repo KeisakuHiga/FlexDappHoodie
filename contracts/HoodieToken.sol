@@ -3,6 +3,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./IDai.sol"; 
 import "./ICErc20.sol"; 
 import "./IRToken.sol";
+import "./IAllocationStrategy.sol";
 
 contract HoodieToken {
   // Basic set up for FDH
