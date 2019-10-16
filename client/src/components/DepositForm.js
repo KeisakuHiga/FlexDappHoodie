@@ -7,13 +7,14 @@ class DepositForm extends Component {
 
   handleMintRDai = async (e) => {
     e.preventDefault()
-    const { hatID,rDaiInstance, accounts } = this.props
+    const { hoodieInstance, hatID,rDaiInstance, accounts } = this.props
     const { depositAmount }  = this.state
     try {
       console.log('start to mint rDai')
       console.log(depositAmount)
       console.log(hatID)
-      await rDaiInstance.methods.mintWithSelectedHat(depositAmount, hatID).send({ from: accounts[0] } )
+      // await rDaiInstance.methods.mintWithSelectedHat(depositAmount, hatID).send({ from: accounts[0] } )
+      await hoodieInstance.methods.mintRDaiAndPushUserToWaitingList(depositAmount).send({ from: accounts[0] } )
         .on('transactionHash', hash => {
           console.log('Tx Hash: ' + hash)
         })

@@ -8,7 +8,6 @@ import "./IRToken.sol";
 import "./IAllocationStrategy.sol";
 
 contract HoodieToken is ERC20, ERC20Detailed, Ownable {
-
   // Instantiate DAIContract with DAI address on rinkeby
   address DAIAddress = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
   IDai public DAIContract = IDai(DAIAddress);
@@ -29,14 +28,25 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   uint32[] public proportions = [proportion];
   bool public doChangeHat = false;
 
+  uint256 public minimumDepositAmount;
+
   constructor(uint256 initialSupply) ERC20Detailed("Flex Dapps Hoodie Token", "FDH", 18) public {
-    _mint(msg.sender, initialSupply*10**18);
+    _mint(msg.sender, initialSupply * 10 ** 18);
+    minimumDepositAmount = 200 * 10 ** 18;
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
   // user approves Hoodie conract to transfer user's DAI
-  // dapp transfer user's DAI to itself
-  // dapp approves rDAI contract to transfer dapp's DAI
   // dapp invoke mint() and get rDAI
   // dapp transfer rDAI to user
+  function mintRDaiAndPushUserToWaitingList(uint256 depositAmount) public returns(bool) {
+  // dapp transfer user's DAI to itself
+    require(depositAmount >= minimumDepositAmount, "Deposit amount should be equal to / greater than 200DAI");
+    require(depositAmount <= DAIContract.allowance(msg.sender, address(this)), "Deposit amount should be equal to / smaller than the allowance");
+    DAIContract.transferFrom(msg.sender, address(this), depositAmount);
+
+  // // dapp approves rDAI contract to transfer dapp's DAI
+  //   rDAIContract.approve(address(rDAIContract), DAIContract.allowance(msg.sender, address(this)))
+    return true;
+  }
 }

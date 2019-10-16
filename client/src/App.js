@@ -28,9 +28,10 @@ class App extends Component {
     hatID: null,
     balanceOfDai: 0,
     balanceOfRDai: 0,
+    balanceOfDaiHoodie: 0,
     addressOfRDaiContract: null,
 
-    userApprovedRDai: null,
+    userApproved: null,
     allowance: 0,
     spender: null,
     interestPayableOf: 0,
@@ -74,7 +75,7 @@ class App extends Component {
   };
 
   getBasicInfo = async () => {
-    const { web3, accounts, hoodieInstance, daiInstance, rDaiInstance, addressOfRDaiContract } = this.state;
+    const { web3, accounts, hoodieInstance, daiInstance, rDaiInstance } = this.state;
     const contract = hoodieInstance.methods;
     const dai = daiInstance.methods;
     const rDai = rDaiInstance.methods;
@@ -85,23 +86,27 @@ class App extends Component {
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
     const balanceOfDai = await dai.balanceOf(accounts[0]).call();
+    const hoodieAddress = hoodieInstance.options.address;
+    const balanceOfDaiHoodie = await dai.balanceOf(hoodieAddress).call();
+
     const allowance = await dai.allowance(accounts[0], hoodieInstance.options.address).call()
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
     // const interestPayableOf = await rDai.interestPayableOf('0x93438172245D2c0e2dd511659A1518210e52AF9c').call();
     // console.log(web3.utils.fromWei(interestPayableOf, 'ether'))
     const interestPayableOf = await rDai.interestPayableOf(accounts[0]).call();
     console.log(web3.utils.fromWei(interestPayableOf, 'ether'))
-    this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, balanceOfRDai, interestPayableOf, allowance, });
+    this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, 
+      balanceOfRDai, interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, });
   };
 
   handleApprove = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, daiInstance, accounts, addressOfRDaiContract, balanceOfDai }  = this.state
+    const { hoodieInstance, daiInstance, accounts, balanceOfDai }  = this.state
     // const BNMax = new BigNumber(2).pow(256).minus(1)
-    const hoodieAddress = await hoodieInstance.options.address
+    const hoodieAddress = hoodieInstance.options.address
     try {
       await daiInstance.methods.approve(hoodieAddress, balanceOfDai).send({ from: accounts[0] });
-      this.setState({ userApprovedRDai: true })
+      this.setState({ userApproved: true })
       const allowance = await daiInstance.methods.allowance(accounts[0], hoodieAddress).call()
       console.log(allowance)
       
@@ -111,7 +116,9 @@ class App extends Component {
   }
 
   render() {
-    const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, balanceOfRDai, userApprovedRDai, rDaiInstance, addressOfRDaiContract, interestPayableOf, allowance, } = this.state
+    const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply,
+            balanceOf, hatID, balanceOfDai, balanceOfRDai, userApproved, rDaiInstance, addressOfRDaiContract,
+            interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -127,18 +134,29 @@ class App extends Component {
           <p>Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
-          <p>Allowance is {web3.utils.fromWei(`${allowance}`, 'ether')}</p>
-          <p>interestPayableOf=> {web3.utils.fromWei(`${interestPayableOf}`, 'ether')}</p>
-        </div>
 
-        <Approve 
-          web3={web3}
-          daiInstance={daiInstance}
-          hoodieInstance={hoodieInstance}
-          accounts={accounts}
-          userApprovedRDai={userApprovedRDai}
-          handleApprove={this.handleApprove}
-        />
+          <br />
+
+          <h4>Allowance is {web3.utils.fromWei(`${allowance}`, 'ether')}</h4>
+          <Approve 
+            web3={web3}
+            daiInstance={daiInstance}
+            hoodieInstance={hoodieInstance}
+            accounts={accounts}
+            userApproved={userApproved}
+            handleApprove={this.handleApprove}
+          />
+
+          <br />
+
+          <p>interestPayableOf=> {web3.utils.fromWei(`${interestPayableOf}`, 'ether')}</p>
+
+          <br />
+
+          <h3>Info of Hoodie DApp</h3>
+          <p>Hoddie address: {hoodieAddress}</p>
+          <p>DAI amount: {web3.utils.fromWei(`${balanceOfDaiHoodie}`, 'ether')}</p>
+        </div>
 
         <br />
 
