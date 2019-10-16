@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class ApproveRDai extends Component {
+class Approve extends Component {
 
   render() { 
     return (
@@ -11,4 +11,4 @@ class ApproveRDai extends Component {
   }
 }
 
-export default ApproveRDai;
+export default Approve;

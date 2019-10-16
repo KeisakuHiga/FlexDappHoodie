@@ -33,4 +33,10 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     _mint(msg.sender, initialSupply*10**18);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
+
+  // user approves Hoodie conract to transfer user's DAI
+  // dapp transfer user's DAI to itself
+  // dapp approves rDAI contract to transfer dapp's DAI
+  // dapp invoke mint() and get rDAI
+  // dapp transfer rDAI to user
 }
