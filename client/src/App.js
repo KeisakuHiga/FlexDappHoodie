@@ -81,13 +81,13 @@ class App extends Component {
     const { web3, accounts, hoodieInstance, daiInstance, rDaiInstance } = this.state;
     // hoodie
     const contract = hoodieInstance.methods;
+    const hoodieAddress = hoodieInstance.options.address;
     const name = await contract.name().call();
     const owner = await contract.owner().call();
     const symbol = await contract.symbol().call();
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
-    const hoodieAddress = hoodieInstance.options.address;
     const waitingList = await contract.getWaitingList().call();
     // dai
     const dai = daiInstance.methods;
@@ -99,7 +99,7 @@ class App extends Component {
     const rDai = rDaiInstance.methods;
     const balanceOfRDaiHoodie = await rDai.balanceOf(hoodieAddress).call();
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
-    const interestPayableOf = await rDai.interestPayableOf(accounts[0]).call();
+    const interestPayableOf = await rDai.interestPayableOf(owner).call();
     console.log(web3.utils.fromWei(interestPayableOf, 'ether'))
     // const interestPayableOf = await rDai.interestPayableOf('0x93438172245D2c0e2dd511659A1518210e52AF9c').call();
     // console.log(web3.utils.fromWei(interestPayableOf, 'ether'))

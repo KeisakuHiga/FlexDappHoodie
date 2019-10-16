@@ -7,12 +7,9 @@ import "./IRToken.sol";
 
 contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   // Instantiate DAIContract with DAI address on rinkeby
-  address DAIAddress = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
-  IDai public DAIContract = IDai(DAIAddress);
-
   //  Instantiate rDAIContract with rDAI address on rinkeby
-  address rDAIAddress = 0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A;
-  IRToken public rDAIContract = IRToken(rDAIAddress);
+  IDai public DAIContract;
+  IRToken public rDAIContract;
 
   // Hat setting
   uint256 public hatID;
@@ -25,20 +22,23 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   uint256 public minimumDepositAmount;
   uint256 public waitingNumCounter;
   address[] public waitingList;
+  uint256 public hoodieCost;
 
-  event UserPushedIntoWaitingList(address user, uint256 depositedAmount)
+  event UserPushedIntoWaitingList(address user, uint256 depositedAmount);
 
   constructor(uint256 initialSupply) ERC20Detailed("Flex Dapps Hoodie Token", "FDH", 18) public {
+    DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
+    rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A);
+    hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
     _mint(msg.sender, initialSupply * 10 ** 18);
     minimumDepositAmount = 1 * 10 ** 18;
-    hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
+    hoodieCost = 20 * 10 ** 18;
   }
 
   function mintRDaiAndPushUserToWaitingList(uint256 depositAmount) public returns(bool) {
   // dapp transfer user's DAI to itself
     require(depositAmount >= minimumDepositAmount, "Deposit amount should be equal to / greater than 200DAI");
-
-    require(DAIContract.transferFrom(msg.sender, address(this), depositAmount), "Transfer DAI from user to Hoodie contract failed");
+    require(DAIContract.transferFrom(msg.sender, address(this), depositAmount), "Transfer DAI to Hoodie contract failed");
 
   // dapp approves rDAI contract to transfer dapp's DAI
     require(DAIContract.approve(address(rDAIContract), depositAmount), "approve() invalid");
@@ -47,7 +47,7 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     require(rDAIContract.mintWithSelectedHat(depositAmount, hatID), "minting failed");
 
   // dapp transfer rDAI to user
-    rDAIContract.transferFrom(address(this), msg.sender, depositAmount);
+    require(rDAIContract.transferFrom(address(this), msg.sender, depositAmount), "Transfer rDAI to user failed");
   
   // add user address to waitingList
     waitingList.push(msg.sender);
@@ -58,5 +58,19 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
 
   function getWaitingList() public view returns(address[] memory) {
     return waitingList;
+  }
+
+  function issueFDH() public returns(bool) {
+    require(transfer(msg.sender, 1), "Issuing FDH failed");
+
+  }
+  function _setNewDaiContractInstance(address _daiContractAddress) public onlyOwner returns(bool) {
+    DAIContract = IDai(_daiContractAddress);
+    return true;
+  }
+
+  function _setNewRDaiContractInstance(address _rDaiContractAddress) public onlyOwner returns(bool) {
+    rDAIContract = IRToken(_rDaiContractAddress);
+    return true;
   }
 }
