@@ -29,7 +29,7 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   bool public doChangeHat = false;
 
   uint256 public minimumDepositAmount;
-  address[] waitingList;
+  address[] public waitingList;
 
   constructor(uint256 initialSupply) ERC20Detailed("Flex Dapps Hoodie Token", "FDH", 18) public {
     _mint(msg.sender, initialSupply * 10 ** 18);
@@ -53,9 +53,15 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     require(rDAIContract.mintWithSelectedHat(depositAmount, hatID), "minting failed");
 
   // dapp transfer rDAI to user
-    // rDAIContract.transferFrom(address(this), msg.sender, depositAmount);
+    rDAIContract.transferFrom(address(this), msg.sender, depositAmount);
   
   // add user address to waitingList
+    waitingList.push(msg.sender);
+
     return true;
+  }
+
+  function getWaitingList() public view returns(address[] memory) {
+    return waitingList;
   }
 }

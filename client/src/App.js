@@ -37,6 +37,7 @@ class App extends Component {
     allowanceRDai: 0,
     spender: null,
     interestPayableOf: 0,
+    waitingList: [],
 
   };
 
@@ -81,13 +82,13 @@ class App extends Component {
     // hoodie
     const contract = hoodieInstance.methods;
     const name = await contract.name().call();
-    const rDai = rDaiInstance.methods;
     const owner = await contract.owner().call();
     const symbol = await contract.symbol().call();
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
     const hoodieAddress = hoodieInstance.options.address;
+    const waitingList = await contract.getWaitingList().call();
     // dai
     const dai = daiInstance.methods;
     const balanceOfDai = await dai.balanceOf(accounts[0]).call();
@@ -95,6 +96,7 @@ class App extends Component {
     const allowance = await dai.allowance(accounts[0], hoodieInstance.options.address).call()
     const allowanceRDai = await dai.allowance(hoodieInstance.options.address, rDaiInstance.options.address).call()
     // rDai
+    const rDai = rDaiInstance.methods;
     const balanceOfRDaiHoodie = await rDai.balanceOf(hoodieAddress).call();
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
     const interestPayableOf = await rDai.interestPayableOf(accounts[0]).call();
@@ -104,7 +106,7 @@ class App extends Component {
 
     this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, 
       balanceOfRDai, interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, 
-      balanceOfRDaiHoodie, allowanceRDai, 
+      balanceOfRDaiHoodie, allowanceRDai, waitingList, 
     });
   };
 
@@ -128,6 +130,7 @@ class App extends Component {
     const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply,
             balanceOf, hatID, balanceOfDai, balanceOfRDai, userApproved, rDaiInstance, addressOfRDaiContract,
             interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, balanceOfRDaiHoodie, allowanceRDai, 
+            waitingList, 
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -168,6 +171,7 @@ class App extends Component {
           <p>DAI amount: {web3.utils.fromWei(`${balanceOfDaiHoodie}`, 'ether')}</p>
           <p>rDAI amount: {web3.utils.fromWei(`${balanceOfRDaiHoodie}`, 'ether')}</p>
           <p>allowanceRDai: {web3.utils.fromWei(`${allowanceRDai}`, 'ether')}</p>
+          <p>Waiting List: {waitingList}</p>
         </div>
 
         <br />
