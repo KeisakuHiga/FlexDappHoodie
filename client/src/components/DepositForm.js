@@ -15,14 +15,7 @@ class DepositForm extends Component {
       console.log(hatID)
       await rDaiInstance.methods.mintWithSelectedHat(depositAmount, hatID).send({ from: accounts[0] } )
         .on('transactionHash', hash => {
-          console.log('H: ' + hash)
-        })
-        .on('confirmation', (confirmationNumber, receipt) => {
-          console.log('CN: ' + confirmationNumber)
-          console.log('R: ' + receipt)
-        })
-        .on('receipt', receipt => {
-          console.log('R: ' + receipt)
+          console.log('Tx Hash: ' + hash)
         })
     } catch (err) {
       console.log(err.message);
@@ -31,7 +24,6 @@ class DepositForm extends Component {
 
   render() {
     const { web3 } = this.props
-    console.log(this.state.depositAmount)
     return (
       <form onSubmit={this.handleMintRDai}>
         <div className="form-group">

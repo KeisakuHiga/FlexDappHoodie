@@ -119,7 +119,8 @@ class App extends Component {
     return (
       <div className="App">
         <div>
-          <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
+          <h1>Welcome to {name} dapp!</h1>
+          <h1>Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
           <h3>Hoodie token's total supply is {totalSupply}</h3>
           <h3>You have {balanceOf} FDH now</h3>
           <p>Owner is {owner}</p>
@@ -143,6 +144,7 @@ class App extends Component {
 
         <DepositForm 
           web3={web3}
+          hoodieInstance={hoodieInstance}
           daiInstance={daiInstance}
           rDaiInstance={rDaiInstance}
           addressOfRDaiContract={addressOfRDaiContract}
