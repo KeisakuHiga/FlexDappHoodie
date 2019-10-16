@@ -35,6 +35,7 @@ class DepositForm extends Component {
             id="inputDAI"
             placeholder="DAI"
             onChange={e => {
+              if (!e.target.value) return
               const depositAmountInWei = web3.utils.toWei(e.target.value, 'ether')
               this.setState({ depositAmount: depositAmountInWei })
             }}

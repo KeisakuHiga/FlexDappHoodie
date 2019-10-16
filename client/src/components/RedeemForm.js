@@ -17,7 +17,7 @@ class RedeemForm extends Component {
       console.log('redeemAmount: ', redeemAmount)
       await rDaiInstance.methods.redeem(redeemAmount).send({ from: accounts[0] })
         .on('receipt', receipt => {
-          this.setState({ transactionHash: receipt.transactionHash})
+          this.setState({ transactionHash: receipt.transactionHash })
         })
 
     } catch (err) {
@@ -33,11 +33,13 @@ class RedeemForm extends Component {
           <div className="form-group">
             <label>How much rDAI will you redeem?</label>
             <input 
-              
               className="form-control"
               id="inputRDAI"
               placeholder="rDAI"
-              onChange={e => this.setState({ redeemAmount: web3.utils.toWei(`${e.target.value}`, 'ether') })}
+              onChange={e => {
+                if (!e.target.value) return
+                this.setState({ redeemAmount: web3.utils.toWei(`${e.target.value}`, 'ether') })
+              }}
             />
           </div>
           <button type="submit" className="btn btn-primary">Redeem rDAI</button>
