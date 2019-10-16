@@ -29,10 +29,12 @@ class App extends Component {
     balanceOfDai: 0,
     balanceOfRDai: 0,
     balanceOfDaiHoodie: 0,
+    balanceOfRDaiHoodie: 0,
     addressOfRDaiContract: null,
 
     userApproved: null,
     allowance: 0,
+    allowanceRDai: 0,
     spender: null,
     interestPayableOf: 0,
 
@@ -76,27 +78,34 @@ class App extends Component {
 
   getBasicInfo = async () => {
     const { web3, accounts, hoodieInstance, daiInstance, rDaiInstance } = this.state;
+    // hoodie
     const contract = hoodieInstance.methods;
-    const dai = daiInstance.methods;
-    const rDai = rDaiInstance.methods;
     const name = await contract.name().call();
+    const rDai = rDaiInstance.methods;
     const owner = await contract.owner().call();
     const symbol = await contract.symbol().call();
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
-    const balanceOfDai = await dai.balanceOf(accounts[0]).call();
     const hoodieAddress = hoodieInstance.options.address;
+    // dai
+    const dai = daiInstance.methods;
+    const balanceOfDai = await dai.balanceOf(accounts[0]).call();
     const balanceOfDaiHoodie = await dai.balanceOf(hoodieAddress).call();
-
     const allowance = await dai.allowance(accounts[0], hoodieInstance.options.address).call()
+    const allowanceRDai = await dai.allowance(hoodieInstance.options.address, rDaiInstance.options.address).call()
+    // rDai
+    const balanceOfRDaiHoodie = await rDai.balanceOf(hoodieAddress).call();
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
-    // const interestPayableOf = await rDai.interestPayableOf('0x93438172245D2c0e2dd511659A1518210e52AF9c').call();
-    // console.log(web3.utils.fromWei(interestPayableOf, 'ether'))
     const interestPayableOf = await rDai.interestPayableOf(accounts[0]).call();
     console.log(web3.utils.fromWei(interestPayableOf, 'ether'))
+    // const interestPayableOf = await rDai.interestPayableOf('0x93438172245D2c0e2dd511659A1518210e52AF9c').call();
+    // console.log(web3.utils.fromWei(interestPayableOf, 'ether'))
+
     this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, 
-      balanceOfRDai, interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, });
+      balanceOfRDai, interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, 
+      balanceOfRDaiHoodie, allowanceRDai, 
+    });
   };
 
   handleApprove = async (e) => {
@@ -118,7 +127,8 @@ class App extends Component {
   render() {
     const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply,
             balanceOf, hatID, balanceOfDai, balanceOfRDai, userApproved, rDaiInstance, addressOfRDaiContract,
-            interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, } = this.state
+            interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, balanceOfRDaiHoodie, allowanceRDai, 
+          } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -156,6 +166,8 @@ class App extends Component {
           <h3>Info of Hoodie DApp</h3>
           <p>Hoddie address: {hoodieAddress}</p>
           <p>DAI amount: {web3.utils.fromWei(`${balanceOfDaiHoodie}`, 'ether')}</p>
+          <p>rDAI amount: {web3.utils.fromWei(`${balanceOfRDaiHoodie}`, 'ether')}</p>
+          <p>allowanceRDai: {web3.utils.fromWei(`${allowanceRDai}`, 'ether')}</p>
         </div>
 
         <br />
