@@ -8,11 +8,6 @@ import "./IRToken.sol";
 import "./IAllocationStrategy.sol";
 
 contract HoodieToken is ERC20, ERC20Detailed, Ownable {
-  // Basic set up for FDH
-
-  uint256 public balanceOfDai;
-  uint public ratestQueueNumber = 1;
-  mapping(uint => address) public depositers;
 
   // Instantiate DAIContract with DAI address on rinkeby
   address DAIAddress = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
@@ -26,11 +21,6 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   address rDAIAddress = 0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A;
   IRToken public rDAIContract = IRToken(rDAIAddress);
 
-  // events
-  event Transfer(address indexed _from, address indexed _to, uint256 _value);
-  event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-  event UserAddedToDepositers(address indexed depositer, uint256 depositedAmount);
-
   // Hat setting
   uint256 public hatID;
   address public recipient = 0x2471e35F51CF54265B20cCFAc3857c2DceEf7349;
@@ -40,8 +30,7 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   bool public doChangeHat = false;
 
   constructor(uint256 initialSupply) ERC20Detailed("Flex Dapps Hoodie Token", "FDH", 18) public {
-    _mint(msg.sender, initialSupply);
-    balanceOfDai = DAIContract.balanceOf(msg.sender);
+    _mint(msg.sender, initialSupply*10**18);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 }

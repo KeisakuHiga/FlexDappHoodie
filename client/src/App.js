@@ -121,8 +121,8 @@ class App extends Component {
         <div>
           <h1>Welcome to {name} dapp!</h1>
           <h1>Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
-          <h3>Hoodie token's total supply is {totalSupply}</h3>
-          <h3>You have {balanceOf} FDH now</h3>
+          <h3>Hoodie token's total supply is {web3.utils.fromWei(`${totalSupply}`, 'ether')}</h3>
+          <h3>You have {web3.utils.fromWei(`${balanceOf}`, 'ether')} FDH now</h3>
           <p>Owner is {owner}</p>
           <p>Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
