@@ -35,11 +35,12 @@ class App extends Component {
 
     userApproved: null,
     allowance: 0,
+    allowanceFDH: 0,
     allowanceRDai: 0,
     spender: null,
     generatedInterestAmt: 0,
-    waitingCounter: 0,
-    waitingList: [],
+    waitingUserNumber: 0,
+    nextRecipientNumber: 0,
 
   };
 
@@ -90,8 +91,9 @@ class App extends Component {
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
-    const waitingCounter = await contract.waitingCounter().call();
-    const waitingList = await contract.getWaitingList().call();
+    const waitingUserNumber = await contract.waitingUserNumber().call();
+    const nextRecipientNumber = await contract.nextRecipientNumber().call();
+    const allowanceFDH = await contract.allowance(hoodieAddress, accounts[0]);
     // dai
     const dai = daiInstance.methods;
     const balanceOfDai = await dai.balanceOf(accounts[0]).call();
@@ -107,7 +109,7 @@ class App extends Component {
 
     this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, 
       balanceOfRDai, generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, 
-      balanceOfRDaiHoodie, allowanceRDai, waitingList, waitingCounter, 
+      balanceOfRDaiHoodie, allowanceRDai, waitingUserNumber, nextRecipientNumber, allowanceFDH, 
     });
   };
 
@@ -131,7 +133,7 @@ class App extends Component {
     const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply,
             balanceOf, hatID, balanceOfDai, balanceOfRDai, userApproved, rDaiInstance, addressOfRDaiContract,
             generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, balanceOfRDaiHoodie, allowanceRDai, 
-            waitingList, waitingCounter, 
+            waitingUserNumber, nextRecipientNumber, allowanceFDH, 
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -148,6 +150,7 @@ class App extends Component {
           <p>Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
+          {/* <p>Your allowance of FDH is {web3.utils.fromWei(`${allowanceFDH}`, 'ether')}</p> */}
 
           <br />
 
@@ -172,8 +175,8 @@ class App extends Component {
           <p>DAI amount: {web3.utils.fromWei(`${balanceOfDaiHoodie}`, 'ether')}</p>
           <p>rDAI amount: {web3.utils.fromWei(`${balanceOfRDaiHoodie}`, 'ether')}</p>
           <p>allowanceRDai: {web3.utils.fromWei(`${allowanceRDai}`, 'ether')}</p>
-          <p>Waiting Number: {waitingCounter}</p>
-          <p>Waiting List: {waitingList}</p>
+          <p>waitingUserNumber: {waitingUserNumber}</p>
+          <p>nextRecipientNumber: {nextRecipientNumber}</p>
         </div>
 
         <br />

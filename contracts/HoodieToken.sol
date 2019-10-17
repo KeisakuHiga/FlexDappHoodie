@@ -6,6 +6,12 @@ import "./IDai.sol";
 import "./IRToken.sol";
 
 contract HoodieToken is ERC20, ERC20Detailed, Ownable {
+  struct User {
+    address userAddress;
+    uint256 userNumber;
+    uint256 depositedAmount;
+    bool isWaiting;
+  }
   // Instantiate DAIContract with DAI address on rinkeby
   //  Instantiate rDAIContract with rDAI address on rinkeby
   IDai public DAIContract;
@@ -20,9 +26,10 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   bool public doChangeHat = false;
 
   uint256 public minimumDepositAmount;
-  uint256 public waitingCounter = 0;
-  address[] public waitingList;
+  uint256 public waitingUserNumber = 0;
+  uint256 public nextRecipientNumber = 0;
   uint256 public hoodieCost;
+  mapping(uint256 => User) public waitingList;
 
   event UserPushedIntoWaitingList(address user, uint256 depositedAmount);
   event IssuedFDH(address recipientOfHoodie);
@@ -51,33 +58,41 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   // dapp transfer rDAI to user
     require(rDAIContract.transferFrom(address(this), msg.sender, depositAmount), "Transfer rDAI to user failed");
   
-  // add user address to waitingList
-    waitingList.push(msg.sender);
+  // add user to waitingList
+    // waitingList.push(msg.sender);
+    waitingList[nextRecipientNumber] = User({
+      userAddress: msg.sender,
+      userNumber: waitingUserNumber,
+      depositedAmount: depositAmount,
+      isWaiting: true
+    });
+    waitingUserNumber++;
     emit UserPushedIntoWaitingList(msg.sender, depositAmount);
-
     return true;
   }
 
-  function getWaitingList() public view returns(address[] memory) {
-    return waitingList;
-  }
-
   function issueFDH() public returns(bool) {
-    // check whether or not the generated interest amount reached 20 rDAI
-    // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
-    
     // test
     require(rDAIContract.interestPayableOf(owner()) > 0, "the interest amount has not reached 20 rDAI yet");
+    
+    // check whether or not the generated interest amount reached 20 rDAI
+    // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
-    // issue 1 FDH to the first user in the waiting list and update the waitingCounter+1
+    //
     require(approve(msg.sender, 1 * 10 ** 18), "Approval failed");
-    address recipientOfHoodie = waitingList[waitingCounter];
-    require(transferFrom(address(this), recipientOfHoodie, 1 * 10 ** 18), "Issuing FDH failed");
+
+    // check wheter or not the user is in the waiting list
+    User memory nextRecipient = waitingList[nextRecipientNumber];
+    while(!nextRecipient.isWaiting) {
+      nextRecipientNumber++;
+      nextRecipient = waitingList[nextRecipientNumber];
+    }
+    // issue 1 FDH to the first user in the waiting list and update the nextRecipientNumber+1
+    require(transferFrom(address(this), nextRecipient.userAddress, 1 * 10 ** 18), "Issuing FDH failed");
 
     // update the next recipient in the waiting list by incrementing the waiting counter
-    waitingCounter++;
-    emit IssuedFDH(recipientOfHoodie);
-
+    nextRecipientNumber++;
+    emit IssuedFDH(nextRecipient.userAddress);
     return true;
   }
 
