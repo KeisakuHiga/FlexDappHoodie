@@ -35,7 +35,7 @@ class App extends Component {
 
     userApproved: null,
     allowance: 0,
-    allowanceFDH: 0,
+    first: true,
     allowanceRDai: 0,
     spender: null,
     generatedInterestAmt: 0,
@@ -93,7 +93,10 @@ class App extends Component {
     const hatID = await contract.hatID().call();
     const waitingUserNumber = await contract.waitingUserNumber().call();
     const nextRecipientNumber = await contract.nextRecipientNumber().call();
-    const allowanceFDH = await contract.allowance(hoodieAddress, accounts[0]);
+    const first = await contract.waitingList(0).call()
+      .then(result => {
+        return result.isWaiting
+      })
     // dai
     const dai = daiInstance.methods;
     const balanceOfDai = await dai.balanceOf(accounts[0]).call();
@@ -109,7 +112,7 @@ class App extends Component {
 
     this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, 
       balanceOfRDai, generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, 
-      balanceOfRDaiHoodie, allowanceRDai, waitingUserNumber, nextRecipientNumber, allowanceFDH, 
+      balanceOfRDaiHoodie, allowanceRDai, waitingUserNumber, nextRecipientNumber, first, 
     });
   };
 
@@ -133,7 +136,7 @@ class App extends Component {
     const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply,
             balanceOf, hatID, balanceOfDai, balanceOfRDai, userApproved, rDaiInstance, addressOfRDaiContract,
             generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, balanceOfRDaiHoodie, allowanceRDai, 
-            waitingUserNumber, nextRecipientNumber, allowanceFDH, 
+            waitingUserNumber, nextRecipientNumber, first, 
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -150,7 +153,7 @@ class App extends Component {
           <p>Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
-          {/* <p>Your allowance of FDH is {web3.utils.fromWei(`${allowanceFDH}`, 'ether')}</p> */}
+          <p>Your allowance of FDH is {`${first}`}</p>
 
           <br />
 

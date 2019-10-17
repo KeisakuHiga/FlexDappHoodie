@@ -38,8 +38,8 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
     rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
-    _mint(address(this), initialSupply * 10 ** 18);
-    // minimumDepositAmount = 20 * 10 ** 18;
+    _mint(owner(), initialSupply * 10 ** 18);
+    // minimumDepositAmount = 20 * 10 ** 18; // for production
     minimumDepositAmount = 1 * 10 ** 18; // for test
     hoodieCost = 20 * 10 ** 18;
   }
@@ -78,17 +78,17 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     // check whether or not the generated interest amount reached 20 rDAI
     // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
-    //
-    require(approve(msg.sender, 1 * 10 ** 18), "Approval failed");
-
     // check wheter or not the user is in the waiting list
-    User memory nextRecipient = waitingList[nextRecipientNumber];
+    User storage nextRecipient = waitingList[nextRecipientNumber];
     while(!nextRecipient.isWaiting) {
       nextRecipientNumber++;
       nextRecipient = waitingList[nextRecipientNumber];
     }
     // issue 1 FDH to the first user in the waiting list and update the nextRecipientNumber+1
-    require(transferFrom(address(this), nextRecipient.userAddress, 1 * 10 ** 18), "Issuing FDH failed");
+    require(transfer(nextRecipient.userAddress, 1 * 10 ** 18), "Issuing FDH failed");
+
+    // once the user receive a FDH, they are removed from the waiting list
+    nextRecipient.isWaiting = false;
 
     // update the next recipient in the waiting list by incrementing the waiting counter
     nextRecipientNumber++;
