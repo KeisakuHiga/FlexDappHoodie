@@ -20,18 +20,20 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   bool public doChangeHat = false;
 
   uint256 public minimumDepositAmount;
-  uint256 public waitingNumCounter;
+  uint256 public waitingCounter = 0;
   address[] public waitingList;
   uint256 public hoodieCost;
 
   event UserPushedIntoWaitingList(address user, uint256 depositedAmount);
+  event IssuedFDH(address recipientOfHoodie);
 
   constructor(uint256 initialSupply) ERC20Detailed("Flex Dapps Hoodie Token", "FDH", 18) public {
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
     rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
-    _mint(msg.sender, initialSupply * 10 ** 18);
-    minimumDepositAmount = 1 * 10 ** 18;
+    _mint(address(this), initialSupply * 10 ** 18);
+    // minimumDepositAmount = 20 * 10 ** 18;
+    minimumDepositAmount = 1 * 10 ** 18; // for test
     hoodieCost = 20 * 10 ** 18;
   }
 
@@ -61,9 +63,24 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   }
 
   function issueFDH() public returns(bool) {
-    require(transfer(msg.sender, 1), "Issuing FDH failed");
+    // check whether or not the generated interest amount reached 20 rDAI
+    // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
+    
+    // test
+    require(rDAIContract.interestPayableOf(owner()) > 0, "the interest amount has not reached 20 rDAI yet");
 
+    // issue 1 FDH to the first user in the waiting list and update the waitingCounter+1
+    require(approve(msg.sender, 1 * 10 ** 18), "Approval failed");
+    address recipientOfHoodie = waitingList[waitingCounter];
+    require(transferFrom(address(this), recipientOfHoodie, 1 * 10 ** 18), "Issuing FDH failed");
+
+    // update the next recipient in the waiting list by incrementing the waiting counter
+    waitingCounter++;
+    emit IssuedFDH(recipientOfHoodie);
+
+    return true;
   }
+
   function _setNewDaiContractInstance(address _daiContractAddress) public onlyOwner returns(bool) {
     DAIContract = IDai(_daiContractAddress);
     return true;

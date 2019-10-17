@@ -8,6 +8,7 @@ import RedeemForm from "./components/RedeemForm";
 import TransferRDaiForm from "./components/TransferRDaiForm";
 import Approve from "./components/Approve";
 import PayInterest from "./components/PayInterest";
+import IssueFDH from "./components/IssueFDH";
 import "./App.css";
 import BigNumber from "big-number";
 
@@ -36,7 +37,8 @@ class App extends Component {
     allowance: 0,
     allowanceRDai: 0,
     spender: null,
-    interestPayableOf: 0,
+    generatedInterestAmt: 0,
+    waitingCounter: 0,
     waitingList: [],
 
   };
@@ -88,6 +90,7 @@ class App extends Component {
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
+    const waitingCounter = await contract.waitingCounter().call();
     const waitingList = await contract.getWaitingList().call();
     // dai
     const dai = daiInstance.methods;
@@ -99,14 +102,12 @@ class App extends Component {
     const rDai = rDaiInstance.methods;
     const balanceOfRDaiHoodie = await rDai.balanceOf(hoodieAddress).call();
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
-    const interestPayableOf = await rDai.interestPayableOf(owner).call();
-    console.log(web3.utils.fromWei(interestPayableOf, 'ether'))
-    // const interestPayableOf = await rDai.interestPayableOf('0x93438172245D2c0e2dd511659A1518210e52AF9c').call();
-    // console.log(web3.utils.fromWei(interestPayableOf, 'ether'))
+    const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
+    console.log(web3.utils.fromWei(generatedInterestAmt, 'ether'))
 
     this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, 
-      balanceOfRDai, interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, 
-      balanceOfRDaiHoodie, allowanceRDai, waitingList, 
+      balanceOfRDai, generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, 
+      balanceOfRDaiHoodie, allowanceRDai, waitingList, waitingCounter, 
     });
   };
 
@@ -129,8 +130,8 @@ class App extends Component {
   render() {
     const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply,
             balanceOf, hatID, balanceOfDai, balanceOfRDai, userApproved, rDaiInstance, addressOfRDaiContract,
-            interestPayableOf, allowance, balanceOfDaiHoodie, hoodieAddress, balanceOfRDaiHoodie, allowanceRDai, 
-            waitingList, 
+            generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, balanceOfRDaiHoodie, allowanceRDai, 
+            waitingList, waitingCounter, 
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -162,7 +163,7 @@ class App extends Component {
 
           <br />
 
-          <p>interestPayableOf=> {web3.utils.fromWei(`${interestPayableOf}`, 'ether')}</p>
+          <p>Generated Interest Amount => {web3.utils.fromWei(`${generatedInterestAmt}`, 'ether')}</p>
 
           <br />
 
@@ -171,6 +172,7 @@ class App extends Component {
           <p>DAI amount: {web3.utils.fromWei(`${balanceOfDaiHoodie}`, 'ether')}</p>
           <p>rDAI amount: {web3.utils.fromWei(`${balanceOfRDaiHoodie}`, 'ether')}</p>
           <p>allowanceRDai: {web3.utils.fromWei(`${allowanceRDai}`, 'ether')}</p>
+          <p>Waiting Number: {waitingCounter}</p>
           <p>Waiting List: {waitingList}</p>
         </div>
 
@@ -208,6 +210,14 @@ class App extends Component {
           web3={web3}
           rDaiInstance={rDaiInstance}
           accounts={accounts}
+        />
+
+        <br />
+        
+        <IssueFDH
+          hoodieInstance={hoodieInstance}
+          accounts={accounts}
+          generatedInterestAmt={generatedInterestAmt}
         />
       </div>
     );
