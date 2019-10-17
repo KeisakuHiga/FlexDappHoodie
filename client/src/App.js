@@ -93,9 +93,12 @@ class App extends Component {
     const hatID = await contract.hatID().call();
     const waitingUserNumber = await contract.waitingUserNumber().call();
     const nextRecipientNumber = await contract.nextRecipientNumber().call();
-    const first = await contract.waitingList(0).call()
+    const first = await contract.waitingList(3).call()
       .then(result => {
         return result.isWaiting
+      })
+      .catch(err => {
+        return false
       })
     // dai
     const dai = daiInstance.methods;
@@ -153,7 +156,7 @@ class App extends Component {
           <p>Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
-          <p>Your allowance of FDH is {`${first}`}</p>
+          <p>Are you waiting for FDH? => {`${first}`}</p>
 
           <br />
 
