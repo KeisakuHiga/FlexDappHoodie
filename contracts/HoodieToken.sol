@@ -7,8 +7,7 @@ import "./IRToken.sol";
 
 contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   struct User {
-    address userAddress;
-    uint256 userNumber;
+    uint256 userWaitingNumber;
     uint256 depositedAmount;
     bool isWaiting;
   }
@@ -26,10 +25,11 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   bool public doChangeHat = false;
 
   uint256 public minimumDepositAmount;
-  uint256 public waitingUserNumber = 0;
+  uint256 public userWaitingNumber = 0;
   uint256 public nextRecipientNumber = 0;
   uint256 public hoodieCost;
-  mapping(uint256 => User) public waitingList;
+  address[] public waitingList;
+  mapping(address => User) public users;
 
   event UserPushedIntoWaitingList(address user, uint256 depositedAmount);
   event IssuedFDH(address recipientOfHoodie);
@@ -59,7 +59,7 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     require(rDAIContract.transferFrom(address(this), msg.sender, depositAmount), "Transfer rDAI to user failed");
   
   // add user to waitingList
-    require(_addUserToWaitingList(depositAmount), "failded to add the user again to the waiting list");
+    require(_addUserToWaitingList(msg.sender, depositAmount), "failded to add the user again to the waiting list");
 
     return true;
   }
@@ -72,23 +72,26 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
     // check wheter or not the user is in the waiting list
-    User storage waitingUser = waitingList[nextRecipientNumber];
+    address userAddress = waitingList[nextRecipientNumber];
+    User storage waitingUser = users[userAddress];
+
     while(!waitingUser.isWaiting) {
       nextRecipientNumber++;
-      waitingUser = waitingList[nextRecipientNumber];
+      userAddress = waitingList[nextRecipientNumber];
+      waitingUser = users[userAddress];
     }
     // issue 1 FDH to the first user in the waiting list and update the nextRecipientNumber+1
-    require(transfer(waitingUser.userAddress, 1 * 10 ** 18), "Issuing FDH failed");
+    require(transfer(userAddress, 1 * 10 ** 18), "Issuing FDH failed");
 
     // once the user receive a FDH, they are removed from the waiting list
     waitingUser.isWaiting = false;
 
     // update the next waitingUser in the waiting list by incrementing the waiting counter
     nextRecipientNumber++;
-    emit IssuedFDH(waitingUser.userAddress);
+    emit IssuedFDH(userAddress);
 
     // add the user to the waiting list again
-    require(_addUserToWaitingList(waitingUser.depositedAmount), "failded to add the user again to the waiting list");
+    require(_addUserToWaitingList(userAddress, waitingUser.depositedAmount), "failded to add the user again to the waiting list");
     
     return true;
   }
@@ -98,7 +101,7 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   // }
 
   function increaseDepositAmount() public returns(bool) {
-    require(waitingList[msg.sender].isWaiting, "this user is not the existing one");
+    require(users[msg.sender].isWaiting, "this user is not the existing one");
   }
 
   function _setNewDaiContractInstance(address _daiContractAddress) public onlyOwner returns(bool) {
@@ -111,16 +114,15 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     return true;
   }
 
-  function _addUserToWaitingList(uint256 depositAmount) internal returns(bool) {
+  function _addUserToWaitingList(address userAddress, uint256 depositAmount) internal returns(bool) {
       // add user to waitingList
-    waitingList[waitingUserNumber] = User({
-      userAddress: msg.sender,
-      userNumber: waitingUserNumber,
+    users[userAddress] = User({
+      userWaitingNumber: userWaitingNumber,
       depositedAmount: depositAmount,
       isWaiting: true
     });
-    waitingUserNumber++;
-    emit UserPushedIntoWaitingList(msg.sender, depositAmount);
+    userWaitingNumber++;
+    emit UserPushedIntoWaitingList(userAddress, depositAmount);
     return true;
   }
 }

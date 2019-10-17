@@ -39,7 +39,7 @@ class App extends Component {
     allowanceRDai: 0,
     spender: null,
     generatedInterestAmt: 0,
-    waitingUserNumber: 0,
+    userWaitingNumber: 0,
     nextRecipientNumber: 0,
 
   };
@@ -91,7 +91,7 @@ class App extends Component {
     const totalSupply = await contract.totalSupply().call();
     const balanceOf = await contract.balanceOf(accounts[0]).call();
     const hatID = await contract.hatID().call();
-    const waitingUserNumber = await contract.waitingUserNumber().call();
+    const userWaitingNumber = await contract.userWaitingNumber().call();
     const nextRecipientNumber = await contract.nextRecipientNumber().call();
     const first = await contract.waitingList(3).call()
       .then(result => {
@@ -115,7 +115,7 @@ class App extends Component {
 
     this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, 
       balanceOfRDai, generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, 
-      balanceOfRDaiHoodie, allowanceRDai, waitingUserNumber, nextRecipientNumber, first, 
+      balanceOfRDaiHoodie, allowanceRDai, userWaitingNumber, nextRecipientNumber, first, 
     });
   };
 
@@ -139,7 +139,7 @@ class App extends Component {
     const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply,
             balanceOf, hatID, balanceOfDai, balanceOfRDai, userApproved, rDaiInstance, addressOfRDaiContract,
             generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, balanceOfRDaiHoodie, allowanceRDai, 
-            waitingUserNumber, nextRecipientNumber, first, 
+            userWaitingNumber, nextRecipientNumber, first, 
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -181,7 +181,7 @@ class App extends Component {
           <p>DAI amount: {web3.utils.fromWei(`${balanceOfDaiHoodie}`, 'ether')}</p>
           <p>rDAI amount: {web3.utils.fromWei(`${balanceOfRDaiHoodie}`, 'ether')}</p>
           <p>allowanceRDai: {web3.utils.fromWei(`${allowanceRDai}`, 'ether')}</p>
-          <p>waitingUserNumber: {waitingUserNumber}</p>
+          <p>userWaitingNumber: {userWaitingNumber}</p>
           <p>nextRecipientNumber: {nextRecipientNumber}</p>
         </div>
 
