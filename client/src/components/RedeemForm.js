@@ -3,23 +3,37 @@ import React, { Component } from 'react';
 class RedeemForm extends Component {
   state = {
     web3: this.props.web3,
+    hoodieInstance: this.props.hoodieInstance,
     rDaiInstance: this.props.rDaiInstance,
     accounts: this.props.accounts,
+    depositedAmount: 0,
     redeemAmount: 0,
     transactionHash: null,
   }
 
+  componentDidMount = async e => {
+    const { hoodieInstance, accounts } = this.state;
+    const depositedAmount = await hoodieInstance.methods.users(accounts[0]).call()
+      .then(user => { return user.depositedAmount })
+      .catch(err => { return false })
+    this.setState({ depositedAmount })
+  }
+
   handleRedeemRDai = async (e) => {
     e.preventDefault()
-    const { rDaiInstance, redeemAmount, accounts }  = this.state
+    const { hoodieInstance, depositedAmount, redeemAmount, accounts }  = this.state
     try {
       console.log('start to redeem rDai')
       console.log('redeemAmount: ', redeemAmount)
-      await rDaiInstance.methods.redeem(redeemAmount).send({ from: accounts[0] })
-        .on('receipt', receipt => {
-          this.setState({ transactionHash: receipt.transactionHash })
-        })
-
+      console.log(depositedAmount)
+      if(depositedAmount - redeemAmount < 0) {
+        throw({ message: 'over redeem amount' })
+      } else {
+        await hoodieInstance.methods.redeemRDai(redeemAmount).send({ from: accounts[0] })
+          .on('receipt', receipt => {
+            this.setState({ transactionHash: receipt.transactionHash })
+          })
+      }
     } catch (err) {
       console.log(err.message);
     }
