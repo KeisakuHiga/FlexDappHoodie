@@ -7,17 +7,26 @@ class DepositForm extends Component {
 
   handleMintRDai = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, hatID,rDaiInstance, accounts } = this.props
+    const { hoodieInstance, hatID, accounts } = this.props
     const { depositAmount }  = this.state
+    const isWaiting = await hoodieInstance.methods.users(accounts[0]).call()
+      .then(user => { return user.isWaiting })
+      .catch(err => { return false })
+    console.log(isWaiting)
     try {
       console.log('start to mint rDai')
       console.log(depositAmount)
       console.log(hatID)
-      // await rDaiInstance.methods.mintWithSelectedHat(depositAmount, hatID).send({ from: accounts[0] } )
-      await hoodieInstance.methods.mintRDaiAndPushUserToWaitingList(depositAmount).send({ from: accounts[0] } )
-        .on('transactionHash', hash => {
-          console.log('Tx Hash: ' + hash)
-        })
+      console.log(isWaiting)
+      if(!isWaiting) {
+        console.log('new user')
+        await hoodieInstance.methods.mintRDaiAndPushUserToWaitingList(depositAmount).send({ from: accounts[0] } )
+        .on('transactionHash', hash => { console.log('Tx Hash: ' + hash) })
+      } else {
+        console.log('existing user')
+          await hoodieInstance.methods.increaseDepositAmount(depositAmount).send({ from: accounts[0] } )
+            .on('transactionHash', hash => { console.log('Tx Hash: ' + hash) })
+      }
     } catch (err) {
       console.log(err.message);
     }

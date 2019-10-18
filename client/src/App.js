@@ -29,14 +29,11 @@ class App extends Component {
     hatID: null,
     balanceOfDai: 0,
     balanceOfRDai: 0,
-    balanceOfDaiHoodie: 0,
-    balanceOfRDaiHoodie: 0,
     addressOfRDaiContract: null,
 
     userApproved: null,
     allowance: 0,
-    first: true,
-    allowanceRDai: 0,
+    isWaiting: false,
     spender: null,
     generatedInterestAmt: 0,
     userWaitingNumber: 0,
@@ -93,29 +90,25 @@ class App extends Component {
     const hatID = await contract.hatID().call();
     const userWaitingNumber = await contract.userWaitingNumber().call();
     const nextRecipientNumber = await contract.nextRecipientNumber().call();
-    const first = await contract.waitingList(3).call()
-      .then(result => {
-        return result.isWaiting
-      })
-      .catch(err => {
-        return false
-      })
+    const isWaiting = await hoodieInstance.methods.users(accounts[0]).call()
+      .then(user => { return user.isWaiting })
+      .catch(err => { return false })
+    const userNumber = await contract.users(accounts[0]).call()
+      .then(user => { return user.userNumber })
+      .catch(err => { return false })
     // dai
     const dai = daiInstance.methods;
     const balanceOfDai = await dai.balanceOf(accounts[0]).call();
-    const balanceOfDaiHoodie = await dai.balanceOf(hoodieAddress).call();
     const allowance = await dai.allowance(accounts[0], hoodieInstance.options.address).call()
-    const allowanceRDai = await dai.allowance(hoodieInstance.options.address, rDaiInstance.options.address).call()
     // rDai
     const rDai = rDaiInstance.methods;
-    const balanceOfRDaiHoodie = await rDai.balanceOf(hoodieAddress).call();
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
     const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
     console.log(web3.utils.fromWei(generatedInterestAmt, 'ether'))
 
     this.setState({ name, owner, symbol, totalSupply, balanceOf, hatID, balanceOfDai, 
-      balanceOfRDai, generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, 
-      balanceOfRDaiHoodie, allowanceRDai, userWaitingNumber, nextRecipientNumber, first, 
+      balanceOfRDai, generatedInterestAmt, allowance, hoodieAddress, userWaitingNumber,
+      nextRecipientNumber, isWaiting, userNumber, 
     });
   };
 
@@ -138,8 +131,8 @@ class App extends Component {
   render() {
     const { web3, accounts, hoodieInstance, daiInstance, name, owner, symbol, totalSupply,
             balanceOf, hatID, balanceOfDai, balanceOfRDai, userApproved, rDaiInstance, addressOfRDaiContract,
-            generatedInterestAmt, allowance, balanceOfDaiHoodie, hoodieAddress, balanceOfRDaiHoodie, allowanceRDai, 
-            userWaitingNumber, nextRecipientNumber, first, 
+            generatedInterestAmt, allowance, hoodieAddress, userWaitingNumber, nextRecipientNumber, isWaiting,
+            userNumber
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -156,8 +149,7 @@ class App extends Component {
           <p>Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
-          <p>Are you waiting for FDH? => {`${first}`}</p>
-
+          <p>Are you waiting for FDH? => {`${isWaiting}`}</p>
           <br />
 
           <h4>Allowance is {web3.utils.fromWei(`${allowance}`, 'ether')}</h4>
@@ -168,21 +160,20 @@ class App extends Component {
             accounts={accounts}
             userApproved={userApproved}
             handleApprove={this.handleApprove}
-          />
+            />
 
           <br />
 
-          <p>Generated Interest Amount => {web3.utils.fromWei(`${generatedInterestAmt}`, 'ether')}</p>
+          <p>Generated Interest Amount => { web3.utils.fromWei(`${generatedInterestAmt}`, 'ether') }</p>
 
           <br />
 
           <h3>Info of Hoodie DApp</h3>
-          <p>Hoddie address: {hoodieAddress}</p>
-          <p>DAI amount: {web3.utils.fromWei(`${balanceOfDaiHoodie}`, 'ether')}</p>
-          <p>rDAI amount: {web3.utils.fromWei(`${balanceOfRDaiHoodie}`, 'ether')}</p>
-          <p>allowanceRDai: {web3.utils.fromWei(`${allowanceRDai}`, 'ether')}</p>
-          <p>userWaitingNumber: {userWaitingNumber}</p>
+          <p>Hoddie address: { hoodieAddress }</p>
+          <p>{ userWaitingNumber - nextRecipientNumber } { userWaitingNumber - nextRecipientNumber > 1 ? <span>people are </span> : <span>person is </span>}waiting for FDH! </p>
           <p>nextRecipientNumber: {nextRecipientNumber}</p>
+          { isWaiting ? <p>Your waiting number: {userNumber}</p> :  null }
+          { nextRecipientNumber === userNumber && isWaiting ? <h3>You are the next recipient!!</h3> : null }
         </div>
 
         <br />

@@ -7,7 +7,7 @@ import "./IRToken.sol";
 
 contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   struct User {
-    uint256 userWaitingNumber;
+    uint256 userNumber;
     uint256 depositedAmount;
     bool isWaiting;
   }
@@ -45,26 +45,33 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   }
 
   function mintRDaiAndPushUserToWaitingList(uint256 depositAmount) public returns(bool) {
-  // dapp transfer user's DAI to itself
-    require(depositAmount >= minimumDepositAmount, "Deposit amount should be equal to / greater than 200DAI");
-    require(DAIContract.transferFrom(msg.sender, address(this), depositAmount), "Transfer DAI to Hoodie contract failed");
+    // check whether or not the user is new
+    require(!users[msg.sender].isWaiting, "This user is existing in the waiting list");
 
-  // dapp approves rDAI contract to transfer dapp's DAI
-    require(DAIContract.approve(address(rDAIContract), depositAmount), "approve() invalid");
+    // mint rDAI and transfer it to user
+    require(_mintRDai(depositAmount), "mining rDAI failed");
 
-  // dapp invoke mint() and get rDAI
-    require(rDAIContract.mintWithSelectedHat(depositAmount, hatID), "minting failed");
-
-  // dapp transfer rDAI to user
-    require(rDAIContract.transferFrom(address(this), msg.sender, depositAmount), "Transfer rDAI to user failed");
-  
-  // add user to waitingList
+    // add user to waitingList
     require(_addUserToWaitingList(msg.sender, depositAmount), "failded to add the user again to the waiting list");
 
     return true;
   }
 
-  function issueFDH() public returns(bool) {
+  function increaseDepositAmount(uint256 topUpAmount) public returns(bool) {
+    // check whether or not the user is the existing one
+    require(users[msg.sender].isWaiting, "this user is a new one");
+
+    // mint additional rDAI
+    require(_mintRDai(topUpAmount),  "mining rDAI failed");
+
+    // update user's deposited amount in User struct
+    User storage user = users[msg.sender];
+    user.depositedAmount += topUpAmount;
+    
+    return true;
+  }
+
+  function issueFDH() public onlyOwner returns(bool) {
     // test
     require(rDAIContract.interestPayableOf(owner()) > 0, "the interest amount has not reached 20 rDAI yet");
     
@@ -96,33 +103,58 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     return true;
   }
 
-  // function redeemRDai() public returns (bool) {
-  //   //
+  // function redeemRDai(uint256 redeemAmount) public returns (bool) {
+  //   require(users[msg.sender].isWaiting, "this user is new");
+  //  // A. if the deposited amount will be below than 200rDAI after redeeming
+  //    // 1) use redeemAll()
+  //    // 2) update the state of user.isWaiting to false
+  //    //　3) update the state of user.depositedAmount to zero
+
+  //  // B. if not
+  //    // 1) use redeem()
+  //    // 2) decrese the state of user.depositedAmount - redeemAmount
   // }
 
-  function increaseDepositAmount() public returns(bool) {
-    require(users[msg.sender].isWaiting, "this user is not the existing one");
-  }
+  function _mintRDai(uint256 depositAmount) internal returns(bool) {
+  // dapp transfer user's DAI to itself
+    require(depositAmount >= minimumDepositAmount, "Deposit amount should be equal to / greater than 200DAI");
+    require(DAIContract.transferFrom(msg.sender, address(this), depositAmount), "Transfer DAI to Hoodie contract failed");
 
-  function _setNewDaiContractInstance(address _daiContractAddress) public onlyOwner returns(bool) {
-    DAIContract = IDai(_daiContractAddress);
-    return true;
-  }
+  // dapp approves rDAI contract to transfer dapp's DAI
+    require(DAIContract.approve(address(rDAIContract), depositAmount), "approve() invalid");
 
-  function _setNewRDaiContractInstance(address _rDaiContractAddress) public onlyOwner returns(bool) {
-    rDAIContract = IRToken(_rDaiContractAddress);
+  // dapp invoke mint() and get rDAI
+    require(rDAIContract.mintWithSelectedHat(depositAmount, hatID), "minting failed");
+
+  // dapp transfer rDAI to user
+    require(rDAIContract.transferFrom(address(this), msg.sender, depositAmount), "Transfer rDAI to user failed");
+
     return true;
   }
 
   function _addUserToWaitingList(address userAddress, uint256 depositAmount) internal returns(bool) {
       // add user to waitingList
     users[userAddress] = User({
-      userWaitingNumber: userWaitingNumber,
+      userNumber: userWaitingNumber,
       depositedAmount: depositAmount,
       isWaiting: true
     });
+    waitingList.push(userAddress);
     userWaitingNumber++;
     emit UserPushedIntoWaitingList(userAddress, depositAmount);
+    return true;
+  }
+
+
+  // identifier isWaiting()
+
+  function switchDaiContractInstance(address daiContractAddress) public onlyOwner returns(bool) {
+    DAIContract = IDai(daiContractAddress);
+    return true;
+  }
+
+  function switchRDaiContractInstance(address rDaiContractAddress) public onlyOwner returns(bool) {
+    rDAIContract = IRToken(rDaiContractAddress);
     return true;
   }
 }
