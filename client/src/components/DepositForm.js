@@ -12,13 +12,16 @@ class DepositForm extends Component {
     const isWaiting = await hoodieInstance.methods.users(accounts[0]).call()
       .then(user => { return user.isWaiting })
       .catch(err => { return false })
+    const depositedAmount = await hoodieInstance.methods.users(accounts[0]).call()
+      .then(user => { return user.depositedAmount })
+      .catch(err => { return false })
     console.log(isWaiting)
     try {
       console.log('start to mint rDai')
       console.log(depositAmount)
       console.log(hatID)
       console.log(isWaiting)
-      if(!isWaiting) {
+      if(!isWaiting && depositedAmount == 0) {
         console.log('new user')
         await hoodieInstance.methods.mintRDaiAndPushUserToWaitingList(depositAmount).send({ from: accounts[0] } )
         .on('transactionHash', hash => { console.log('Tx Hash: ' + hash) })

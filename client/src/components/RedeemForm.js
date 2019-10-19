@@ -38,8 +38,9 @@ class RedeemForm extends Component {
   handleRedeemRDai = async (e) => {
     e.preventDefault()
     const { hoodieInstance, rDaiInstance, depositedAmount, redeemAmount, accounts, approved }  = this.state
-    const rDaiAddress = rDaiInstance.options.address
+    const hoodieAddress = hoodieInstance.options.address
     const balanceOfRDai = await rDaiInstance.methods.balanceOf(accounts[0]).call();
+    const rDaiAllowance = await rDaiInstance.methods.allowance(accounts[0], hoodieAddress).call();
     
     // await rDaiInstance.methods.redeem(redeemAmount).send({ from: accounts[0] })
     //   .on('receipt', receipt => { this.setState({ transactionHash: receipt.transactionHash }) })
@@ -48,13 +49,12 @@ class RedeemForm extends Component {
       console.log('redeemAmount: ', {redeemAmount})
       console.log({depositedAmount})
       console.log({balanceOfRDai})
-      console.log({address: hoodieInstance.options.address})
+      console.log({address: hoodieAddress})
       if(depositedAmount - redeemAmount < 0) {
         throw({ message: 'over redeem amount' })
       } else {
-        if (!approved) {
-          await rDaiInstance.methods.approve(hoodieInstance.options.address, balanceOfRDai).send({ from: accounts[0] })
-          this.setState({ approved: true })
+        if (rDaiAllowance == 0) {
+          await rDaiInstance.methods.approve(hoodieAddress, balanceOfRDai).send({ from: accounts[0] })
         }
         await hoodieInstance.methods.redeemRDai(redeemAmount).send({ from: accounts[0] })
       }
