@@ -44,6 +44,10 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     hoodieCost = 20 * 10 ** 18;
   }
 
+  function getWaitingList() public returns(address[] memory) {
+    return waitingList;
+  }
+
   function mintRDaiAndPushUserToWaitingList(uint256 depositAmount) public returns(bool) {
     // check whether or not the user is new
     require(!users[msg.sender].isWaiting, "This user is existing in the waiting list");
@@ -97,31 +101,20 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   function redeemRDai(uint256 redeemAmount) public returns (bool) {
     // transfer rDAI from user's account to Hoodie contract
     require(rDAIContract.transferFrom(msg.sender, address(this), redeemAmount), "Transfer rDAI to Hoodie contract failed");
-    // dapp approves rDAI contract to transfer dapp's rDAI
-    // require(rDAIContract.approve(address(rDAIContract), redeemAmount), "approve() invalid");
     // get user struct
     User storage user = users[msg.sender];
     // check whether or not the user is in the waiting list
     require(user.isWaiting, "this user is not in the waiting list");
-    // A. if the deposited amount will be below than 200rDAI after redeeming
-    // if(user.depositedAmount.sub(redeemAmount) < 200 * 10 ** 18) {
-      // 1) use redeemAll()
-      require(rDAIContract.redeem(redeemAmount), "redeem() failed");
-      // require(rDAIContract.redeem(msg.sender), "redeemAndTransferAll() failed");
-      // 2) dapp transfer rDAI to user
-      require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
-      // 3) update the state of user.isWaiting to false
+    // 1) use redeem()
+    require(rDAIContract.redeem(redeemAmount), "redeem() failed");
+    // 2) dapp transfer rDAI to user
+    require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
+    // 3) decrese the state of user.depositedAmount - redeemAmount
+    user.depositedAmount = user.depositedAmount.sub(redeemAmount);
+    // if user's depositedAmount become below than 200 rDAI, it will be removed from the waiting list
+    if (user.depositedAmount < 200 * 10 ** 18) {
       user.isWaiting = false;
-      // 4) update the state of user.depositedAmount to zero
-      user.depositedAmount = 0;
-    // }  else { // B. if not
-      // 1) use redeem()
-      // require(rDAIContract.redeemAndTransfer(msg.sender, redeemAmount), "redeemAndTransfer() failed");
-      // 2) dapp transfer rDAI to user
-      // require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
-      // 3) decrese the state of user.depositedAmount - redeemAmount
-      // user.depositedAmount = user.depositedAmount.sub(redeemAmount);
-    // }
+    }
     return true;
   }
 
