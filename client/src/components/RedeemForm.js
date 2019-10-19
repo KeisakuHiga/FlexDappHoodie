@@ -53,7 +53,9 @@ class RedeemForm extends Component {
       if(depositedAmount - redeemAmount < 0) {
         throw({ message: 'over redeem amount' })
       } else {
-        await rDaiInstance.methods.approve(hoodieAddress, balanceOfRDai).send({ from: accounts[0] })
+        if (rDaiAllowance < redeemAmount) {
+          await rDaiInstance.methods.approve(hoodieAddress, redeemAmount).send({ from: accounts[0] })
+        }
         await hoodieInstance.methods.redeemRDai(redeemAmount).send({ from: accounts[0] })
       }
     } catch (err) {

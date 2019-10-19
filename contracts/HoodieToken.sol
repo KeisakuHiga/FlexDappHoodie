@@ -1,13 +1,14 @@
 pragma solidity ^0.5.0;
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./IDai.sol"; 
 import "./IRToken.sol";
 
 contract HoodieToken is Ownable {
+  using SafeMath for uint256;
+
   struct User {
-    uint numOfHoodie;
+    uint256 numOfHoodie;
     uint256 rNumber;
     uint256 depositedAmount;
     bool isWaiting;
@@ -144,12 +145,11 @@ contract HoodieToken is Ownable {
   }
 
   function redeemRDai(uint256 redeemAmount) public returns (bool) {
+    User storage user = users[msg.sender];
+    // check whether or not the user has enough rDAI to redeem
+    require(user.depositedAmount >= redeemAmount, "insufficient amount of rDAI");
     // transfer rDAI from user's account to Hoodie contract
     require(rDAIContract.transferFrom(msg.sender, address(this), redeemAmount), "Transfer rDAI to Hoodie contract failed");
-    // get user struct
-    User storage user = users[msg.sender];
-    // check whether or not the user is in the waiting list
-    require(user.isWaiting, "this user is not in the waiting list");
     // 1) use redeem()
     // 2) dapp transfer rDAI to user
     // 3) decrese the state of user.depositedAmount - redeemAmount
