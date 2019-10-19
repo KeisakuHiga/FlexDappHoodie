@@ -21,11 +21,11 @@ class RedeemForm extends Component {
   }
   handleApprove = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, daiInstance, accounts, balanceOfDai }  = this.state
+    const { hoodieInstance, daiInstance, accounts, balanceOfDai, redeemAmount }  = this.state
     // const BNMax = new BigNumber(2).pow(256).minus(1)
     const hoodieAddress = hoodieInstance.options.address
     try {
-      await daiInstance.methods.approve(hoodieAddress, balanceOfDai).send({ from: accounts[0] });
+      await daiInstance.methods.approve(hoodieAddress, redeemAmount).send({ from: accounts[0] });
       this.setState({ userApproved: true })
       const allowance = await daiInstance.methods.allowance(accounts[0], hoodieAddress).call()
       console.log(allowance)
@@ -53,9 +53,7 @@ class RedeemForm extends Component {
       if(depositedAmount - redeemAmount < 0) {
         throw({ message: 'over redeem amount' })
       } else {
-        if (rDaiAllowance === 0) {
-          await rDaiInstance.methods.approve(hoodieAddress, balanceOfRDai).send({ from: accounts[0] })
-        }
+        await rDaiInstance.methods.approve(hoodieAddress, balanceOfRDai).send({ from: accounts[0] })
         await hoodieInstance.methods.redeemRDai(redeemAmount).send({ from: accounts[0] })
       }
     } catch (err) {

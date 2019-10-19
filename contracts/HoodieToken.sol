@@ -5,7 +5,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./IDai.sol"; 
 import "./IRToken.sol";
 
-contract HoodieToken is ERC20, ERC20Detailed, Ownable {
+contract HoodieToken is Ownable {
   struct User {
     uint numOfHoodie;
     uint256 rNumber;
@@ -25,12 +25,11 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   uint32[] public proportions = [proportion];
   bool public doChangeHat = false;
 
-  uint256 public hoodieReceivers = 0;
-  uint256 public minimumDepositAmount;
-  uint256 public userWaitingNumber = 0;
-  uint256 public nextRecipientNumber = 0;
-  uint256 public hoodieCost;
+  uint256 public minimumDepositAmount = 1 * 10 ** 18; // for test
+  uint256 public hoodieCost = 20 * 10 ** 18;
+
   uint256 public roundNumber = 0;
+  uint256 public hoodieReceivers = 0;
   uint256 public mostDeposited = 0;
   address public nextInLine = address(0);
   address[] public waitingList;
@@ -40,14 +39,10 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   event IssuedFDH(address recipientOfHoodie);
   event NewRoundStarted(uint256 newRountNumber);
 
-  constructor(uint256 initialSupply) ERC20Detailed("Flex Dapps Hoodie Token", "FDH", 18) public {
+  constructor() public {
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
     rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
-    _mint(owner(), initialSupply * 10 ** 18);
-    // minimumDepositAmount = 20 * 10 ** 18; // for production
-    minimumDepositAmount = 1 * 10 ** 18; // for test
-    hoodieCost = 20 * 10 ** 18;
   }
 
   function getWaitingList() public view returns(address[] memory) {
@@ -88,11 +83,13 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     // check whether or not the generated interest amount reached 20 rDAI
     // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
-    User storage user = users[nextInLine];
     // user goes to the next round waiting list
     // add the user to the next round waiting list
-    require(_addUserToWaitingList(nextInLine, user.depositedAmount), "failded to add the user to the next round waiting list");
-    
+    User storage user = users[nextInLine];
+    user.numOfHoodie++;
+    user.rNumber++;
+    emit IssuedFDH(nextInLine);
+
     // OFF CHAIN BACKEND LOGIC
     // update nextInLine to be the person who has deposited the next most
     // update mostDeposited to be equal to the deposit of nextInLine
@@ -142,6 +139,7 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     //   nextInLine = _next;
     //   hoodieReceivers++;
     // }
+
     return true;
   }
 
@@ -177,7 +175,6 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     return true;
   }
 
-
   ////////////////////////
   // internal functions //
   ////////////////////////
@@ -195,18 +192,13 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
   }
 
   function _addUserToWaitingList(address userAddress, uint256 depositAmount) internal returns(bool) {
-    User storage user = users[userAddress];
-    user.depositedAmount = depositAmount;
-    user.isWaiting = true;
-
-    if (user.depositedAmount == 0) {
-      user.numOfHoodie = 0;
-      user.rNumber = roundNumber;
-      waitingList.push(userAddress);
-    } else {
-      user.numOfHoodie++;
-      user.rNumber++;
-    }
+    users[userAddress] = User({
+      numOfHoodie: 0,
+      depositedAmount: depositAmount,
+      rNumber: roundNumber,
+      isWaiting: true
+    });
+    waitingList.push(userAddress);
 
     emit UserPushedIntoWaitingList(userAddress, depositAmount, users[userAddress].rNumber);
     return true;

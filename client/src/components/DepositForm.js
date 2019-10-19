@@ -21,7 +21,7 @@ class DepositForm extends Component {
       console.log(depositAmount)
       console.log(hatID)
       console.log(isWaiting)
-      if(!isWaiting && depositedAmount === 0) {
+      if(!isWaiting && depositedAmount == 0) {
         console.log('new user')
         await hoodieInstance.methods.mintRDaiAndPushUserToWaitingList(depositAmount).send({ from: accounts[0] } )
         .on('transactionHash', hash => { console.log('Tx Hash: ' + hash) })
