@@ -39,6 +39,8 @@ contract HoodieToken is Ownable {
   event UserPushedIntoWaitingList(address user, uint256 depositedAmount, uint256 roundNumber);
   event IssuedFDH(address recipientOfHoodie);
   event NewRoundStarted(uint256 newRountNumber);
+  event IncreasedDeposit(address user, uint256 newDepositedAmount);
+  event RedeemedRDai(address user, uint256 newDepositedAmount);
 
   constructor() public {
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
@@ -62,6 +64,7 @@ contract HoodieToken is Ownable {
       mostDeposited = depositAmount;
       nextInLine = msg.sender;
     }
+    emit UserPushedIntoWaitingList(msg.sender, depositAmount, users[msg.sender].rNumber);
     return true;
   }
 
@@ -74,6 +77,7 @@ contract HoodieToken is Ownable {
     if(user.depositedAmount >= 200 * 10 ** 18 && !user.isWaiting) {
       user.isWaiting = true;
     }
+    emit IncreasedDeposit(msg.sender, user.depositedAmount);
     return true;
   }
 
@@ -115,11 +119,11 @@ contract HoodieToken is Ownable {
     // nextInLine = _next;
     // hoodieReceivers++;
 
-    // // update round number here
-    // if (hoodieReceivers == waitingList.length) {
-    //   roundNumber++;
-    //   hoodieReceivers = 0;
-    //   emit NewRoundStarted(roundNumber);
+    // update round number here
+    if (hoodieReceivers == waitingList.length) {
+      roundNumber++;
+      hoodieReceivers = 0;
+      emit NewRoundStarted(roundNumber);
 
     //   // find the next receiver in the new round
     //   for (uint i = 0; i < waitingList.length; i++) {
@@ -139,7 +143,7 @@ contract HoodieToken is Ownable {
     //   mostDeposited = _max;
     //   nextInLine = _next;
     //   hoodieReceivers++;
-    // }
+    }
 
     return true;
   }
@@ -160,6 +164,7 @@ contract HoodieToken is Ownable {
     if (user.depositedAmount < 200 * 10 ** 18) {
       user.isWaiting = false;
     }
+    emit RedeemedRDai(msg.sender, user.depositedAmount);
     return true;
   }
 
@@ -199,8 +204,6 @@ contract HoodieToken is Ownable {
       isWaiting: true
     });
     waitingList.push(userAddress);
-
-    emit UserPushedIntoWaitingList(userAddress, depositAmount, users[userAddress].rNumber);
     return true;
   }
 }
