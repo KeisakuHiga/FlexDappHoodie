@@ -65,7 +65,7 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     return true;
   }
 
-  function issueFDH() public onlyOwner returns(bool) {
+  function issueFDH() public returns(bool) {
     // test
     require(rDAIContract.interestPayableOf(owner()) > 0, "the interest amount has not reached 20 rDAI yet");
     
@@ -83,7 +83,7 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     }
     // issue 1 FDH to the first user in the waiting list and update the nextRecipientNumber+1
     require(transfer(userAddress, 1 * 10 ** 18), "Issuing FDH failed");
-    // once the user receive a FDH, they are removed from the waiting list
+    // once the user receive a FDH, the user account is removed from the waiting list
     waitingUser.isWaiting = false;
     // update the next waitingUser in the waiting list by incrementing the waiting counter
     nextRecipientNumber++;
@@ -98,29 +98,30 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
     // transfer rDAI from user's account to Hoodie contract
     require(rDAIContract.transferFrom(msg.sender, address(this), redeemAmount), "Transfer rDAI to Hoodie contract failed");
     // dapp approves rDAI contract to transfer dapp's rDAI
-    require(rDAIContract.approve(address(rDAIContract), redeemAmount), "approve() invalid");
+    // require(rDAIContract.approve(address(rDAIContract), redeemAmount), "approve() invalid");
     // get user struct
     User storage user = users[msg.sender];
     // check whether or not the user is in the waiting list
     require(user.isWaiting, "this user is not in the waiting list");
     // A. if the deposited amount will be below than 200rDAI after redeeming
-    if(user.depositedAmount.sub(redeemAmount) < 200 * 10 ** 18) {
+    // if(user.depositedAmount.sub(redeemAmount) < 200 * 10 ** 18) {
       // 1) use redeemAll()
-      require(rDAIContract.redeemAndTransferAll(msg.sender), "redeemAndTransferAll() failed");
-      // // 2) dapp transfer rDAI to user
-      // require(DAIContract.transferFrom(address(this), msg.sender, redeemAmount), "Transfer DAI to user failed");
-      // 3) update the state of user.isWaiting to false
-      user.isWaiting = false;
-      // 4) update the state of user.depositedAmount to zero
-      user.depositedAmount = 0;
-    }  else { // B. if not
+      require(rDAIContract.redeem(redeemAmount), "redeem() failed");
+      // require(rDAIContract.redeem(msg.sender), "redeemAndTransferAll() failed");
+      // 2) dapp transfer rDAI to user
+      // require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
+      // // 3) update the state of user.isWaiting to false
+      // user.isWaiting = false;
+      // // 4) update the state of user.depositedAmount to zero
+      // user.depositedAmount = 0;
+    // }  else { // B. if not
       // 1) use redeem()
-      require(rDAIContract.redeemAndTransfer(msg.sender, redeemAmount), "redeemAndTransfer() failed");
-      // // 2) dapp transfer rDAI to user
-      // require(DAIContract.transferFrom(address(this), msg.sender, redeemAmount), "Transfer DAI to user failed");
+      // require(rDAIContract.redeemAndTransfer(msg.sender, redeemAmount), "redeemAndTransfer() failed");
+      // 2) dapp transfer rDAI to user
+      // require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
       // 3) decrese the state of user.depositedAmount - redeemAmount
-      user.depositedAmount = user.depositedAmount.sub(redeemAmount);
-    }
+      // user.depositedAmount = user.depositedAmount.sub(redeemAmount);
+    // }
     return true;
   }
 

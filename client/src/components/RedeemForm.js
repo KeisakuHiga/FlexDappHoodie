@@ -33,6 +33,7 @@ class RedeemForm extends Component {
       console.log(err.message)
     }
   }
+
   handleRedeemRDai = async (e) => {
     e.preventDefault()
     const { hoodieInstance, rDaiInstance, depositedAmount, redeemAmount, accounts }  = this.state
@@ -41,12 +42,14 @@ class RedeemForm extends Component {
 
     try {
       console.log('start to redeem rDai')
-      console.log('redeemAmount: ', redeemAmount)
-      console.log(depositedAmount)
+      console.log('redeemAmount: ', {redeemAmount})
+      console.log({depositedAmount})
+      console.log({balanceOfRDai})
+      console.log({address: hoodieInstance.options.address})
       if(depositedAmount - redeemAmount < 0) {
         throw({ message: 'over redeem amount' })
       } else {
-        await rDaiInstance.methods.approve(rDaiAddress, balanceOfRDai).send({ from: accounts[0] });
+        await rDaiInstance.methods.approve(hoodieInstance.options.address, balanceOfRDai).send({ from: accounts[0] });
         await hoodieInstance.methods.redeemRDai(redeemAmount).send({ from: accounts[0] })
           .on('receipt', receipt => { this.setState({ transactionHash: receipt.transactionHash }) })
       }
