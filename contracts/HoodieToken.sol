@@ -109,11 +109,11 @@ contract HoodieToken is ERC20, ERC20Detailed, Ownable {
       require(rDAIContract.redeem(redeemAmount), "redeem() failed");
       // require(rDAIContract.redeem(msg.sender), "redeemAndTransferAll() failed");
       // 2) dapp transfer rDAI to user
-      // require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
-      // // 3) update the state of user.isWaiting to false
-      // user.isWaiting = false;
-      // // 4) update the state of user.depositedAmount to zero
-      // user.depositedAmount = 0;
+      require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
+      // 3) update the state of user.isWaiting to false
+      user.isWaiting = false;
+      // 4) update the state of user.depositedAmount to zero
+      user.depositedAmount = 0;
     // }  else { // B. if not
       // 1) use redeem()
       // require(rDAIContract.redeemAndTransfer(msg.sender, redeemAmount), "redeemAndTransfer() failed");
