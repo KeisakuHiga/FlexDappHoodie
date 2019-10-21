@@ -6,7 +6,6 @@ import getWeb3 from "./utils/getWeb3";
 import DepositForm from "./components/DepositForm";
 import RedeemForm from "./components/RedeemForm";
 import Approve from "./components/Approve";
-import PayInterest from "./components/PayInterest";
 import IssueFDH from "./components/IssueFDH";
 import "./App.css";
 import BigNumber from "big-number";
@@ -63,7 +62,8 @@ class App extends Component {
         
       // Create DAI contract instance.
       const rDaiABI = RDaiAbi;
-      const addressOfRDaiContract = '0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A';
+      const addressOfRDaiContract = '0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A'; // before
+      // const addressOfRDaiContract = '0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578'; // latest
       const rDaiInstance = new web3.eth.Contract(rDaiABI, addressOfRDaiContract);
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
@@ -83,6 +83,8 @@ class App extends Component {
     const contract = hoodieInstance.methods;
     const hoodieAddress = hoodieInstance.options.address;
     const owner = await contract.owner().call();
+    const recipients = await contract.recipients(0).call();
+    console.log(recipients)
     const hatID = await contract.hatID().call();
     const nextInLine = await contract.nextInLine().call();
     const mostDeposited = await contract.mostDeposited().call();
@@ -114,9 +116,10 @@ class App extends Component {
     // rDai
     const rDai = rDaiInstance.methods;
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
-    const receivedSavingsOf = await rDai.receivedSavingsOf(owner).call();
-    console.log(web3.utils.fromWei(receivedSavingsOf, 'ether'))
-    const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
+    const getHatByID = await rDai.getHatByID(hatID).call();
+    console.log(getHatByID)
+    // console.log(web3.utils.fromWei(receivedSavingsOf, 'ether'))
+    const generatedInterestAmt = await rDai.interestPayableOf(accounts[0]).call();
 
     this.setState({ balanceOfDai, balanceOfRDai, generatedInterestAmt, allowance, });
   };
@@ -205,14 +208,6 @@ class App extends Component {
           rDaiInstance={rDaiInstance}
           accounts={accounts}
           depositedAmount={depositedAmount}
-        />
-
-        <br />
-        
-        <PayInterest
-          web3={web3}
-          rDaiInstance={rDaiInstance}
-          accounts={accounts}
         />
 
         <br />
