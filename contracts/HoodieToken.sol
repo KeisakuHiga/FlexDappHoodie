@@ -29,6 +29,8 @@ contract HoodieToken is Ownable {
   uint256 public minimumDepositAmount = 1 * 10 ** 18; // for test
   uint256 public hoodieCost = 20 * 10 ** 18;
 
+  uint256 public waitingUserNumber = 0;
+  uint256 public nextWaitingUserNum = 0;
   uint256 public roundNumber = 0;
   uint256 public hoodieReceivers = 0;
   uint256 public mostDeposited = 0;
@@ -74,8 +76,27 @@ contract HoodieToken is Ownable {
     // update user's deposited amount in User struct
     User storage user = users[msg.sender];
     user.depositedAmount = user.depositedAmount.add(topUpAmount);
-    if(user.depositedAmount >= 200 * 10 ** 18 && !user.isWaiting) {
+
+    // update the mostDeposted
+    if (user.depositedAmount > mostDeposited) {
+      mostDeposited = user.depositedAmount;
+      nextInLine = msg.sender;
+    }
+
+    // user can be back to the waiting list when the depositedAmount is more than the minimumDepositAmount
+    if(user.depositedAmount >= minimumDepositAmount && !user.isWaiting) {
       user.isWaiting = true;
+
+      // if the round number was updated while a user was away from the waiting list, 
+      // the user's rNumber and the waitingUserNumber should be updated as well
+      if(user.rNumber < roundNumber) {
+        user.rNumber = roundNumber;
+        waitingUserNumber++;
+      } else if (user.rNumber == roundNumber) {
+        waitingUserNumber++;
+      } else {
+        nextWaitingUserNum++;
+      }
     }
     emit IncreasedDeposit(msg.sender, user.depositedAmount);
     return true;
@@ -88,11 +109,21 @@ contract HoodieToken is Ownable {
     // check whether or not the generated interest amount reached 20 rDAI
     // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
+    /////////////////////////
+    ////// caution!!   //////     // shoud check whether or not the user is the 1st position ==> nextInLine?
+    /////////////////////////
+
+    
+
+
+
     // user goes to the next round waiting list
     // add the user to the next round waiting list
     User storage user = users[nextInLine];
     user.numOfHoodie++;
     user.rNumber++;
+    nextWaitingUserNum++;
+    hoodieReceivers++;
     emit IssuedFDH(nextInLine);
 
     // OFF CHAIN BACKEND LOGIC
@@ -119,10 +150,11 @@ contract HoodieToken is Ownable {
     // nextInLine = _next;
     // hoodieReceivers++;
 
-    // update round number here
-    if (hoodieReceivers == waitingList.length) {
+    // update round number when the number of hoodie receivers is equal to the waiting user number
+    if (hoodieReceivers == waitingUserNumber) {
       roundNumber++;
       hoodieReceivers = 0;
+      waitingUserNumber = nextWaitingUserNum;
       emit NewRoundStarted(roundNumber);
 
     //   // find the next receiver in the new round
@@ -148,6 +180,12 @@ contract HoodieToken is Ownable {
     return true;
   }
 
+  ///////////////
+  // IMPORTANT ///////////////////////////////////////////////////////////////////////////////////////
+  // We need to think about a case a user redeems his/her rDAI with OTHER FRONTEND
+  // Hoodie contract cannot keep track of the case and update the right order of the waiting list
+  // Therefore, nextInLine is unchanged even when the user's depositedAmount is below than 200rDAI
+
   function redeemRDai(uint256 redeemAmount) public returns (bool) {
     User storage user = users[msg.sender];
     // check whether or not the user has enough rDAI to redeem
@@ -160,15 +198,31 @@ contract HoodieToken is Ownable {
     require(rDAIContract.redeem(redeemAmount), "redeem() failed");
     require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
     user.depositedAmount = user.depositedAmount.sub(redeemAmount);
-    // if user's depositedAmount become below than 200 rDAI, it will be removed from the waiting list
-    if (user.depositedAmount < 200 * 10 ** 18) {
+
+    // if user's depositedAmount become below than the minimumDepositAmount, it will be removed from the waiting list
+    if (user.depositedAmount < minimumDepositAmount) {
       user.isWaiting = false;
+
+      if(user.rNumber == roundNumber) {
+      // update the waiting user number of the current waiting list
+        waitingUserNumber--;
+      } else {
+      // update the waiting user number of the next waiting list
+        nextWaitingUserNum--;
+      }
     }
     emit RedeemedRDai(msg.sender, user.depositedAmount);
     return true;
   }
 
   // identifier isWaiting()
+
+
+  // function updateNextInLine() public returns (bool) {
+  //   if(
+
+  //   )
+  // }
 
   function switchDaiContractInstance(address daiContractAddress) public onlyOwner returns(bool) {
     DAIContract = IDai(daiContractAddress);
@@ -204,6 +258,7 @@ contract HoodieToken is Ownable {
       isWaiting: true
     });
     waitingList.push(userAddress);
+    waitingUserNumber++;
     return true;
   }
 }
