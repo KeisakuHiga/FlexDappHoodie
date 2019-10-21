@@ -114,8 +114,9 @@ class App extends Component {
     // rDai
     const rDai = rDaiInstance.methods;
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
+    const receivedSavingsOf = await rDai.receivedSavingsOf(owner).call();
+    console.log(web3.utils.fromWei(receivedSavingsOf, 'ether'))
     const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
-    console.log(web3.utils.fromWei(generatedInterestAmt, 'ether'))
 
     this.setState({ balanceOfDai, balanceOfRDai, generatedInterestAmt, allowance, });
   };

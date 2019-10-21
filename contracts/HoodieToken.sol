@@ -46,7 +46,7 @@ contract HoodieToken is Ownable {
 
   constructor() public {
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
-    rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A);
+    rDAIContract = IRToken(0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
