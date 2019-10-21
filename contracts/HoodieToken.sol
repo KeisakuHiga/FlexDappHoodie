@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./IDai.sol"; 
+import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./IDai.sol";
 import "./IRToken.sol";
 
 contract HoodieToken is Ownable {
@@ -12,6 +12,7 @@ contract HoodieToken is Ownable {
     uint256 rNumber;
     uint256 depositedAmount;
     bool isWaiting;
+    bool hasDeposited;
   }
   // Instantiate DAIContract with DAI address on rinkeby
   // Instantiate rDAIContract with rDAI address on rinkeby
@@ -76,6 +77,10 @@ contract HoodieToken is Ownable {
     user.depositedAmount = user.depositedAmount.add(topUpAmount);
     if(user.depositedAmount >= 200 * 10 ** 18 && !user.isWaiting) {
       user.isWaiting = true;
+      if (user.depositedAmount > mostDeposited) {
+        mostDeposited = user.depositedAmount;
+        nextInLine = msg.sender;
+      }
     }
     emit IncreasedDeposit(msg.sender, user.depositedAmount);
     return true;
@@ -84,7 +89,7 @@ contract HoodieToken is Ownable {
   function issueFDH() public returns(bool) {
     // test
     require(rDAIContract.interestPayableOf(owner()) > 0, "the interest amount has not reached 20 rDAI yet");
-    
+
     // check whether or not the generated interest amount reached 20 rDAI
     // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
@@ -164,6 +169,7 @@ contract HoodieToken is Ownable {
     if (user.depositedAmount < 200 * 10 ** 18) {
       user.isWaiting = false;
     }
+    /// if this user was nextInLine, we may need to set a new nextInLine
     emit RedeemedRDai(msg.sender, user.depositedAmount);
     return true;
   }
@@ -197,13 +203,17 @@ contract HoodieToken is Ownable {
   }
 
   function _addUserToWaitingList(address userAddress, uint256 depositAmount) internal returns(bool) {
+    User memory _oldUser = users[userAddress];
     users[userAddress] = User({
       numOfHoodie: 0,
       depositedAmount: depositAmount,
       rNumber: roundNumber,
-      isWaiting: true
+      isWaiting: true,
+      hasDeposited: true
     });
-    waitingList.push(userAddress);
+    if (!_oldUser.hasDeposited) {
+      waitingList.push(userAddress);
+    }
     return true;
   }
 }
