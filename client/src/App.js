@@ -47,7 +47,6 @@ class App extends Component {
 
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
-
       const networkId = await web3.eth.net.getId();
       // Get contract instance.
       const HoodieDeployedNetwork = HoodieToken.networks[networkId];
@@ -145,11 +144,15 @@ class App extends Component {
   }
 
   render() {
+<<<<<<< HEAD
     const { web3, accounts, hoodieInstance, daiInstance, owner, hatID, balanceOfDai, balanceOfRDai, userApproved,
             rDaiInstance, addressOfRDaiContract, generatedInterestAmt, allowance, hoodieAddress, waitingUserNumber,
             hoodieReceivers, isWaiting, depositedAmount, numOfHoodie, rNumber, nextInLine, roundNumber, mostDeposited,
 
           } = this.state
+=======
+    const { web3, accounts, hoodieInstance, name, symbol, totalSupply, balanceOf, owner } = this.state
+>>>>>>> bf147e043672d0b5d50bbb437bc1fd1a9aba59da
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -157,6 +160,7 @@ class App extends Component {
     return (
       <div className="App">
         <div>
+<<<<<<< HEAD
           <h1>Welcome to Flex Hoodie dapp!</h1>
           <h1>Deposit your DAI and get Hoodie!</h1>
           <p>Owner is {owner} and the Hat ID is {hatID}</p>
@@ -190,6 +194,12 @@ class App extends Component {
           <p>Num of hoodie receivers: { hoodieReceivers }</p>
           <p>Next receiver >>>> { nextInLine }</p>
           <p>{ waitingUserNumber - hoodieReceivers } { waitingUserNumber - hoodieReceivers > 1 ? <span>people are </span> : <span>person is </span>}waiting for a hoodie! </p>
+=======
+          <h1>Welcome to {name} dapp! Get {symbol} and exchange it with Flex Dapps' Hoodie!</h1>
+          <h3>Hoodie token's total supply is {totalSupply}</h3>
+          <h3>You have {balanceOf} FDH now</h3>
+          <p>owner address: {owner}</p>
+>>>>>>> bf147e043672d0b5d50bbb437bc1fd1a9aba59da
         </div>
 
         <br />

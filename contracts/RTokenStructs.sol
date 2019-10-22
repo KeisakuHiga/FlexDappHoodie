@@ -28,7 +28,7 @@ contract RTokenStructs {
         uint32[] proportions;
     }
 
-    /// @dev Account structure
+    // @dev Account structure
     struct Account {
         uint256 hatID;
         uint256 rAmount;
