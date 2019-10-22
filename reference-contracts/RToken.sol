@@ -27,23 +27,32 @@ contract RToken is
 
     uint256 public constant SELF_HAT_ID = uint256(int256(-1));
     uint32 public constant PROPORTION_BASE = 0xFFFFFFFF;
+    uint256 public constant MAX_NUM_HAT_RECIPIENTS = 50;
 
     /**
      * @notice Create rToken linked with cToken at `cToken_`
      */
-    function initialize(IAllocationStrategy allocationStrategy) external {
+    function initialize(
+        IAllocationStrategy allocationStrategy,
+        string calldata name_,
+        string calldata symbol_,
+        uint256 decimals_) external {
         require(!initialized, 'The library has already been initialized.');
         initialize();
         _owner = msg.sender;
         _guardCounter = 1;
-        name = 'Redeemable DAI (rDAI ethberlin)';
-        symbol = 'rDAItest';
-        decimals = 18;
+        name = name_;
+        symbol = symbol_;
+        decimals = decimals_;
         savingAssetConversionRate = 10**18;
         ias = allocationStrategy;
         token = IERC20(ias.underlying());
+
         // special hat aka. zero hat : hatID = 0
         hats.push(Hat(new address[](0), new uint32[](0)));
+
+        // everyone is using it by default!
+        hatStats[0].useCount = uint256(int256(-1));
     }
 
     //
@@ -344,8 +353,22 @@ contract RToken is
         view
         returns (AccountStats memory)
     {
-        Account storage account = accounts[owner];
-        return account.stats;
+        AccountStats storage stats = accountStats[owner];
+        return stats;
+    }
+
+    /// @dev IRToken.getHatStats implementation
+    function getHatStats(uint256 hatID)
+        external
+        view
+        returns (HatStats memory stats) {
+        HatStatsStored storage statsStored = hatStats[hatID];
+        stats.useCount = statsStored.useCount;
+        stats.totalLoans = statsStored.totalLoans;
+        stats.totalSavings = statsStored.totalInternalSavings
+            .mul(ias.exchangeRateStored())
+            .div(savingAssetConversionRate);
+        return stats;
     }
 
     /// @dev IRToken.getCurrentSavingStrategy implementation
@@ -357,10 +380,10 @@ contract RToken is
     function getSavingAssetBalance()
         external
         view
-        returns (uint256 nAmount, uint256 sAmount)
+        returns (uint256 rAmount, uint256 sAmount)
     {
         sAmount = savingAssetOrignalAmount;
-        nAmount = sAmount.mul(ias.exchangeRateStored()).div(10**18);
+        rAmount = sAmount.mul(ias.exchangeRateStored()).div(10**18);
     }
 
     /// @dev IRToken.changeAllocationStrategy implementation
@@ -387,6 +410,12 @@ contract RToken is
         savingAssetConversionRate = sOriginalCreated.mul(10**18).div(
             sOriginalBurned
         );
+    }
+
+    /// @dev IRToken.changeHatFor implementation
+    function changeHatFor(address contractAddress, uint256 hatID) external onlyOwner {
+        require(_isContract(contractAddress), "Admin can only change hat for contract address");
+        changeHatInternal(contractAddress, hatID);
     }
 
     /// @dev Update the rToken logic contract code
@@ -440,8 +469,13 @@ contract RToken is
         // EFFECTS & INTERACTIONS
         // (No safe failures beyond this point)
 
+        // check if src & dst have the same hat
+        bool sameHat = accounts[src].hatID == accounts[dst].hatID && accounts[src].hatID != 0;
+
         // apply hat inheritance rule
-        if (accounts[src].hatID != 0 && accounts[dst].hatID == 0) {
+        if ((accounts[src].hatID != 0 &&
+            accounts[dst].hatID == 0 &&
+            accounts[src].hatID != SELF_HAT_ID)) {
             changeHatInternal(dst, accounts[src].hatID);
         }
 
@@ -454,13 +488,22 @@ contract RToken is
         }
 
         // lRecipients adjustments
-        uint256 sInternalAmountCollected = estimateAndRecollectLoans(
-            src,
-            tokens
-        );
-        distributeLoans(dst, tokens, sInternalAmountCollected);
+        if (!sameHat) {
+            uint256 sInternalAmountCollected = estimateAndRecollectLoans(
+                src,
+                tokens
+            );
+            distributeLoans(dst, tokens, sInternalAmountCollected);
+        } else {
+            // apply same hat optimization
+            sameHatTransfer(src, dst, tokens);
+        }
 
         // rInterest adjustment for src
+        //
+        // rInterest should be the portion that is from interest payment, by
+        // definition it should not be larger than rAmount.
+        // It could happen because of rounding errors.
         if (accounts[src].rInterest > accounts[src].rAmount) {
             accounts[src].rInterest = accounts[src].rAmount;
         }
@@ -549,7 +592,7 @@ contract RToken is
     /**
      * @dev Create a new Hat
      * @param recipients List of beneficial recipients
-     * @param proportions Relative proportions of benefits received by the recipients
+*    * @param proportions Relative proportions of benefits received by the recipients
      */
     function createHatInternal(
         address[] memory recipients,
@@ -558,6 +601,7 @@ contract RToken is
         uint256 i;
 
         require(recipients.length > 0, 'Invalid hat: at least one recipient');
+        require(recipients.length <= MAX_NUM_HAT_RECIPIENTS, "Invalild hat: maximum number of recipients reached");
         require(
             recipients.length == proportions.length,
             'Invalid hat: length not matching'
@@ -590,6 +634,9 @@ contract RToken is
      */
     function changeHatInternal(address owner, uint256 hatID) internal {
         Account storage account = accounts[owner];
+        uint256 oldHatID = account.hatID;
+        HatStatsStored storage oldHatStats = hatStats[oldHatID];
+        HatStatsStored storage newHatStats = hatStats[hatID];
         if (account.rAmount > 0) {
             uint256 sInternalAmountCollected = estimateAndRecollectLoans(
                 owner,
@@ -600,7 +647,9 @@ contract RToken is
         } else {
             account.hatID = hatID;
         }
-        emit HatChanged(owner, hatID);
+        oldHatStats.useCount -= 1;
+        newHatStats.useCount += 1;
+        emit HatChanged(owner, oldHatID, hatID);
     }
 
     /**
@@ -641,60 +690,45 @@ contract RToken is
         Hat storage hat = hats[account.hatID == SELF_HAT_ID
             ? 0
             : account.hatID];
-        bool[] memory recipientsNeedsNewHat = new bool[](hat.recipients.length);
         uint256 i;
         if (hat.recipients.length > 0) {
             uint256 rLeft = rAmount;
             uint256 sInternalLeft = sInternalAmount;
             for (i = 0; i < hat.proportions.length; ++i) {
-                Account storage recipient = accounts[hat.recipients[i]];
+                address recipientAddress = hat.recipients[i];
+                Account storage recipientAccount = accounts[recipientAddress];
                 bool isLastRecipient = i == (hat.proportions.length - 1);
 
-                // inherit the hat if needed
-                if (recipient.hatID == 0) {
-                    recipientsNeedsNewHat[i] = true;
-                }
-
+                // calculate the loan amount of the recipient
                 uint256 lDebtRecipient = isLastRecipient
                     ? rLeft
                     : (rAmount * hat.proportions[i]) / PROPORTION_BASE;
-                account.lRecipients[hat.recipients[i]] = account.lRecipients[hat
-                    .recipients[i]]
+                // distribute the loan to the recipient
+                account.lRecipients[recipientAddress] = account.lRecipients[recipientAddress]
                     .add(lDebtRecipient);
-                recipient.lDebt = recipient.lDebt.add(lDebtRecipient);
-                // leftover adjustments
-                if (rLeft > lDebtRecipient) {
-                    rLeft -= lDebtRecipient;
-                } else {
-                    rLeft = 0;
-                }
+                recipientAccount.lDebt = recipientAccount.lDebt
+                    .add(lDebtRecipient);
+                // remaining value adjustments
+                rLeft = gentleSub(rLeft, lDebtRecipient);
 
+                // calculate the savings holdings of the recipient
                 uint256 sInternalAmountRecipient = isLastRecipient
                     ? sInternalLeft
                     : (sInternalAmount * hat.proportions[i]) / PROPORTION_BASE;
-                recipient.sInternalAmount = recipient.sInternalAmount.add(
-                    sInternalAmountRecipient
-                );
-                // leftover adjustments
-                if (sInternalLeft >= sInternalAmountRecipient) {
-                    sInternalLeft -= sInternalAmountRecipient;
-                } else {
-                    sInternalLeft = 0;
-                }
+                recipientAccount.sInternalAmount = recipientAccount.sInternalAmount
+                    .add(sInternalAmountRecipient);
+                // remaining value adjustments
+                sInternalLeft = gentleSub(sInternalLeft, sInternalAmountRecipient);
+
+                _updateLoanStats(owner, recipientAddress, account.hatID, true, lDebtRecipient, sInternalAmountRecipient);
             }
         } else {
-            // Account uses the zero hat, give all interest to the owner
+            // Account uses the zero/self hat, give all interest to the owner
             account.lDebt = account.lDebt.add(rAmount);
-            account.sInternalAmount = account.sInternalAmount.add(
-                sInternalAmount
-            );
-        }
+            account.sInternalAmount = account.sInternalAmount
+                .add(sInternalAmount);
 
-        // apply to new hat owners
-        for (i = 0; i < hat.proportions.length; ++i) {
-            if (recipientsNeedsNewHat[i]) {
-                changeHatInternal(hat.recipients[i], account.hatID);
-            }
+            _updateLoanStats(owner, owner, account.hatID, true, rAmount, sInternalAmount);
         }
     }
 
@@ -710,16 +744,12 @@ contract RToken is
         internal
         returns (uint256 sInternalAmount)
     {
-        Account storage account = accounts[owner];
-        Hat storage hat = hats[account.hatID == SELF_HAT_ID
-            ? 0
-            : account.hatID];
         // accrue interest so estimate is up to date
         ias.accrueInterest();
         sInternalAmount = rAmount.mul(savingAssetConversionRate).div(
             ias.exchangeRateStored()
         ); // the 1e18 decimals should be cancelled out
-        recollectLoans(account, hat, rAmount, sInternalAmount);
+        recollectLoans(owner, rAmount, sInternalAmount);
     }
 
     /**
@@ -734,86 +764,96 @@ contract RToken is
         internal
         returns (uint256 sOriginalBurned)
     {
-        Account storage account = accounts[owner];
-        Hat storage hat = hats[account.hatID == SELF_HAT_ID
-            ? 0
-            : account.hatID];
         sOriginalBurned = ias.redeemUnderlying(rAmount);
         uint256 sInternalBurned = sOriginalBurned
             .mul(savingAssetConversionRate)
             .div(10**18);
-        recollectLoans(account, hat, rAmount, sInternalBurned);
+        recollectLoans(owner, rAmount, sInternalBurned);
     }
 
     /**
      * @dev Recollect loan from the recipients
-     * @param account Owner account
-     * @param hat     Owner's hat
+     * @param owner   Owner address
      * @param rAmount rToken amount being written of from the recipients
      * @param sInternalAmount Amount of sasving assets (internal amount) recollected from the recipients
      */
     function recollectLoans(
-        Account storage account,
-        Hat storage hat,
+        address owner,
         uint256 rAmount,
         uint256 sInternalAmount
     ) internal {
-        uint256 i;
+        Account storage account = accounts[owner];
+        Hat storage hat = hats[account.hatID == SELF_HAT_ID
+            ? 0
+            : account.hatID];
         if (hat.recipients.length > 0) {
             uint256 rLeft = rAmount;
             uint256 sInternalLeft = sInternalAmount;
+            uint256 i;
             for (i = 0; i < hat.proportions.length; ++i) {
-                Account storage recipient = accounts[hat.recipients[i]];
+                address recipientAddress = hat.recipients[i];
+                Account storage recipientAccount = accounts[recipientAddress];
                 bool isLastRecipient = i == (hat.proportions.length - 1);
 
+                // calulate loans to be collected from the recipient
                 uint256 lDebtRecipient = isLastRecipient
                     ? rLeft
                     : (rAmount * hat.proportions[i]) / PROPORTION_BASE;
-                if (recipient.lDebt > lDebtRecipient) {
-                    recipient.lDebt -= lDebtRecipient;
-                } else {
-                    recipient.lDebt = 0;
-                }
-                if (account.lRecipients[hat.recipients[i]] > lDebtRecipient) {
-                    account.lRecipients[hat.recipients[i]] -= lDebtRecipient;
-                } else {
-                    account.lRecipients[hat.recipients[i]] = 0;
-                }
-                // leftover adjustments
-                if (rLeft > lDebtRecipient) {
-                    rLeft -= lDebtRecipient;
-                } else {
-                    rLeft = 0;
-                }
+                recipientAccount.lDebt = gentleSub(
+                    recipientAccount.lDebt,
+                    lDebtRecipient);
+                account.lRecipients[recipientAddress] = gentleSub(
+                    account.lRecipients[recipientAddress],
+                    lDebtRecipient);
+                // loans leftover adjustments
+                rLeft = gentleSub(rLeft, lDebtRecipient);
 
+                // calculate savings to be collected from the recipient
                 uint256 sInternalAmountRecipient = isLastRecipient
                     ? sInternalLeft
                     : (sInternalAmount * hat.proportions[i]) / PROPORTION_BASE;
-                if (recipient.sInternalAmount > sInternalAmountRecipient) {
-                    recipient.sInternalAmount -= sInternalAmountRecipient;
-                } else {
-                    recipient.sInternalAmount = 0;
-                }
-                // leftover adjustments
-                if (sInternalLeft >= sInternalAmountRecipient) {
-                    sInternalLeft -= sInternalAmountRecipient;
-                } else {
-                    sInternalLeft = 0;
-                }
+                recipientAccount.sInternalAmount = gentleSub(
+                    recipientAccount.sInternalAmount,
+                    sInternalAmountRecipient);
+                // savings leftover adjustments
+                sInternalLeft = gentleSub(sInternalLeft, sInternalAmountRecipient);
+
+                _updateLoanStats(owner, recipientAddress, account.hatID, false, lDebtRecipient, sInternalAmountRecipient);
             }
         } else {
             // Account uses the zero hat, recollect interests from the owner
-            if (account.lDebt > rAmount) {
-                account.lDebt -= rAmount;
-            } else {
-                account.lDebt = 0;
-            }
-            if (account.sInternalAmount > sInternalAmount) {
-                account.sInternalAmount -= sInternalAmount;
-            } else {
-                account.sInternalAmount = 0;
-            }
+            account.lDebt = gentleSub(account.lDebt, rAmount);
+            account.sInternalAmount = gentleSub(account.sInternalAmount, sInternalAmount);
+
+            _updateLoanStats(owner, owner, account.hatID, false, rAmount, sInternalAmount);
         }
+    }
+
+    /**
+     * @dev Optimized recollect and distribute loan for the same hat
+     * @param src Source address
+     * @param dst Destination address
+     * @param rAmount rToken amount being written of from the recipients
+     */
+    function sameHatTransfer(
+        address src,
+        address dst,
+        uint256 rAmount) internal {
+        // accrue interest so estimate is up to date
+        ias.accrueInterest();
+
+        Account storage srcAccount = accounts[src];
+        Account storage dstAccount = accounts[dst];
+
+        uint256 sInternalAmount = rAmount
+            .mul(savingAssetConversionRate)
+            .div(ias.exchangeRateStored()); // the 1e18 decimals should be cancelled out
+
+        srcAccount.lDebt = gentleSub(srcAccount.lDebt, rAmount);
+        srcAccount.sInternalAmount = gentleSub(srcAccount.sInternalAmount, sInternalAmount);
+
+        dstAccount.lDebt = dstAccount.lDebt.add(rAmount);
+        dstAccount.sInternalAmount = dstAccount.sInternalAmount.add(sInternalAmount);
     }
 
     /**
@@ -822,13 +862,13 @@ contract RToken is
      */
     function payInterestInternal(address owner) internal {
         Account storage account = accounts[owner];
+        AccountStats storage stats = accountStats[owner];
 
         ias.accrueInterest();
         uint256 interestAmount = getInterestPayableOf(account);
 
         if (interestAmount > 0) {
-            account.stats.cumulativeInterest = account
-                .stats
+            stats.cumulativeInterest = stats
                 .cumulativeInterest
                 .add(interestAmount);
             account.rInterest = account.rInterest.add(interestAmount);
@@ -837,5 +877,50 @@ contract RToken is
             emit InterestPaid(owner, interestAmount);
             emit Transfer(address(this), owner, interestAmount);
         }
+    }
+
+    function _updateLoanStats(
+        address owner,
+        address recipient,
+        uint256 hatID,
+        bool isDistribution,
+        uint256 redeemableAmount,
+        uint256 internalSavingsAmount) private {
+        HatStatsStored storage hatStats = hatStats[hatID];
+
+        emit LoansTransferred(owner, recipient, hatID,
+            true,
+            redeemableAmount,
+            internalSavingsAmount
+                .mul(ias.exchangeRateStored())
+                .div(savingAssetConversionRate));
+
+        if (isDistribution) {
+            hatStats.totalLoans = hatStats.totalLoans.add(redeemableAmount);
+            hatStats.totalInternalSavings = hatStats.totalInternalSavings
+                .add(internalSavingsAmount);
+        } else {
+            hatStats.totalLoans = gentleSub(hatStats.totalLoans, redeemableAmount);
+            hatStats.totalInternalSavings = gentleSub(
+                hatStats.totalInternalSavings,
+                internalSavingsAmount);
+        }
+    }
+
+    function _isContract(address addr) private view returns (bool) {
+      uint size;
+      assembly { size := extcodesize(addr) }
+      return size > 0;
+    }
+
+    /**
+     * @dev Gently subtract b from a without revert
+     *
+     * Due to the use of integeral arithmatic, imprecision may cause a tiny
+     * amount to be off when substracting the otherwise precise proportions.
+     */
+    function gentleSub(uint256 a, uint256 b) private pure returns (uint256) {
+        if (a < b) return 0;
+        else return a - b;
     }
 }

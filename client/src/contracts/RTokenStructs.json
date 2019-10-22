@@ -1,33 +1,33 @@
 {
   "contractName": "RTokenStructs",
   "abi": [],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/khiga619/Sites/FlexDappHoodie/contracts/RTokenStructs.sol\":\"RTokenStructs\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/khiga619/Sites/FlexDappHoodie/contracts/RTokenStructs.sol\":{\"keccak256\":\"0x50806b47478b0597a6466e8e336c6ef6d7c8641770a57a9671fe540abcb79d3f\",\"urls\":[\"bzzr://799d35f9621739026f9de744042705cd497a1a9357729234efd69728429c73d7\"]}},\"version\":1}",
-  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3fe6080604052600080fdfea165627a7a72305820db31c6b4206bc033deb5c82edd48a9f85012a0ff77288c70f9bcef2c048d22d20029",
-  "deployedBytecode": "0x6080604052600080fdfea165627a7a72305820db31c6b4206bc033deb5c82edd48a9f85012a0ff77288c70f9bcef2c048d22d20029",
-  "sourceMap": "25:978:5:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;25:978:5;;;;;;;",
-  "deployedSourceMap": "25:978:5:-;;;;;",
-  "source": "pragma solidity ^0.5.0;\n\ncontract RTokenStructs {\n    /*\n    * @notice Global stats\n    */\n    struct GlobalStats {\n        /// @notice Total redeemable tokens supply\n        uint256 totalSupply;\n        /// @notice Total saving assets in redeemable amount\n        uint256 totalSavingsAmount;\n    }\n\n    struct AccountStats {\n        uint256 cumulativeInterest;\n    }\n\n    /*\n     * @notice Hat structure describes who are the recipients of the interest\n     *\n     * To be a valid hat structure:\n     *   - at least one recipient\n     *   - recipients.length == proportions.length\n     *   - each value in proportions should be greater than 0\n     */\n    struct Hat {\n        address[] recipients;\n        uint32[] proportions;\n    }\n\n    /// @dev Account structure\n    struct Account {\n        uint256 hatID;\n        uint256 rAmount;\n        uint256 rInterest;\n        mapping(address => uint256) lRecipients;\n        uint256 lDebt;\n        uint256 sInternalAmount;\n        AccountStats stats;\n    }\n}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/khiga619/Sites/FlexDappHoodie/contracts/RTokenStructs.sol\":\"RTokenStructs\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/khiga619/Sites/FlexDappHoodie/contracts/RTokenStructs.sol\":{\"keccak256\":\"0x6ec57b08f4ade0648a92643396a62d1f2d28f7f2a670565997fd9c347a55d76b\",\"urls\":[\"bzzr://5745464fd2ad634b913168c4571d1d2885920bf154aa996c3b3af2412d4eb79a\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3fe6080604052600080fdfea165627a7a72305820d515c331a1496dc629904986f21101ec37bcd7c96dbaba5f2ffc1d5fadae3f220029",
+  "deployedBytecode": "0x6080604052600080fdfea165627a7a72305820d515c331a1496dc629904986f21101ec37bcd7c96dbaba5f2ffc1d5fadae3f220029",
+  "sourceMap": "25:1758:6:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;25:1758:6;;;;;;;",
+  "deployedSourceMap": "25:1758:6:-;;;;;",
+  "source": "pragma solidity ^0.5.8;\n\ncontract RTokenStructs {\n    /**\n     * @notice Global stats\n     */\n    struct GlobalStats {\n        /// @notice Total redeemable tokens supply\n        uint256 totalSupply;\n        /// @notice Total saving assets in redeemable amount\n        uint256 totalSavingsAmount;\n    }\n\n    /**\n     * @notice Account stats\n     */\n    struct AccountStats {\n        /// @notice Cumulative interest generated for the account\n        uint256 cumulativeInterest;\n    }\n\n    /**\n     * @notice Hat stats\n     */\n    struct HatStats {\n        /// @notice Number of addresses has the hat\n        uint256 useCount;\n        /// @notice Total net loans distributed through the hat\n        uint256 totalLoans;\n        /// @notice Total net savings distributed through the hat\n        uint256 totalSavings;\n    }\n\n    /**\n     * @notice Hat stats stored\n     */\n    struct HatStatsStored {\n        /// @notice Number of addresses has the hat\n        uint256 useCount;\n        /// @notice Total net loans distributed through the hat\n        uint256 totalLoans;\n        /// @notice Total net savings distributed through the hat\n        uint256 totalInternalSavings;\n    }\n\n    /**\n     * @notice Hat structure describes who are the recipients of the interest\n     *\n     * To be a valid hat structure:\n     *   - at least one recipient\n     *   - recipients.length == proportions.length\n     *   - each value in proportions should be greater than 0\n     */\n    struct Hat {\n        address[] recipients;\n        uint32[] proportions;\n    }\n\n    /// @dev Account structure\n    struct Account {\n        uint256 hatID;\n        uint256 rAmount;\n        uint256 rInterest;\n        mapping(address => uint256) lRecipients;\n        uint256 lDebt;\n        uint256 sInternalAmount;\n    }\n}",
   "sourcePath": "/Users/khiga619/Sites/FlexDappHoodie/contracts/RTokenStructs.sol",
   "ast": {
     "absolutePath": "/Users/khiga619/Sites/FlexDappHoodie/contracts/RTokenStructs.sol",
     "exportedSymbols": {
       "RTokenStructs": [
-        718
+        1235
       ]
     },
-    "id": 719,
+    "id": 1236,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 685,
+        "id": 1190,
         "literals": [
           "solidity",
           "^",
           "0.5",
-          ".0"
+          ".8"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:5"
+        "src": "0:23:6"
       },
       {
         "baseContracts": [],
@@ -35,24 +35,24 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 718,
+        "id": 1235,
         "linearizedBaseContracts": [
-          718
+          1235
         ],
         "name": "RTokenStructs",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "RTokenStructs.GlobalStats",
-            "id": 690,
+            "id": 1195,
             "members": [
               {
                 "constant": false,
-                "id": 687,
+                "id": 1192,
                 "name": "totalSupply",
                 "nodeType": "VariableDeclaration",
-                "scope": 690,
-                "src": "175:19:5",
+                "scope": 1195,
+                "src": "178:19:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -60,10 +60,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 686,
+                  "id": 1191,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "175:7:5",
+                  "src": "178:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -74,11 +74,11 @@
               },
               {
                 "constant": false,
-                "id": 689,
+                "id": 1194,
                 "name": "totalSavingsAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 690,
-                "src": "265:26:5",
+                "scope": 1195,
+                "src": "268:26:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -86,10 +86,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 688,
+                  "id": 1193,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "265:7:5",
+                  "src": "268:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -101,21 +101,21 @@
             ],
             "name": "GlobalStats",
             "nodeType": "StructDefinition",
-            "scope": 718,
-            "src": "95:203:5",
+            "scope": 1235,
+            "src": "98:203:6",
             "visibility": "public"
           },
           {
             "canonicalName": "RTokenStructs.AccountStats",
-            "id": 693,
+            "id": 1198,
             "members": [
               {
                 "constant": false,
-                "id": 692,
+                "id": 1197,
                 "name": "cumulativeInterest",
                 "nodeType": "VariableDeclaration",
-                "scope": 693,
-                "src": "334:26:5",
+                "scope": 1198,
+                "src": "448:26:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -123,10 +123,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 691,
+                  "id": 1196,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "334:7:5",
+                  "src": "448:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -138,21 +138,199 @@
             ],
             "name": "AccountStats",
             "nodeType": "StructDefinition",
-            "scope": 718,
-            "src": "304:63:5",
+            "scope": 1235,
+            "src": "352:129:6",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "RTokenStructs.HatStats",
+            "id": 1205,
+            "members": [
+              {
+                "constant": false,
+                "id": 1200,
+                "name": "useCount",
+                "nodeType": "VariableDeclaration",
+                "scope": 1205,
+                "src": "606:16:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1199,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "606:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 1202,
+                "name": "totalLoans",
+                "nodeType": "VariableDeclaration",
+                "scope": 1205,
+                "src": "696:18:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1201,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "696:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 1204,
+                "name": "totalSavings",
+                "nodeType": "VariableDeclaration",
+                "scope": 1205,
+                "src": "790:20:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1203,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "790:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "HatStats",
+            "nodeType": "StructDefinition",
+            "scope": 1235,
+            "src": "528:289:6",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "RTokenStructs.HatStatsStored",
+            "id": 1212,
+            "members": [
+              {
+                "constant": false,
+                "id": 1207,
+                "name": "useCount",
+                "nodeType": "VariableDeclaration",
+                "scope": 1212,
+                "src": "955:16:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1206,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "955:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 1209,
+                "name": "totalLoans",
+                "nodeType": "VariableDeclaration",
+                "scope": 1212,
+                "src": "1045:18:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1208,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1045:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 1211,
+                "name": "totalInternalSavings",
+                "nodeType": "VariableDeclaration",
+                "scope": 1212,
+                "src": "1139:28:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1210,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1139:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "HatStatsStored",
+            "nodeType": "StructDefinition",
+            "scope": 1235,
+            "src": "871:303:6",
             "visibility": "public"
           },
           {
             "canonicalName": "RTokenStructs.Hat",
-            "id": 700,
+            "id": 1219,
             "members": [
               {
                 "constant": false,
-                "id": 696,
+                "id": 1215,
                 "name": "recipients",
                 "nodeType": "VariableDeclaration",
-                "scope": 700,
-                "src": "677:20:5",
+                "scope": 1219,
+                "src": "1485:20:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -161,20 +339,20 @@
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 694,
+                    "id": 1213,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "677:7:5",
+                    "src": "1485:7:6",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "id": 695,
+                  "id": 1214,
                   "length": null,
                   "nodeType": "ArrayTypeName",
-                  "src": "677:9:5",
+                  "src": "1485:9:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                     "typeString": "address[]"
@@ -185,11 +363,11 @@
               },
               {
                 "constant": false,
-                "id": 699,
+                "id": 1218,
                 "name": "proportions",
                 "nodeType": "VariableDeclaration",
-                "scope": 700,
-                "src": "707:20:5",
+                "scope": 1219,
+                "src": "1515:20:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -198,19 +376,19 @@
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 697,
+                    "id": 1216,
                     "name": "uint32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "707:6:5",
+                    "src": "1515:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
                     }
                   },
-                  "id": 698,
+                  "id": 1217,
                   "length": null,
                   "nodeType": "ArrayTypeName",
-                  "src": "707:8:5",
+                  "src": "1515:8:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_array$_t_uint32_$dyn_storage_ptr",
                     "typeString": "uint32[]"
@@ -222,21 +400,21 @@
             ],
             "name": "Hat",
             "nodeType": "StructDefinition",
-            "scope": 718,
-            "src": "656:78:5",
+            "scope": 1235,
+            "src": "1464:78:6",
             "visibility": "public"
           },
           {
             "canonicalName": "RTokenStructs.Account",
-            "id": 717,
+            "id": 1234,
             "members": [
               {
                 "constant": false,
-                "id": 702,
+                "id": 1221,
                 "name": "hatID",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "796:13:5",
+                "scope": 1234,
+                "src": "1604:13:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -244,10 +422,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 701,
+                  "id": 1220,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "796:7:5",
+                  "src": "1604:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -258,11 +436,11 @@
               },
               {
                 "constant": false,
-                "id": 704,
+                "id": 1223,
                 "name": "rAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "819:15:5",
+                "scope": 1234,
+                "src": "1627:15:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -270,10 +448,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 703,
+                  "id": 1222,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "819:7:5",
+                  "src": "1627:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -284,11 +462,11 @@
               },
               {
                 "constant": false,
-                "id": 706,
+                "id": 1225,
                 "name": "rInterest",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "844:17:5",
+                "scope": 1234,
+                "src": "1652:17:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -296,10 +474,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 705,
+                  "id": 1224,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "844:7:5",
+                  "src": "1652:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -310,11 +488,11 @@
               },
               {
                 "constant": false,
-                "id": 710,
+                "id": 1229,
                 "name": "lRecipients",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "871:39:5",
+                "scope": 1234,
+                "src": "1679:39:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -322,28 +500,28 @@
                   "typeString": "mapping(address => uint256)"
                 },
                 "typeName": {
-                  "id": 709,
+                  "id": 1228,
                   "keyType": {
-                    "id": 707,
+                    "id": 1226,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "879:7:5",
+                    "src": "1687:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
                   "nodeType": "Mapping",
-                  "src": "871:27:5",
+                  "src": "1679:27:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                     "typeString": "mapping(address => uint256)"
                   },
                   "valueType": {
-                    "id": 708,
+                    "id": 1227,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "890:7:5",
+                    "src": "1698:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -355,11 +533,11 @@
               },
               {
                 "constant": false,
-                "id": 712,
+                "id": 1231,
                 "name": "lDebt",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "920:13:5",
+                "scope": 1234,
+                "src": "1728:13:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -367,10 +545,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 711,
+                  "id": 1230,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "920:7:5",
+                  "src": "1728:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -381,11 +559,11 @@
               },
               {
                 "constant": false,
-                "id": 714,
+                "id": 1233,
                 "name": "sInternalAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "943:23:5",
+                "scope": 1234,
+                "src": "1751:23:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -393,41 +571,13 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 713,
+                  "id": 1232,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "943:7:5",
+                  "src": "1751:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
-              },
-              {
-                "constant": false,
-                "id": 716,
-                "name": "stats",
-                "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "976:18:5",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_AccountStats_$693_storage_ptr",
-                  "typeString": "struct RTokenStructs.AccountStats"
-                },
-                "typeName": {
-                  "contractScope": null,
-                  "id": 715,
-                  "name": "AccountStats",
-                  "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 693,
-                  "src": "976:12:5",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_AccountStats_$693_storage_ptr",
-                    "typeString": "struct RTokenStructs.AccountStats"
                   }
                 },
                 "value": null,
@@ -436,37 +586,37 @@
             ],
             "name": "Account",
             "nodeType": "StructDefinition",
-            "scope": 718,
-            "src": "771:230:5",
+            "scope": 1235,
+            "src": "1579:202:6",
             "visibility": "public"
           }
         ],
-        "scope": 719,
-        "src": "25:978:5"
+        "scope": 1236,
+        "src": "25:1758:6"
       }
     ],
-    "src": "0:1003:5"
+    "src": "0:1783:6"
   },
   "legacyAST": {
     "absolutePath": "/Users/khiga619/Sites/FlexDappHoodie/contracts/RTokenStructs.sol",
     "exportedSymbols": {
       "RTokenStructs": [
-        718
+        1235
       ]
     },
-    "id": 719,
+    "id": 1236,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 685,
+        "id": 1190,
         "literals": [
           "solidity",
           "^",
           "0.5",
-          ".0"
+          ".8"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:5"
+        "src": "0:23:6"
       },
       {
         "baseContracts": [],
@@ -474,24 +624,24 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 718,
+        "id": 1235,
         "linearizedBaseContracts": [
-          718
+          1235
         ],
         "name": "RTokenStructs",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "RTokenStructs.GlobalStats",
-            "id": 690,
+            "id": 1195,
             "members": [
               {
                 "constant": false,
-                "id": 687,
+                "id": 1192,
                 "name": "totalSupply",
                 "nodeType": "VariableDeclaration",
-                "scope": 690,
-                "src": "175:19:5",
+                "scope": 1195,
+                "src": "178:19:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -499,10 +649,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 686,
+                  "id": 1191,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "175:7:5",
+                  "src": "178:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -513,11 +663,11 @@
               },
               {
                 "constant": false,
-                "id": 689,
+                "id": 1194,
                 "name": "totalSavingsAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 690,
-                "src": "265:26:5",
+                "scope": 1195,
+                "src": "268:26:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -525,10 +675,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 688,
+                  "id": 1193,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "265:7:5",
+                  "src": "268:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -540,21 +690,21 @@
             ],
             "name": "GlobalStats",
             "nodeType": "StructDefinition",
-            "scope": 718,
-            "src": "95:203:5",
+            "scope": 1235,
+            "src": "98:203:6",
             "visibility": "public"
           },
           {
             "canonicalName": "RTokenStructs.AccountStats",
-            "id": 693,
+            "id": 1198,
             "members": [
               {
                 "constant": false,
-                "id": 692,
+                "id": 1197,
                 "name": "cumulativeInterest",
                 "nodeType": "VariableDeclaration",
-                "scope": 693,
-                "src": "334:26:5",
+                "scope": 1198,
+                "src": "448:26:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -562,10 +712,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 691,
+                  "id": 1196,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "334:7:5",
+                  "src": "448:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -577,21 +727,199 @@
             ],
             "name": "AccountStats",
             "nodeType": "StructDefinition",
-            "scope": 718,
-            "src": "304:63:5",
+            "scope": 1235,
+            "src": "352:129:6",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "RTokenStructs.HatStats",
+            "id": 1205,
+            "members": [
+              {
+                "constant": false,
+                "id": 1200,
+                "name": "useCount",
+                "nodeType": "VariableDeclaration",
+                "scope": 1205,
+                "src": "606:16:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1199,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "606:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 1202,
+                "name": "totalLoans",
+                "nodeType": "VariableDeclaration",
+                "scope": 1205,
+                "src": "696:18:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1201,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "696:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 1204,
+                "name": "totalSavings",
+                "nodeType": "VariableDeclaration",
+                "scope": 1205,
+                "src": "790:20:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1203,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "790:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "HatStats",
+            "nodeType": "StructDefinition",
+            "scope": 1235,
+            "src": "528:289:6",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "RTokenStructs.HatStatsStored",
+            "id": 1212,
+            "members": [
+              {
+                "constant": false,
+                "id": 1207,
+                "name": "useCount",
+                "nodeType": "VariableDeclaration",
+                "scope": 1212,
+                "src": "955:16:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1206,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "955:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 1209,
+                "name": "totalLoans",
+                "nodeType": "VariableDeclaration",
+                "scope": 1212,
+                "src": "1045:18:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1208,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1045:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 1211,
+                "name": "totalInternalSavings",
+                "nodeType": "VariableDeclaration",
+                "scope": 1212,
+                "src": "1139:28:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 1210,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1139:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "HatStatsStored",
+            "nodeType": "StructDefinition",
+            "scope": 1235,
+            "src": "871:303:6",
             "visibility": "public"
           },
           {
             "canonicalName": "RTokenStructs.Hat",
-            "id": 700,
+            "id": 1219,
             "members": [
               {
                 "constant": false,
-                "id": 696,
+                "id": 1215,
                 "name": "recipients",
                 "nodeType": "VariableDeclaration",
-                "scope": 700,
-                "src": "677:20:5",
+                "scope": 1219,
+                "src": "1485:20:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -600,20 +928,20 @@
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 694,
+                    "id": 1213,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "677:7:5",
+                    "src": "1485:7:6",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "id": 695,
+                  "id": 1214,
                   "length": null,
                   "nodeType": "ArrayTypeName",
-                  "src": "677:9:5",
+                  "src": "1485:9:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                     "typeString": "address[]"
@@ -624,11 +952,11 @@
               },
               {
                 "constant": false,
-                "id": 699,
+                "id": 1218,
                 "name": "proportions",
                 "nodeType": "VariableDeclaration",
-                "scope": 700,
-                "src": "707:20:5",
+                "scope": 1219,
+                "src": "1515:20:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -637,19 +965,19 @@
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 697,
+                    "id": 1216,
                     "name": "uint32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "707:6:5",
+                    "src": "1515:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
                     }
                   },
-                  "id": 698,
+                  "id": 1217,
                   "length": null,
                   "nodeType": "ArrayTypeName",
-                  "src": "707:8:5",
+                  "src": "1515:8:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_array$_t_uint32_$dyn_storage_ptr",
                     "typeString": "uint32[]"
@@ -661,21 +989,21 @@
             ],
             "name": "Hat",
             "nodeType": "StructDefinition",
-            "scope": 718,
-            "src": "656:78:5",
+            "scope": 1235,
+            "src": "1464:78:6",
             "visibility": "public"
           },
           {
             "canonicalName": "RTokenStructs.Account",
-            "id": 717,
+            "id": 1234,
             "members": [
               {
                 "constant": false,
-                "id": 702,
+                "id": 1221,
                 "name": "hatID",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "796:13:5",
+                "scope": 1234,
+                "src": "1604:13:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -683,10 +1011,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 701,
+                  "id": 1220,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "796:7:5",
+                  "src": "1604:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -697,11 +1025,11 @@
               },
               {
                 "constant": false,
-                "id": 704,
+                "id": 1223,
                 "name": "rAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "819:15:5",
+                "scope": 1234,
+                "src": "1627:15:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -709,10 +1037,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 703,
+                  "id": 1222,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "819:7:5",
+                  "src": "1627:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -723,11 +1051,11 @@
               },
               {
                 "constant": false,
-                "id": 706,
+                "id": 1225,
                 "name": "rInterest",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "844:17:5",
+                "scope": 1234,
+                "src": "1652:17:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -735,10 +1063,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 705,
+                  "id": 1224,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "844:7:5",
+                  "src": "1652:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -749,11 +1077,11 @@
               },
               {
                 "constant": false,
-                "id": 710,
+                "id": 1229,
                 "name": "lRecipients",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "871:39:5",
+                "scope": 1234,
+                "src": "1679:39:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -761,28 +1089,28 @@
                   "typeString": "mapping(address => uint256)"
                 },
                 "typeName": {
-                  "id": 709,
+                  "id": 1228,
                   "keyType": {
-                    "id": 707,
+                    "id": 1226,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "879:7:5",
+                    "src": "1687:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
                   "nodeType": "Mapping",
-                  "src": "871:27:5",
+                  "src": "1679:27:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                     "typeString": "mapping(address => uint256)"
                   },
                   "valueType": {
-                    "id": 708,
+                    "id": 1227,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "890:7:5",
+                    "src": "1698:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -794,11 +1122,11 @@
               },
               {
                 "constant": false,
-                "id": 712,
+                "id": 1231,
                 "name": "lDebt",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "920:13:5",
+                "scope": 1234,
+                "src": "1728:13:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -806,10 +1134,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 711,
+                  "id": 1230,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "920:7:5",
+                  "src": "1728:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -820,11 +1148,11 @@
               },
               {
                 "constant": false,
-                "id": 714,
+                "id": 1233,
                 "name": "sInternalAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "943:23:5",
+                "scope": 1234,
+                "src": "1751:23:6",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -832,41 +1160,13 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 713,
+                  "id": 1232,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "943:7:5",
+                  "src": "1751:7:6",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
-              },
-              {
-                "constant": false,
-                "id": 716,
-                "name": "stats",
-                "nodeType": "VariableDeclaration",
-                "scope": 717,
-                "src": "976:18:5",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_AccountStats_$693_storage_ptr",
-                  "typeString": "struct RTokenStructs.AccountStats"
-                },
-                "typeName": {
-                  "contractScope": null,
-                  "id": 715,
-                  "name": "AccountStats",
-                  "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 693,
-                  "src": "976:12:5",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_AccountStats_$693_storage_ptr",
-                    "typeString": "struct RTokenStructs.AccountStats"
                   }
                 },
                 "value": null,
@@ -875,16 +1175,16 @@
             ],
             "name": "Account",
             "nodeType": "StructDefinition",
-            "scope": 718,
-            "src": "771:230:5",
+            "scope": 1235,
+            "src": "1579:202:6",
             "visibility": "public"
           }
         ],
-        "scope": 719,
-        "src": "25:978:5"
+        "scope": 1236,
+        "src": "25:1758:6"
       }
     ],
-    "src": "0:1003:5"
+    "src": "0:1783:6"
   },
   "compiler": {
     "name": "solc",
@@ -892,7 +1192,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-10-10T07:52:04.372Z",
+  "updatedAt": "2019-10-22T06:43:55.411Z",
   "devdoc": {
     "methods": {}
   },
