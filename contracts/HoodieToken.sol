@@ -117,7 +117,7 @@ contract HoodieToken {
     user.numOfHoodie++;
     hoodieReceivers++;
     user.waitingNumber = waitingList.length;
-    waitingList.push(nextInLine)
+    waitingList.push(nextInLine);
     recipientNum++;
     emit IssuedFDH(nextInLine);
 
@@ -181,7 +181,7 @@ contract HoodieToken {
       isWaiting: true,
       hasDeposited: true
     });
-    waitingList.push(userAddress)
+    waitingList.push(userAddress);
     recipientNum++;
     return true;
   }
