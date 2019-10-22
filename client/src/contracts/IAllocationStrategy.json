@@ -82,30 +82,30 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"exchangeRateStored\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"underlying\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"redeemAmount\",\"type\":\"uint256\"}],\"name\":\"redeemUnderlying\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"accrueInterest\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"investAmount\",\"type\":\"uint256\"}],\"name\":\"investUnderlying\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/khiga619/Sites/FlexDappHoodie/contracts/IAllocationStrategy.sol\":\"IAllocationStrategy\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/khiga619/Sites/FlexDappHoodie/contracts/IAllocationStrategy.sol\":{\"keccak256\":\"0x493629978020bbc36476beb97f453359f2b2d3377cb77d4d1fdfa29f6fa8cb1f\",\"urls\":[\"bzzr://3ff71e0563bb2002dd49b96f74e246ab6e5e6e409f7e0c893c5f868d286305d9\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"exchangeRateStored\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"underlying\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"redeemAmount\",\"type\":\"uint256\"}],\"name\":\"redeemUnderlying\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"accrueInterest\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"investAmount\",\"type\":\"uint256\"}],\"name\":\"investUnderlying\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"accrueInterest()\":{\"details\":\"This should calculates interest accrued from the last checkpointed     block up to the current block and writes new checkpoint to storage.\",\"return\":\"bool success(true) or failure(false)\"},\"exchangeRateStored()\":{\"return\":\"uint256 Calculated exchange rate scaled by 1e18\"},\"investUnderlying(uint256)\":{\"details\":\"Interst shall be accrued\",\"params\":{\"investAmount\":\"The amount of the underlying asset to supply\"},\"return\":\"uint256 Amount of saving assets created\"},\"redeemUnderlying(uint256)\":{\"details\":\"Interst shall be accrued\",\"params\":{\"redeemAmount\":\"The amount of underlying to redeem\"},\"return\":\"uint256 Amount of saving assets burned\"},\"underlying()\":{\"return\":\"address Underlying asset address\"}}},\"userdoc\":{\"methods\":{\"accrueInterest()\":{\"notice\":\"Applies accrued interest to all savings\"},\"exchangeRateStored()\":{\"notice\":\"Calculates the exchange rate from the underlying to the saving assets\"},\"investUnderlying(uint256)\":{\"notice\":\"Sender supplies underlying assets into the market and receives saving assets in exchange\"},\"redeemUnderlying(uint256)\":{\"notice\":\"Sender redeems saving assets in exchange for a specified amount of underlying asset\"},\"underlying()\":{\"notice\":\"Underlying asset for the strategy\"}},\"notice\":\"Allocation strategy for assets.        - It invests the underlying assets into some yield generating contracts,          usually lending contracts, in return it gets new assets aka. saving assets.        - Sainv assets can be redeemed back to the underlying assets plus interest any time.\"}},\"settings\":{\"compilationTarget\":{\"/Users/khiga619/Sites/FlexDappHoodie/contracts/IAllocationStrategy.sol\":\"IAllocationStrategy\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/khiga619/Sites/FlexDappHoodie/contracts/IAllocationStrategy.sol\":{\"keccak256\":\"0x988f8199fc9a1d533ef4244c2e1339ea3200618791f79e7d40959161719b6c9b\",\"urls\":[\"bzzr://c8c69393afc53919939e89657ff195ff952d5ac4d1388dbd18b745e56eee46ec\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.5.0;\n\n/*\n * @notice Allocation strategy for assets.\n *         - It invests the underlying assets into some yield generating contracts,\n *           usually lending contracts, in return it gets new assets aka. saving assets.\n *         - Sainv assets can be redeemed back to the underlying assets plus interest any time.\n */\ninterface IAllocationStrategy {\n\n    /*\n     * @notice Underlying asset for the strategy\n     * @return address Underlying asset address\n     */\n    function underlying() external view returns (address);\n\n    /*\n     * @notice Calculates the exchange rate from the underlying to the saving assets\n     * @return uint256 Calculated exchange rate scaled by 1e18\n     */\n    function exchangeRateStored() external view returns (uint256);\n\n    /*\n      * @notice Applies accrued interest to all savings\n      * @dev This should calculates interest accrued from the last checkpointed\n      *      block up to the current block and writes new checkpoint to storage.\n      * @return bool success(true) or failure(false)\n      */\n    function accrueInterest() external returns (bool);\n\n    /*\n     * @notice Sender supplies underlying assets into the market and receives saving assets in exchange\n     * @dev Interst shall be accrued\n     * @param investAmount The amount of the underlying asset to supply\n     * @return uint256 Amount of saving assets created\n     */\n    function investUnderlying(uint256 investAmount) external returns (uint256);\n\n    /*\n     * @notice Sender redeems saving assets in exchange for a specified amount of underlying asset\n     * @dev Interst shall be accrued\n     * @param redeemAmount The amount of underlying to redeem\n     * @return uint256 Amount of saving assets burned\n     */\n    function redeemUnderlying(uint256 redeemAmount) external returns (uint256);\n\n}",
+  "source": "pragma solidity ^0.5.8;\n\n/**\n * @notice Allocation strategy for assets.\n *         - It invests the underlying assets into some yield generating contracts,\n *           usually lending contracts, in return it gets new assets aka. saving assets.\n *         - Sainv assets can be redeemed back to the underlying assets plus interest any time.\n */\ninterface IAllocationStrategy {\n\n    /**\n     * @notice Underlying asset for the strategy\n     * @return address Underlying asset address\n     */\n    function underlying() external view returns (address);\n\n    /**\n     * @notice Calculates the exchange rate from the underlying to the saving assets\n     * @return uint256 Calculated exchange rate scaled by 1e18\n     */\n    function exchangeRateStored() external view returns (uint256);\n\n    /**\n      * @notice Applies accrued interest to all savings\n      * @dev This should calculates interest accrued from the last checkpointed\n      *      block up to the current block and writes new checkpoint to storage.\n      * @return bool success(true) or failure(false)\n      */\n    function accrueInterest() external returns (bool);\n\n    /**\n     * @notice Sender supplies underlying assets into the market and receives saving assets in exchange\n     * @dev Interst shall be accrued\n     * @param investAmount The amount of the underlying asset to supply\n     * @return uint256 Amount of saving assets created\n     */\n    function investUnderlying(uint256 investAmount) external returns (uint256);\n\n    /**\n     * @notice Sender redeems saving assets in exchange for a specified amount of underlying asset\n     * @dev Interst shall be accrued\n     * @param redeemAmount The amount of underlying to redeem\n     * @return uint256 Amount of saving assets burned\n     */\n    function redeemUnderlying(uint256 redeemAmount) external returns (uint256);\n\n}",
   "sourcePath": "/Users/khiga619/Sites/FlexDappHoodie/contracts/IAllocationStrategy.sol",
   "ast": {
     "absolutePath": "/Users/khiga619/Sites/FlexDappHoodie/contracts/IAllocationStrategy.sol",
     "exportedSymbols": {
       "IAllocationStrategy": [
-        349
+        771
       ]
     },
-    "id": 350,
+    "id": 772,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 319,
+        "id": 741,
         "literals": [
           "solidity",
           "^",
           "0.5",
-          ".0"
+          ".8"
         ],
         "nodeType": "PragmaDirective",
         "src": "0:23:1"
@@ -114,41 +114,41 @@
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "interface",
-        "documentation": null,
+        "documentation": "@notice Allocation strategy for assets.\n        - It invests the underlying assets into some yield generating contracts,\n          usually lending contracts, in return it gets new assets aka. saving assets.\n        - Sainv assets can be redeemed back to the underlying assets plus interest any time.",
         "fullyImplemented": false,
-        "id": 349,
+        "id": 771,
         "linearizedBaseContracts": [
-          349
+          771
         ],
         "name": "IAllocationStrategy",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": null,
-            "documentation": null,
-            "id": 324,
+            "documentation": "@notice Underlying asset for the strategy\n@return address Underlying asset address",
+            "id": 746,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "underlying",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 320,
+              "id": 742,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "512:2:1"
+              "src": "514:2:1"
             },
             "returnParameters": {
-              "id": 323,
+              "id": 745,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 322,
+                  "id": 744,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 324,
-                  "src": "538:7:1",
+                  "scope": 746,
+                  "src": "540:7:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -156,10 +156,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 321,
+                    "id": 743,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "538:7:1",
+                    "src": "540:7:1",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -170,40 +170,40 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "537:9:1"
+              "src": "539:9:1"
             },
-            "scope": 349,
-            "src": "493:54:1",
+            "scope": 771,
+            "src": "495:54:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
-            "documentation": null,
-            "id": 329,
+            "documentation": "@notice Calculates the exchange rate from the underlying to the saving assets\n@return uint256 Calculated exchange rate scaled by 1e18",
+            "id": 751,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "exchangeRateStored",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 325,
+              "id": 747,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "743:2:1"
+              "src": "746:2:1"
             },
             "returnParameters": {
-              "id": 328,
+              "id": 750,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 327,
+                  "id": 749,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 329,
-                  "src": "769:7:1",
+                  "scope": 751,
+                  "src": "772:7:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -211,10 +211,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 326,
+                    "id": 748,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "769:7:1",
+                    "src": "772:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -224,40 +224,40 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "768:9:1"
+              "src": "771:9:1"
             },
-            "scope": 349,
-            "src": "716:62:1",
+            "scope": 771,
+            "src": "719:62:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
-            "documentation": null,
-            "id": 334,
+            "documentation": "@notice Applies accrued interest to all savings\n@dev This should calculates interest accrued from the last checkpointed\n     block up to the current block and writes new checkpoint to storage.\n@return bool success(true) or failure(false)",
+            "id": 756,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "accrueInterest",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 330,
+              "id": 752,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1093:2:1"
+              "src": "1097:2:1"
             },
             "returnParameters": {
-              "id": 333,
+              "id": 755,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 332,
+                  "id": 754,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 334,
-                  "src": "1114:4:1",
+                  "scope": 756,
+                  "src": "1118:4:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -265,10 +265,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 331,
+                    "id": 753,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1114:4:1",
+                    "src": "1118:4:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -278,34 +278,34 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1113:6:1"
+              "src": "1117:6:1"
             },
-            "scope": 349,
-            "src": "1070:50:1",
+            "scope": 771,
+            "src": "1074:50:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
-            "documentation": null,
-            "id": 341,
+            "documentation": "@notice Sender supplies underlying assets into the market and receives saving assets in exchange\n@dev Interst shall be accrued\n@param investAmount The amount of the underlying asset to supply\n@return uint256 Amount of saving assets created",
+            "id": 763,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "investUnderlying",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 337,
+              "id": 759,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 336,
+                  "id": 758,
                   "name": "investAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 341,
-                  "src": "1435:20:1",
+                  "scope": 763,
+                  "src": "1440:20:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -313,10 +313,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 335,
+                    "id": 757,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1435:7:1",
+                    "src": "1440:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -326,19 +326,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1434:22:1"
+              "src": "1439:22:1"
             },
             "returnParameters": {
-              "id": 340,
+              "id": 762,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 339,
+                  "id": 761,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 341,
-                  "src": "1475:7:1",
+                  "scope": 763,
+                  "src": "1480:7:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -346,10 +346,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 338,
+                    "id": 760,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1475:7:1",
+                    "src": "1480:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -359,34 +359,34 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1474:9:1"
+              "src": "1479:9:1"
             },
-            "scope": 349,
-            "src": "1409:75:1",
+            "scope": 771,
+            "src": "1414:75:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
-            "documentation": null,
-            "id": 348,
+            "documentation": "@notice Sender redeems saving assets in exchange for a specified amount of underlying asset\n@dev Interst shall be accrued\n@param redeemAmount The amount of underlying to redeem\n@return uint256 Amount of saving assets burned",
+            "id": 770,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "redeemUnderlying",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 344,
+              "id": 766,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 343,
+                  "id": 765,
                   "name": "redeemAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 348,
-                  "src": "1783:20:1",
+                  "scope": 770,
+                  "src": "1789:20:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -394,10 +394,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 342,
+                    "id": 764,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1783:7:1",
+                    "src": "1789:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -407,19 +407,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1782:22:1"
+              "src": "1788:22:1"
             },
             "returnParameters": {
-              "id": 347,
+              "id": 769,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 346,
+                  "id": 768,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 348,
-                  "src": "1823:7:1",
+                  "scope": 770,
+                  "src": "1829:7:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -427,10 +427,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 345,
+                    "id": 767,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1823:7:1",
+                    "src": "1829:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -440,38 +440,38 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1822:9:1"
+              "src": "1828:9:1"
             },
-            "scope": 349,
-            "src": "1757:75:1",
+            "scope": 771,
+            "src": "1763:75:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 350,
-        "src": "344:1491:1"
+        "scope": 772,
+        "src": "345:1496:1"
       }
     ],
-    "src": "0:1835:1"
+    "src": "0:1841:1"
   },
   "legacyAST": {
     "absolutePath": "/Users/khiga619/Sites/FlexDappHoodie/contracts/IAllocationStrategy.sol",
     "exportedSymbols": {
       "IAllocationStrategy": [
-        349
+        771
       ]
     },
-    "id": 350,
+    "id": 772,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 319,
+        "id": 741,
         "literals": [
           "solidity",
           "^",
           "0.5",
-          ".0"
+          ".8"
         ],
         "nodeType": "PragmaDirective",
         "src": "0:23:1"
@@ -480,41 +480,41 @@
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "interface",
-        "documentation": null,
+        "documentation": "@notice Allocation strategy for assets.\n        - It invests the underlying assets into some yield generating contracts,\n          usually lending contracts, in return it gets new assets aka. saving assets.\n        - Sainv assets can be redeemed back to the underlying assets plus interest any time.",
         "fullyImplemented": false,
-        "id": 349,
+        "id": 771,
         "linearizedBaseContracts": [
-          349
+          771
         ],
         "name": "IAllocationStrategy",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": null,
-            "documentation": null,
-            "id": 324,
+            "documentation": "@notice Underlying asset for the strategy\n@return address Underlying asset address",
+            "id": 746,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "underlying",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 320,
+              "id": 742,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "512:2:1"
+              "src": "514:2:1"
             },
             "returnParameters": {
-              "id": 323,
+              "id": 745,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 322,
+                  "id": 744,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 324,
-                  "src": "538:7:1",
+                  "scope": 746,
+                  "src": "540:7:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -522,10 +522,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 321,
+                    "id": 743,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "538:7:1",
+                    "src": "540:7:1",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -536,40 +536,40 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "537:9:1"
+              "src": "539:9:1"
             },
-            "scope": 349,
-            "src": "493:54:1",
+            "scope": 771,
+            "src": "495:54:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
-            "documentation": null,
-            "id": 329,
+            "documentation": "@notice Calculates the exchange rate from the underlying to the saving assets\n@return uint256 Calculated exchange rate scaled by 1e18",
+            "id": 751,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "exchangeRateStored",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 325,
+              "id": 747,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "743:2:1"
+              "src": "746:2:1"
             },
             "returnParameters": {
-              "id": 328,
+              "id": 750,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 327,
+                  "id": 749,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 329,
-                  "src": "769:7:1",
+                  "scope": 751,
+                  "src": "772:7:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -577,10 +577,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 326,
+                    "id": 748,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "769:7:1",
+                    "src": "772:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -590,40 +590,40 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "768:9:1"
+              "src": "771:9:1"
             },
-            "scope": 349,
-            "src": "716:62:1",
+            "scope": 771,
+            "src": "719:62:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
-            "documentation": null,
-            "id": 334,
+            "documentation": "@notice Applies accrued interest to all savings\n@dev This should calculates interest accrued from the last checkpointed\n     block up to the current block and writes new checkpoint to storage.\n@return bool success(true) or failure(false)",
+            "id": 756,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "accrueInterest",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 330,
+              "id": 752,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1093:2:1"
+              "src": "1097:2:1"
             },
             "returnParameters": {
-              "id": 333,
+              "id": 755,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 332,
+                  "id": 754,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 334,
-                  "src": "1114:4:1",
+                  "scope": 756,
+                  "src": "1118:4:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -631,10 +631,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 331,
+                    "id": 753,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1114:4:1",
+                    "src": "1118:4:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -644,34 +644,34 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1113:6:1"
+              "src": "1117:6:1"
             },
-            "scope": 349,
-            "src": "1070:50:1",
+            "scope": 771,
+            "src": "1074:50:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
-            "documentation": null,
-            "id": 341,
+            "documentation": "@notice Sender supplies underlying assets into the market and receives saving assets in exchange\n@dev Interst shall be accrued\n@param investAmount The amount of the underlying asset to supply\n@return uint256 Amount of saving assets created",
+            "id": 763,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "investUnderlying",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 337,
+              "id": 759,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 336,
+                  "id": 758,
                   "name": "investAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 341,
-                  "src": "1435:20:1",
+                  "scope": 763,
+                  "src": "1440:20:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -679,10 +679,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 335,
+                    "id": 757,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1435:7:1",
+                    "src": "1440:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -692,19 +692,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1434:22:1"
+              "src": "1439:22:1"
             },
             "returnParameters": {
-              "id": 340,
+              "id": 762,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 339,
+                  "id": 761,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 341,
-                  "src": "1475:7:1",
+                  "scope": 763,
+                  "src": "1480:7:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -712,10 +712,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 338,
+                    "id": 760,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1475:7:1",
+                    "src": "1480:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -725,34 +725,34 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1474:9:1"
+              "src": "1479:9:1"
             },
-            "scope": 349,
-            "src": "1409:75:1",
+            "scope": 771,
+            "src": "1414:75:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
-            "documentation": null,
-            "id": 348,
+            "documentation": "@notice Sender redeems saving assets in exchange for a specified amount of underlying asset\n@dev Interst shall be accrued\n@param redeemAmount The amount of underlying to redeem\n@return uint256 Amount of saving assets burned",
+            "id": 770,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "redeemUnderlying",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 344,
+              "id": 766,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 343,
+                  "id": 765,
                   "name": "redeemAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 348,
-                  "src": "1783:20:1",
+                  "scope": 770,
+                  "src": "1789:20:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -760,10 +760,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 342,
+                    "id": 764,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1783:7:1",
+                    "src": "1789:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -773,19 +773,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1782:22:1"
+              "src": "1788:22:1"
             },
             "returnParameters": {
-              "id": 347,
+              "id": 769,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 346,
+                  "id": 768,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 348,
-                  "src": "1823:7:1",
+                  "scope": 770,
+                  "src": "1829:7:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -793,10 +793,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 345,
+                    "id": 767,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1823:7:1",
+                    "src": "1829:7:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -806,20 +806,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1822:9:1"
+              "src": "1828:9:1"
             },
-            "scope": 349,
-            "src": "1757:75:1",
+            "scope": 771,
+            "src": "1763:75:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 350,
-        "src": "344:1491:1"
+        "scope": 772,
+        "src": "345:1496:1"
       }
     ],
-    "src": "0:1835:1"
+    "src": "0:1841:1"
   },
   "compiler": {
     "name": "solc",
@@ -827,11 +827,53 @@
   },
   "networks": {},
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-10-10T07:52:04.366Z",
+  "updatedAt": "2019-10-22T06:43:55.398Z",
   "devdoc": {
-    "methods": {}
+    "methods": {
+      "accrueInterest()": {
+        "details": "This should calculates interest accrued from the last checkpointed     block up to the current block and writes new checkpoint to storage.",
+        "return": "bool success(true) or failure(false)"
+      },
+      "exchangeRateStored()": {
+        "return": "uint256 Calculated exchange rate scaled by 1e18"
+      },
+      "investUnderlying(uint256)": {
+        "details": "Interst shall be accrued",
+        "params": {
+          "investAmount": "The amount of the underlying asset to supply"
+        },
+        "return": "uint256 Amount of saving assets created"
+      },
+      "redeemUnderlying(uint256)": {
+        "details": "Interst shall be accrued",
+        "params": {
+          "redeemAmount": "The amount of underlying to redeem"
+        },
+        "return": "uint256 Amount of saving assets burned"
+      },
+      "underlying()": {
+        "return": "address Underlying asset address"
+      }
+    }
   },
   "userdoc": {
-    "methods": {}
+    "methods": {
+      "accrueInterest()": {
+        "notice": "Applies accrued interest to all savings"
+      },
+      "exchangeRateStored()": {
+        "notice": "Calculates the exchange rate from the underlying to the saving assets"
+      },
+      "investUnderlying(uint256)": {
+        "notice": "Sender supplies underlying assets into the market and receives saving assets in exchange"
+      },
+      "redeemUnderlying(uint256)": {
+        "notice": "Sender redeems saving assets in exchange for a specified amount of underlying asset"
+      },
+      "underlying()": {
+        "notice": "Underlying asset for the strategy"
+      }
+    },
+    "notice": "Allocation strategy for assets.        - It invests the underlying assets into some yield generating contracts,          usually lending contracts, in return it gets new assets aka. saving assets.        - Sainv assets can be redeemed back to the underlying assets plus interest any time."
   }
 }

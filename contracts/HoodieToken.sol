@@ -49,8 +49,8 @@ contract HoodieToken {
     recipients.push(owner);
     proportions.push(100);
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
-    rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A); // before
-    // rDAIContract = IRToken(0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578); // latest
+    // rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A); // before   CAUTION!! change the frontend code too!!!
+    rDAIContract = IRToken(0x6AA5c6aB94403Bdbbf74f21607D46Be631E6CcC5); // latest
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
@@ -123,7 +123,6 @@ contract HoodieToken {
     address[] memory recipientsFromUser;
     uint32[] memory proportionsFromUser;
     (userHatId, recipientsFromUser, proportionsFromUser) = rDAIContract.getHatByAddress(nextInLine);
-    // (userHatId,,) = rDAIContract.getHatByAddress(nextInLine);
     address recipientFromUser = recipientsFromUser[0];
     uint32 proportionFromUser = proportionsFromUser[0];
 
@@ -135,7 +134,9 @@ contract HoodieToken {
     uint256 rDaiBalanceOfUser = rDAIContract.balanceOf(nextInLine);
     require(rDaiBalanceOfUser >= user.depositedAmount, "user's rDAI balance is smaller than the hoodie contract's");
 
-    // 3. invoke payInterest() to pay the rDAI(interest) to FlexDapps account
+    // 3. if there are more than 2 users who deposited the same amount of DAI?
+
+    // 4. invoke payInterest() to pay the rDAI(interest) to FlexDapps account
     require(rDAIContract.payInterest(owner), "failded payInterest()");
 
     // user goes to the next round waiting list and is added to the next round waiting list

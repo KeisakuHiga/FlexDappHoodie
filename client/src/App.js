@@ -62,8 +62,8 @@ class App extends Component {
         
       // Create DAI contract instance.
       const rDaiABI = RDaiAbi;
-      const addressOfRDaiContract = '0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A'; // before
-      // const addressOfRDaiContract = '0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578'; // latest
+      // const addressOfRDaiContract = '0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A'; // before
+      const addressOfRDaiContract = '0x6AA5c6aB94403Bdbbf74f21607D46Be631E6CcC5'; // latest
       const rDaiInstance = new web3.eth.Contract(rDaiABI, addressOfRDaiContract);
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
@@ -83,8 +83,6 @@ class App extends Component {
     const contract = hoodieInstance.methods;
     const hoodieAddress = hoodieInstance.options.address;
     const owner = await contract.owner().call();
-    const proportions = await contract.proportions(0).call();
-    console.log(proportions)
     const hatID = await contract.hatID().call();
     const nextInLine = await contract.nextInLine().call();
     const mostDeposited = await contract.mostDeposited().call();
@@ -116,27 +114,29 @@ class App extends Component {
     // rDai
     const rDai = rDaiInstance.methods;
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
-    const getHatByID = await rDai.getHatByID(hatID).call();
-    console.log(getHatByID)
-    const getHatByAddress = await rDai.getHatByAddress(accounts[0]).call()
-    // .then(user => { return user.proportions[0] })
-    // .catch(err => { return false })
-    console.log(getHatByAddress)
-    // console.log(web3.utils.fromWei(receivedSavingsOf, 'ether'))
     const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
-
+    console.log(generatedInterestAmt)
+    const receivedSavingsOf = await rDai.receivedSavingsOf(owner).call()
+    console.log('receivedSavingsOf', web3.utils.fromWei(receivedSavingsOf, 'ether'))
+    const receivedLoanOf = await rDai.receivedLoanOf(owner).call()
+    console.log('receivedLoanOf', web3.utils.fromWei(receivedLoanOf, 'ether'))
+    console.log('difference: ', receivedSavingsOf - receivedLoanOf)
+    
+    const balanceOf = await rDai.balanceOf(accounts[0]).call()
+    console.log('balanceOf', web3.utils.fromWei(balanceOf, 'ether'))
     this.setState({ balanceOfDai, balanceOfRDai, generatedInterestAmt, allowance, });
   };
 
   handleApprove = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, daiInstance, rDaiInstance, accounts, balanceOfDai, hatID }  = this.state
+    const { hoodieInstance, daiInstance, rDaiInstance, accounts, balanceOfDai, hatID, owner }  = this.state
     // const BNMax = new BigNumber(2).pow(256).minus(1)
     const hoodieAddress = hoodieInstance.options.address
     try {
       await daiInstance.methods.approve(hoodieAddress, balanceOfDai).send({ from: accounts[0] });
       this.setState({ userApproved: true })
       await rDaiInstance.methods.changeHat(hatID).send({ from: accounts[0] });
+      // await rDaiInstance.methods.payInterest(owner).send({ from: accounts[0] });
       
       
     } catch (err) {
