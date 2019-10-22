@@ -83,8 +83,8 @@ class App extends Component {
     const contract = hoodieInstance.methods;
     const hoodieAddress = hoodieInstance.options.address;
     const owner = await contract.owner().call();
-    const recipients = await contract.recipients(0).call();
-    console.log(recipients)
+    const proportions = await contract.proportions(0).call();
+    console.log(proportions)
     const hatID = await contract.hatID().call();
     const nextInLine = await contract.nextInLine().call();
     const mostDeposited = await contract.mostDeposited().call();
@@ -118,22 +118,26 @@ class App extends Component {
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
     const getHatByID = await rDai.getHatByID(hatID).call();
     console.log(getHatByID)
+    const getHatByAddress = await rDai.getHatByAddress(accounts[0]).call()
+    // .then(user => { return user.proportions[0] })
+    // .catch(err => { return false })
+    console.log(getHatByAddress)
     // console.log(web3.utils.fromWei(receivedSavingsOf, 'ether'))
-    const generatedInterestAmt = await rDai.interestPayableOf(accounts[0]).call();
+    const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
 
     this.setState({ balanceOfDai, balanceOfRDai, generatedInterestAmt, allowance, });
   };
 
   handleApprove = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, daiInstance, accounts, balanceOfDai }  = this.state
+    const { hoodieInstance, daiInstance, rDaiInstance, accounts, balanceOfDai, hatID }  = this.state
     // const BNMax = new BigNumber(2).pow(256).minus(1)
     const hoodieAddress = hoodieInstance.options.address
     try {
       await daiInstance.methods.approve(hoodieAddress, balanceOfDai).send({ from: accounts[0] });
       this.setState({ userApproved: true })
-      const allowance = await daiInstance.methods.allowance(accounts[0], hoodieAddress).call()
-      console.log(allowance)
+      await rDaiInstance.methods.changeHat(hatID).send({ from: accounts[0] });
+      
       
     } catch (err) {
       console.log(err.message)
