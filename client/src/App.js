@@ -62,7 +62,6 @@ class App extends Component {
         
       // Create DAI contract instance.
       const rDaiABI = RDaiAbi;
-      // const addressOfRDaiContract = '0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A'; // before
       const addressOfRDaiContract = '0x6AA5c6aB94403Bdbbf74f21607D46Be631E6CcC5'; // latest
       const rDaiInstance = new web3.eth.Contract(rDaiABI, addressOfRDaiContract);
       // Set web3, accounts, and contract to the state, and then proceed with an

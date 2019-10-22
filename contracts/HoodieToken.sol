@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-// import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./IDai.sol";
 import "./IRToken.sol";
 
@@ -8,8 +7,8 @@ contract HoodieToken {
   using SafeMath for uint256;
 
   struct User {
+    uint256 waitingNumber;
     uint256 numOfHoodie;
-    uint256 rNumber;
     uint256 depositedAmount;
     bool isWaiting;
     bool hasDeposited;
@@ -29,28 +28,23 @@ contract HoodieToken {
   uint256 public minimumDepositAmount = 1 * 10 ** 18; // for test
   uint256 public hoodieCost = 20 * 10 ** 18;
 
-  uint256 public waitingUserNumber = 0;
-  uint256 public nextWaitingUserNum = 0;
-  uint256 public roundNumber = 0;
   uint256 public hoodieReceivers = 0;
-  uint256 public mostDeposited = 0;
-  address public nextInLine = address(0);
+  uint256 public recipientNum = 0;
+  address public nextInLine = waitingList[recipientNum];
   address[] public waitingList;
   mapping(address => User) public users;
 
-  event UserPushedIntoWaitingList(address user, uint256 depositedAmount, uint256 roundNumber);
-  event IssuedFDH(address recipientOfHoodie);
-  event NewRoundStarted(uint256 newRountNumber);
+  event UserPushedIntoWaitingList(address user, uint256 depositedAmount);
   event IncreasedDeposit(address user, uint256 newDepositedAmount);
   event RedeemedRDai(address user, uint256 newDepositedAmount);
+  event IssuedFDH(address recipient);
 
   constructor() public {
     owner = msg.sender;
     recipients.push(owner);
     proportions.push(100);
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
-    // rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A); // before   CAUTION!! change the frontend code too!!!
-    rDAIContract = IRToken(0x6AA5c6aB94403Bdbbf74f21607D46Be631E6CcC5); // latest
+    rDAIContract = IRToken(0x6AA5c6aB94403Bdbbf74f21607D46Be631E6CcC5);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
@@ -66,11 +60,8 @@ contract HoodieToken {
     require(_mintRDai(depositAmount), "mining rDAI failed");
     // add user to waitingList
     require(_addUserToWaitingList(msg.sender, depositAmount), "failded to add the user again to the waiting list");
-    if (depositAmount > mostDeposited) {
-      mostDeposited = depositAmount;
-      nextInLine = msg.sender;
-    }
-    emit UserPushedIntoWaitingList(msg.sender, depositAmount, users[msg.sender].rNumber);
+
+    emit UserPushedIntoWaitingList(msg.sender, depositAmount);
     return true;
   }
 
@@ -81,30 +72,9 @@ contract HoodieToken {
     User storage user = users[msg.sender];
     user.depositedAmount = user.depositedAmount.add(topUpAmount);
 
-    // update the mostDeposted
-    if (user.depositedAmount > mostDeposited) {
-      mostDeposited = user.depositedAmount;
-      nextInLine = msg.sender;
-    }
-
     // user can be back to the waiting list when the depositedAmount is more than the minimumDepositAmount
     if(user.depositedAmount >= minimumDepositAmount && !user.isWaiting) {
       user.isWaiting = true;
-      if (user.depositedAmount > mostDeposited) {
-        mostDeposited = user.depositedAmount;
-        nextInLine = msg.sender;
-      }
-
-      // if the round number was updated while a user was away from the waiting list,
-      // the user's rNumber and the waitingUserNumber should be updated as well
-      if(user.rNumber < roundNumber) {
-        user.rNumber = roundNumber;
-        waitingUserNumber++;
-      } else if (user.rNumber == roundNumber) {
-        waitingUserNumber++;
-      } else {
-        nextWaitingUserNum++;
-      }
     }
     emit IncreasedDeposit(msg.sender, user.depositedAmount);
     return true;
@@ -118,6 +88,12 @@ contract HoodieToken {
     // require(rDAIContract.interestPayableOf(owner) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
     User storage user = users[nextInLine];
+    // 0. user isWaiting ture?
+    while(!user.isWaiting) {
+      recipientNum++;
+      user = users[nextInLine];
+    }
+
     // 1. check whether or not a user has the hoodie hat
     uint256 userHatId;
     address[] memory recipientsFromUser;
@@ -134,68 +110,16 @@ contract HoodieToken {
     uint256 rDaiBalanceOfUser = rDAIContract.balanceOf(nextInLine);
     require(rDaiBalanceOfUser >= user.depositedAmount, "user's rDAI balance is smaller than the hoodie contract's");
 
-    // 3. if there are more than 2 users who deposited the same amount of DAI?
-
-    // 4. invoke payInterest() to pay the rDAI(interest) to FlexDapps account
+    // 3. invoke payInterest() to pay the rDAI(interest) to FlexDapps account
     require(rDAIContract.payInterest(owner), "failded payInterest()");
 
     // user goes to the next round waiting list and is added to the next round waiting list
     user.numOfHoodie++;
-    user.rNumber++;
-    nextWaitingUserNum++;
     hoodieReceivers++;
+    user.waitingNumber = waitingList.length;
+    waitingList.push(nextInLine)
+    recipientNum++;
     emit IssuedFDH(nextInLine);
-
-    // OFF CHAIN BACKEND LOGIC
-    // update nextInLine to be the person who has deposited the next most
-    // update mostDeposited to be equal to the deposit of nextInLine
-    // uint256 _max = 0;
-    // address _next = address(0);
-
-    // for (uint256 i = 0; i < waitingList.length; i++) {
-    //   if (
-    //       users[waitingList[i]].rNumber == roundNumber &&
-    //       users[waitingList[i]].isWaiting &&
-    //       _max < users[waitingList[i]].depositedAmount
-    //     )
-    //     {
-    //       _max = users[waitingList[i]].depositedAmount;
-    //       _next = waitingList[i];
-    //     } else {
-    //       _max = users[waitingList[i]].depositedAmount;
-    //       _next = waitingList[i];
-    //     }
-    // }
-    // mostDeposited = _max;
-    // nextInLine = _next;
-    // hoodieReceivers++;
-
-    // update round number when the number of hoodie receivers is equal to the waiting user number
-    if (hoodieReceivers == waitingUserNumber) {
-      roundNumber++;
-      hoodieReceivers = 0;
-      waitingUserNumber = nextWaitingUserNum;
-      emit NewRoundStarted(roundNumber);
-
-    //   // find the next receiver in the new round
-    //   for (uint i = 0; i < waitingList.length; i++) {
-    //     if (
-    //         users[waitingList[i]].rNumber == roundNumber &&
-    //         users[waitingList[i]].isWaiting &&
-    //         _max < users[waitingList[i]].depositedAmount
-    //       )
-    //       {
-    //         _max = users[waitingList[i]].depositedAmount;
-    //         _next = waitingList[i];
-    //       } else {
-    //         _max = users[waitingList[i]].depositedAmount;
-    //         _next = waitingList[i];
-    //       }
-    //   }
-    //   mostDeposited = _max;
-    //   nextInLine = _next;
-    //   hoodieReceivers++;
-    }
 
     return true;
   }
@@ -216,25 +140,10 @@ contract HoodieToken {
     // if user's depositedAmount become below than the minimumDepositAmount, it will be removed from the waiting list
     if (user.depositedAmount < minimumDepositAmount) {
       user.isWaiting = false;
-
-      if(user.rNumber == roundNumber) {
-      // update the waiting user number of the current waiting list
-        waitingUserNumber--;
-      } else if (user.rNumber > roundNumber) {
-      // update the waiting user number of the next waiting list
-        nextWaitingUserNum--;
-      }
     }
-    /// if this user was nextInLine, we may need to set a new nextInLine
     emit RedeemedRDai(msg.sender, user.depositedAmount);
     return true;
   }
-
-  // function updateNextInLine() public returns (bool) {
-  //   if(
-
-  //   )
-  // }
 
   function switchDaiContractInstance(address daiContractAddress) public returns(bool) {
     require(msg.sender == owner, "only owner can invoke this function");
@@ -265,18 +174,15 @@ contract HoodieToken {
   }
 
   function _addUserToWaitingList(address userAddress, uint256 depositAmount) internal returns(bool) {
-    User memory _oldUser = users[userAddress];
     users[userAddress] = User({
+      waitingNumber: recipientNum,
       numOfHoodie: 0,
       depositedAmount: depositAmount,
-      rNumber: roundNumber,
       isWaiting: true,
       hasDeposited: true
     });
-    if (!_oldUser.hasDeposited) {
-      waitingList.push(userAddress);
-    }
-    waitingUserNumber++;
+    waitingList.push(userAddress)
+    recipientNum++;
     return true;
   }
 }
