@@ -21,7 +21,6 @@ class App extends Component {
     owner: null,
     hatID: null,
     numOfHoodie: 0, 
-    rNumber: 0,
     balanceOfDai: 0,
     balanceOfRDai: 0,
     addressOfRDaiContract: null,
@@ -35,8 +34,6 @@ class App extends Component {
     waitingUserNumber: 0,
     hoodieReceivers: 0,
     nextInLine: null,
-    mostDeposited: 0,
-    roundNumber: 0,
 
   };
 
@@ -84,10 +81,7 @@ class App extends Component {
     const owner = await contract.owner().call();
     const hatID = await contract.hatID().call();
     const nextInLine = await contract.nextInLine().call();
-    const mostDeposited = await contract.mostDeposited().call();
     const hoodieReceivers = await contract.hoodieReceivers().call();
-    const waitingUserNumber = await contract.waitingUserNumber().call();
-    const roundNumber = await contract.roundNumber().call();
     const isWaiting = await contract.users(accounts[0]).call()
       .then(user => { return user.isWaiting })
       .catch(err => { return false })
@@ -102,7 +96,7 @@ class App extends Component {
       .catch(err => { return false })
 
     this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, numOfHoodie, rNumber,
-                    hoodieReceivers, waitingUserNumber, nextInLine, roundNumber, mostDeposited,
+                    hoodieReceivers, nextInLine, 
 
                   })
 
@@ -164,7 +158,6 @@ class App extends Component {
           <p>Your depositedAmount is {web3.utils.fromWei(`${depositedAmount}`, 'ether')}</p>
           <p>Are you waiting for FDH? => {`${isWaiting}`}</p>
           <p>You've got {numOfHoodie} hoodie</p>
-          <p>You are on the {rNumber} round now</p>
           <br />
 
           <h4>Allowance is {web3.utils.fromWei(`${allowance}`, 'ether')}</h4>
@@ -184,11 +177,8 @@ class App extends Component {
           <br />
 
           <h3>Info of Hoodie DApp --- { hoodieAddress }</h3>
-          <p>Hoddie round: { roundNumber }</p>
-          <p>mostDeposited: {web3.utils.fromWei(`${mostDeposited}`, 'ether')} DAI</p>
           <p>Num of hoodie receivers: { hoodieReceivers }</p>
           <p>Next receiver >>>> { nextInLine }</p>
-          <p>{ waitingUserNumber - hoodieReceivers } { waitingUserNumber - hoodieReceivers > 1 ? <span>people are </span> : <span>person is </span>}waiting for a hoodie! </p>
         </div>
 
         <br />

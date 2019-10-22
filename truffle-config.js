@@ -4,8 +4,6 @@ require('dotenv').config()
 
 // This mnemonic is from $ ganache-cli
 // accounts[0] = 0x2471e35F51CF54265B20cCFAc3857c2DceEf7349;
-const mnemonic = process.env.MNEMONIC;
-const rinkebyAPI = process.env.RINKEBY_API;
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -24,11 +22,16 @@ module.exports = {
     },
     rinkeby: {
       provider: function() { 
-        return new HDWalletProvider(mnemonic, `https://rinkeby.infura.io/v3/${rinkebyAPI}`);
+        return new HDWalletProvider(process.env.MNEMONIC, `https://rinkeby.infura.io/v3/${process.env.RINKEBY_API}`);
       },
       network_id: 4,
       gas: 4500000,
       gasPrice: 10000000000,
     },
+  },
+  compilers: {
+    solc: {
+      version: "0.5.8"
+    }
   }
 };
