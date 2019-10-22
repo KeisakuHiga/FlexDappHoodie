@@ -29,10 +29,7 @@ class RedeemForm extends Component {
       this.setState({ userApproved: true })
       const allowance = await daiInstance.methods.allowance(accounts[0], hoodieAddress).call()
       console.log(allowance)
-      
-    } catch (err) {
-      console.log(err.message)
-    }
+    } catch (err) { console.log(err.message) }
   }
 
   handleRedeemRDai = async (e) => {
@@ -42,25 +39,25 @@ class RedeemForm extends Component {
     const balanceOfRDai = await rDaiInstance.methods.balanceOf(accounts[0]).call();
     const rDaiAllowance = await rDaiInstance.methods.allowance(accounts[0], hoodieAddress).call();
     
-    await rDaiInstance.methods.redeem(redeemAmount).send({ from: accounts[0] })
-      .on('receipt', receipt => { this.setState({ transactionHash: receipt.transactionHash }) })
-    // try {
-    //   console.log('start to redeem rDai')
-    //   console.log('redeemAmount: ', {redeemAmount})
-    //   console.log({depositedAmount})
-    //   console.log({balanceOfRDai})
-    //   console.log({address: hoodieAddress})
-    //   if(depositedAmount - redeemAmount < 0) {
-    //     throw({ message: 'over redeem amount' })
-    //   } else {
-    //     if (rDaiAllowance < redeemAmount) {
-    //       await rDaiInstance.methods.approve(hoodieAddress, redeemAmount).send({ from: accounts[0] })
-    //     }
-    //     await hoodieInstance.methods.redeemRDai(redeemAmount).send({ from: accounts[0] })
-    //   }
-    // } catch (err) {
-    //   console.log(err.message);
-    // }
+    // await rDaiInstance.methods.redeem(redeemAmount).send({ from: accounts[0] })
+    //   .on('receipt', receipt => { this.setState({ transactionHash: receipt.transactionHash }) })
+    try {
+      console.log('start to redeem rDai')
+      console.log('redeemAmount: ', {redeemAmount})
+      console.log({depositedAmount})
+      console.log({balanceOfRDai})
+      console.log({address: hoodieAddress})
+      if(depositedAmount - redeemAmount < 0) {
+        throw({ message: 'over redeem amount' })
+      } else {
+        if (rDaiAllowance < redeemAmount) {
+          await rDaiInstance.methods.approve(hoodieAddress, redeemAmount).send({ from: accounts[0] })
+        }
+        await hoodieInstance.methods.redeemRDai(redeemAmount).send({ from: accounts[0] })
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
   }
 
   render() {

@@ -1,10 +1,10 @@
 pragma solidity ^0.5.0;
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
+// import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./IDai.sol";
 import "./IRToken.sol";
 
-contract HoodieToken is Ownable {
+contract HoodieToken {
   using SafeMath for uint256;
 
   struct User {
@@ -21,11 +21,10 @@ contract HoodieToken is Ownable {
 
   // Hat setting
   uint256 public hatID;
-  address public recipient = owner();
-  uint32 public proportion = 100;
-  address[] public recipients = [recipient];
-  uint32[] public proportions = [proportion];
-  bool public doChangeHat = false;
+  address public owner;
+  address[] public recipients;
+  uint32[] public proportions;
+  bool public doChangeHat = true;
 
   uint256 public minimumDepositAmount = 1 * 10 ** 18; // for test
   uint256 public hoodieCost = 20 * 10 ** 18;
@@ -46,8 +45,12 @@ contract HoodieToken is Ownable {
   event RedeemedRDai(address user, uint256 newDepositedAmount);
 
   constructor() public {
+    owner = msg.sender;
+    recipients.push(owner);
+    proportions.push(100);
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
-    rDAIContract = IRToken(0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578);
+    rDAIContract = IRToken(0xb0C72645268E95696f5b6F40aa5b12E1eBdc8a5A); // before
+    // rDAIContract = IRToken(0x4f3E18CEAbe50E64B37142c9655b3baB44eFF578); // latest
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
@@ -106,25 +109,36 @@ contract HoodieToken is Ownable {
     emit IncreasedDeposit(msg.sender, user.depositedAmount);
     return true;
   }
-
+  
   function issueFDH() public returns(bool) {
     // test
-    require(rDAIContract.interestPayableOf(owner()) > 0, "the interest amount has not reached 20 rDAI yet");
+    require(rDAIContract.interestPayableOf(owner) > 0, "the interest amount has not reached 20 rDAI yet");
 
     // check whether or not the generated interest amount reached 20 rDAI
-    // require(rDAIContract.interestPayableOf(owner()) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
+    // require(rDAIContract.interestPayableOf(owner) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
-    /////////////////////////
-    ////// caution!!   //////     // shoud check whether or not the user is the 1st position ==> nextInLine?
-    /////////////////////////
-
-
-
-
-
-    // user goes to the next round waiting list
-    // add the user to the next round waiting list
     User storage user = users[nextInLine];
+    // 1. check whether or not a user has the hoodie hat
+    uint256 userHatId;
+    address[] memory recipientsFromUser;
+    uint32[] memory proportionsFromUser;
+    (userHatId, recipientsFromUser, proportionsFromUser) = rDAIContract.getHatByAddress(nextInLine);
+    // (userHatId,,) = rDAIContract.getHatByAddress(nextInLine);
+    address recipientFromUser = recipientsFromUser[0];
+    uint32 proportionFromUser = proportionsFromUser[0];
+
+    require(userHatId == hatID, "user does not have the same hat as the hoodie contract's");
+    require(recipientFromUser == owner, "No much with the owner address");
+    require(proportionFromUser == 2 ** 32 - 1, "No much with the proportion");
+
+    // 2. check whether or not a user's rDAI balance is the same as hoodie contract's
+    uint256 rDaiBalanceOfUser = rDAIContract.balanceOf(nextInLine);
+    require(rDaiBalanceOfUser >= user.depositedAmount, "user's rDAI balance is smaller than the hoodie contract's");
+
+    // 3. invoke payInterest() to pay the rDAI(interest) to FlexDapps account
+    require(rDAIContract.payInterest(owner), "failded payInterest()");
+
+    // user goes to the next round waiting list and is added to the next round waiting list
     user.numOfHoodie++;
     user.rNumber++;
     nextWaitingUserNum++;
@@ -185,12 +199,6 @@ contract HoodieToken is Ownable {
     return true;
   }
 
-  ///////////////
-  // IMPORTANT ///////////////////////////////////////////////////////////////////////////////////////
-  // We need to think about a case a user redeems his/her rDAI with OTHER FRONTEND
-  // Hoodie contract cannot keep track of the case and update the right order of the waiting list
-  // Therefore, nextInLine is unchanged even when the user's depositedAmount is below than 200rDAI
-
   function redeemRDai(uint256 redeemAmount) public returns (bool) {
     User storage user = users[msg.sender];
     // check whether or not the user has enough rDAI to redeem
@@ -221,21 +229,20 @@ contract HoodieToken is Ownable {
     return true;
   }
 
-  // identifier isWaiting()
-
-
   // function updateNextInLine() public returns (bool) {
   //   if(
 
   //   )
   // }
 
-  function switchDaiContractInstance(address daiContractAddress) public onlyOwner returns(bool) {
+  function switchDaiContractInstance(address daiContractAddress) public returns(bool) {
+    require(msg.sender == owner, "only owner can invoke this function");
     DAIContract = IDai(daiContractAddress);
     return true;
   }
 
-  function switchRDaiContractInstance(address rDaiContractAddress) public onlyOwner returns(bool) {
+  function switchRDaiContractInstance(address rDaiContractAddress) public returns(bool) {
+    require(msg.sender == owner, "only owner can invoke this function");
     rDAIContract = IRToken(rDaiContractAddress);
     return true;
   }
