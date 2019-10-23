@@ -75,14 +75,15 @@ contract HoodieToken {
     // user can be back to the waiting list when the depositedAmount is more
     // than the minimumDepositAmount and be given a new waiting number
     if(user.depositedAmount >= minimumDepositAmount && !user.isWaiting) {
+      uint position = _getNumberOfWaitingUsers();
       user.isWaiting = true;
-      user.waitingNumber = waitingList.length;
-      waitingList.push(msg.sender);
+      user.waitingNumber = position;
+      // waitingList.push(msg.sender); // Tom: if the user is already in the waitingList, this will add their address again
     }
     emit IncreasedDeposit(msg.sender, user.depositedAmount);
     return true;
   }
-  
+
   function issueFDH() public returns(bool) {
     // test
     require(rDAIContract.interestPayableOf(owner) > 0, "the interest amount has not reached 20 rDAI yet");
@@ -125,14 +126,13 @@ contract HoodieToken {
     // user gets a hoodie
     user.numOfHoodie++;
     hoodieReceivers++;
-    user.waitingNumber = waitingList.length;
+    user.waitingNumber = _getNumberOfWaitingUsers();
     emit IssuedFDH(nextInLine);
-
-    // add the user to the waitingList as the last person
-    waitingList.push(nextInLine);
 
     // update the nextInLine
     recipientNum++;
+    // Tom: this could go out of bounds if there is only one person on the waiting list
+    // we might need to check this against waitingList.length
     nextInLine = waitingList[recipientNum];
 
     return true;
@@ -188,17 +188,31 @@ contract HoodieToken {
   }
 
   function _addUserToWaitingList(address userAddress, uint256 depositAmount) internal returns(bool) {
+    User _oldUser = users[userAddress];
     users[userAddress] = User({
-      waitingNumber: waitingList.length,
+      waitingNumber: _getNumberOfWaitingUsers(),
       numOfHoodie: 0,
       depositedAmount: depositAmount,
       isWaiting: true,
       hasDeposited: true
     });
-    waitingList.push(userAddress);
+    if (!_oldUser.hasDeposited) {
+      waitingList.push(userAddress); // Tom: it's possible to get on the waiting list twice
+    }
     if(users[userAddress].waitingNumber == recipientNum) {
       nextInLine = waitingList[recipientNum];
     }
     return true;
+  }
+
+  function _getNumberOfWaitingUsers() internal view returns (uint256) {
+    uint i = 0;
+    User memory user;
+    uint waitingNumber = 0;
+    for (i; i < waitingList.length; i++) {
+      user = users[waitingList[i]];
+      if (user.isWaiting) waitingNumber++;
+    }
+    return waitingNumber;
   }
 }
