@@ -34,7 +34,7 @@ class RedeemForm extends Component {
 
   handleRedeemRDai = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, rDaiInstance, depositedAmount, redeemAmount, accounts, approved }  = this.state
+    const { hoodieInstance, rDaiInstance, depositedAmount, redeemAmount, accounts }  = this.state
     const hoodieAddress = hoodieInstance.options.address
     const balanceOfRDai = await rDaiInstance.methods.balanceOf(accounts[0]).call();
     const rDaiAllowance = await rDaiInstance.methods.allowance(accounts[0], hoodieAddress).call();

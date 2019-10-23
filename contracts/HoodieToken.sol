@@ -43,8 +43,6 @@ contract HoodieToken {
     owner = msg.sender;
     recipients.push(owner);
     proportions.push(100);
-    _addUserToWaitingList(owner, 0);
-    nextInLine = waitingList[recipientNum];
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
     rDAIContract = IRToken(0x6AA5c6aB94403Bdbbf74f21607D46Be631E6CcC5);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
@@ -74,9 +72,12 @@ contract HoodieToken {
     User storage user = users[msg.sender];
     user.depositedAmount = user.depositedAmount.add(topUpAmount);
 
-    // user can be back to the waiting list when the depositedAmount is more than the minimumDepositAmount
+    // user can be back to the waiting list when the depositedAmount is more
+    // than the minimumDepositAmount and be given a new waiting number
     if(user.depositedAmount >= minimumDepositAmount && !user.isWaiting) {
       user.isWaiting = true;
+      user.waitingNumber = waitingList.length;
+      waitingList.push(msg.sender);
     }
     emit IncreasedDeposit(msg.sender, user.depositedAmount);
     return true;
@@ -93,6 +94,12 @@ contract HoodieToken {
     // 0. user isWaiting ture?
     while(!user.isWaiting) {
       recipientNum++;
+      // if there is no waiting user, just invoke payInterest()
+      if(recipientNum == waitingList.length) {
+        require(rDAIContract.payInterest(owner), "failded payInterest()");
+        return true;
+      }
+      nextInLine = waitingList[recipientNum];
       user = users[nextInLine];
     }
 
@@ -115,13 +122,18 @@ contract HoodieToken {
     // 3. invoke payInterest() to pay the rDAI(interest) to FlexDapps account
     require(rDAIContract.payInterest(owner), "failded payInterest()");
 
-    // user goes to the next round waiting list and is added to the next round waiting list
+    // user gets a hoodie
     user.numOfHoodie++;
     hoodieReceivers++;
     user.waitingNumber = waitingList.length;
-    waitingList.push(nextInLine);
-    recipientNum++;
     emit IssuedFDH(nextInLine);
+
+    // add the user to the waitingList as the last person
+    waitingList.push(nextInLine);
+
+    // update the nextInLine
+    recipientNum++;
+    nextInLine = waitingList[recipientNum];
 
     return true;
   }
@@ -147,13 +159,13 @@ contract HoodieToken {
     return true;
   }
 
-  function switchDaiContractInstance(address daiContractAddress) public returns(bool) {
+  function switchDaiContractAddress(address daiContractAddress) public returns(bool) {
     require(msg.sender == owner, "only owner can invoke this function");
     DAIContract = IDai(daiContractAddress);
     return true;
   }
 
-  function switchRDaiContractInstance(address rDaiContractAddress) public returns(bool) {
+  function switchRDaiContractAddress(address rDaiContractAddress) public returns(bool) {
     require(msg.sender == owner, "only owner can invoke this function");
     rDAIContract = IRToken(rDaiContractAddress);
     return true;
@@ -184,6 +196,9 @@ contract HoodieToken {
       hasDeposited: true
     });
     waitingList.push(userAddress);
+    if(users[userAddress].waitingNumber == recipientNum) {
+      nextInLine = waitingList[recipientNum];
+    }
     return true;
   }
 }
