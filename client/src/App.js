@@ -84,8 +84,6 @@ class App extends Component {
     console.log(nextInLine)
     const getWaitingList = await contract.getWaitingList().call();
     console.log(getWaitingList)
-    const recipientNum = await contract.recipientNum().call();
-    console.log('recipientNum =>', recipientNum)
     const hoodieReceivers = await contract.hoodieReceivers().call();
     const isWaiting = await contract.users(accounts[0]).call()
       .then(user => { return user.isWaiting })
@@ -99,7 +97,7 @@ class App extends Component {
     const waitingNumber = await contract.users(accounts[0]).call()
       .then(user => { return user.waitingNumber })
       .catch(err => { return false })
-    console.log(waitingNumber)
+    console.log('user waiting number => ', waitingNumber)
 
     this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, numOfHoodie, 
                     hoodieReceivers, nextInLine, 
