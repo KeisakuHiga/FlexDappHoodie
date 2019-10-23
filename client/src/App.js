@@ -81,6 +81,10 @@ class App extends Component {
     const owner = await contract.owner().call();
     const hatID = await contract.hatID().call();
     const nextInLine = await contract.nextInLine().call();
+    const getWaitingList = await contract.getWaitingList().call();
+    console.log(getWaitingList)
+    const recipientNum = await contract.recipientNum().call();
+    console.log('recipientNum =>', recipientNum)
     const hoodieReceivers = await contract.hoodieReceivers().call();
     const isWaiting = await contract.users(accounts[0]).call()
       .then(user => { return user.isWaiting })

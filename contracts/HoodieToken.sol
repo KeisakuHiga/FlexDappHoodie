@@ -21,8 +21,8 @@ contract HoodieToken {
   // Hat setting
   uint256 public hatID;
   address public owner;
-  address[] public recipients = [owner];
-  uint32[] public proportions = [100];
+  address[] public recipients;
+  uint32[] public proportions;
   bool public doChangeHat = true;
 
   uint256 public minimumDepositAmount = 1 * 10 ** 18; // for test
@@ -30,7 +30,7 @@ contract HoodieToken {
 
   uint256 public hoodieReceivers = 0;
   uint256 public recipientNum = 0;
-  address public nextInLine = waitingList[recipientNum];
+  address public nextInLine;
   address[] public waitingList;
   mapping(address => User) public users;
 
@@ -41,8 +41,10 @@ contract HoodieToken {
 
   constructor() public {
     owner = msg.sender;
-    // recipients.push(owner);
-    // proportions.push(100);
+    recipients.push(owner);
+    proportions.push(100);
+    _addUserToWaitingList(owner, 0);
+    nextInLine = waitingList[recipientNum];
     DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
     rDAIContract = IRToken(0x6AA5c6aB94403Bdbbf74f21607D46Be631E6CcC5);
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
@@ -175,14 +177,13 @@ contract HoodieToken {
 
   function _addUserToWaitingList(address userAddress, uint256 depositAmount) internal returns(bool) {
     users[userAddress] = User({
-      waitingNumber: recipientNum,
+      waitingNumber: waitingList.length,
       numOfHoodie: 0,
       depositedAmount: depositAmount,
       isWaiting: true,
       hasDeposited: true
     });
     waitingList.push(userAddress);
-    recipientNum++;
     return true;
   }
 }
