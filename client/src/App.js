@@ -96,6 +96,10 @@ class App extends Component {
     const numOfHoodie = await contract.users(accounts[0]).call()
       .then(user => { return user.numOfHoodie })
       .catch(err => { return false })
+    const waitingNumber = await contract.users(accounts[0]).call()
+      .then(user => { return user.waitingNumber })
+      .catch(err => { return false })
+    console.log(waitingNumber)
 
     this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, numOfHoodie, 
                     hoodieReceivers, nextInLine, 

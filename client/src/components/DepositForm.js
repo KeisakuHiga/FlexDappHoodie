@@ -18,18 +18,11 @@ class DepositForm extends Component {
     console.log(isWaiting)
     try {
       console.log('start to mint rDai')
-      console.log(depositAmount)
+      console.log(depositedAmount)
       console.log(hatID)
       console.log(isWaiting)
-      if(!isWaiting && depositedAmount == 0) {
-        console.log('new user')
-        await hoodieInstance.methods.mintRDaiAndPushUserToWaitingList(depositAmount).send({ from: accounts[0] } )
-        .on('transactionHash', hash => { console.log('Tx Hash: ' + hash) })
-      } else {
-        console.log('existing user')
-          await hoodieInstance.methods.increaseDepositAmount(depositAmount).send({ from: accounts[0] } )
-            .on('transactionHash', hash => { console.log('Tx Hash: ' + hash) })
-      }
+      await hoodieInstance.methods.depositDAI(depositAmount).send({ from: accounts[0] } )
+      .on('transactionHash', hash => { console.log('Tx Hash: ' + hash) })
     } catch (err) {
       console.log(err.message);
     }
