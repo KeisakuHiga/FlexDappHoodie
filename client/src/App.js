@@ -81,6 +81,7 @@ class App extends Component {
     const owner = await contract.owner().call();
     const hatID = await contract.hatID().call();
     const nextInLine = await contract.nextInLine().call();
+    console.log(nextInLine)
     const getWaitingList = await contract.getWaitingList().call();
     console.log(getWaitingList)
     const recipientNum = await contract.recipientNum().call();
@@ -95,11 +96,8 @@ class App extends Component {
     const numOfHoodie = await contract.users(accounts[0]).call()
       .then(user => { return user.numOfHoodie })
       .catch(err => { return false })
-    const rNumber = await contract.users(accounts[0]).call()
-      .then(user => { return user.rNumber })
-      .catch(err => { return false })
 
-    this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, numOfHoodie, rNumber,
+    this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, numOfHoodie, 
                     hoodieReceivers, nextInLine, 
 
                   })
@@ -112,15 +110,14 @@ class App extends Component {
     const rDai = rDaiInstance.methods;
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
     const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
-    console.log(generatedInterestAmt)
-    const receivedSavingsOf = await rDai.receivedSavingsOf(owner).call()
-    console.log('receivedSavingsOf', web3.utils.fromWei(receivedSavingsOf, 'ether'))
-    const receivedLoanOf = await rDai.receivedLoanOf(owner).call()
-    console.log('receivedLoanOf', web3.utils.fromWei(receivedLoanOf, 'ether'))
-    console.log('difference: ', receivedSavingsOf - receivedLoanOf)
+    console.log('generatedInterestAmt', web3.utils.fromWei(generatedInterestAmt, 'ether'))
+
+    // const receivedSavingsOf = await rDai.receivedSavingsOf(owner).call()
+    // console.log('receivedSavingsOf', web3.utils.fromWei(receivedSavingsOf, 'ether'))
+    // const receivedLoanOf = await rDai.receivedLoanOf(owner).call();
+    // console.log('receivedLoanOf', web3.utils.fromWei(receivedLoanOf, 'ether'))
+    // console.log('difference: ', receivedSavingsOf - receivedLoanOf)
     
-    const balanceOf = await rDai.balanceOf(accounts[0]).call()
-    console.log('balanceOf', web3.utils.fromWei(balanceOf, 'ether'))
     this.setState({ balanceOfDai, balanceOfRDai, generatedInterestAmt, allowance, });
   };
 
@@ -143,9 +140,8 @@ class App extends Component {
 
   render() {
     const { web3, accounts, hoodieInstance, daiInstance, owner, hatID, balanceOfDai, balanceOfRDai, userApproved,
-            rDaiInstance, addressOfRDaiContract, generatedInterestAmt, allowance, hoodieAddress, waitingUserNumber,
-            hoodieReceivers, isWaiting, depositedAmount, numOfHoodie, rNumber, nextInLine, roundNumber, mostDeposited,
-
+            rDaiInstance, addressOfRDaiContract, generatedInterestAmt, allowance, hoodieAddress,
+            hoodieReceivers, isWaiting, depositedAmount, numOfHoodie, nextInLine,
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
