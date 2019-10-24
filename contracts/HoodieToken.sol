@@ -153,9 +153,10 @@ contract HoodieToken {
   function _topUpDAI(uint256 _depositAmount) internal returns (bool) {
     User storage _user = users[msg.sender];
     _user.depositedAmount = _user.depositedAmount.add(_depositAmount);
+
     if(_user.depositedAmount >= minimumDepositAmount && !_user.isWaiting) {
-      _user.isWaiting = true;
       _user.waitingNumber = _giveTheLastNumber();
+      _user.isWaiting = true;
     }
     return true;
   }
@@ -230,10 +231,9 @@ contract HoodieToken {
     uint256 _min = waitingList.length;
     for (i; i < waitingList.length; i++) {
       _user = users[waitingList[i]];
-      if (_user.isWaiting && _user.waitingNumber < _min) {
+      if (_user.isWaiting && _user.waitingNumber <= _min) {
         _min = _user.waitingNumber;
         nextInLine = waitingList[i];
-        users[nextInLine].waitingNumber = 0;
       }
     }
     return true;
