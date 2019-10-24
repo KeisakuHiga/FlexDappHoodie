@@ -24234,12 +24234,12 @@
         }
       },
       "links": {},
-      "address": "0x07dB271E66CcF8E537890Af17Ac617fFb1fE9565",
-      "transactionHash": "0x9dfeadc1e1489267c7160e717fe823b85157deb9c68f7ee3366d781fc3effa94"
+      "address": "0xee6156928A6aDeaD68368737b7e1423f1cBe8D5F",
+      "transactionHash": "0x687ff5b19c566f39147edceaeba0a77a25a77c4860bf6fb1990b93ad1f4c4378"
     }
   },
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-10-24T04:14:11.159Z",
+  "updatedAt": "2019-10-24T04:17:06.014Z",
   "devdoc": {
     "methods": {}
   },
