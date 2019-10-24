@@ -179,7 +179,7 @@ contract HoodieToken {
     uint256 _last = 0;
     for (i; i < waitingList.length; i++) {
       _user = users[waitingList[i]];
-      if (_user.waitingNumber > _last && _user.isWaiting) {
+      if (_user.waitingNumber >= _last && _user.isWaiting) {
         _last = _user.waitingNumber.add(1);
       }
     }
@@ -213,27 +213,29 @@ contract HoodieToken {
     User storage _user = users[_userAddress];
     if (_getNumberOfWaitingUsers() == 1) {
       _user.waitingNumber = 0;
+    } else {
+      _user.waitingNumber = _giveTheLastNumber();
     }
-    _user.waitingNumber = _giveTheLastNumber();
-    
     _user.numOfHoodie++;
     hoodieReceivers++;
     return true;
   }
 
   function _updateNextInLine() internal returns (bool) {
+    if (_getNumberOfWaitingUsers() == 0) {
+      nextInLine = address(0);
+      return true;
+    }
+    
     uint256 i = 0;
     User memory _user;
     uint256 _min = waitingList.length;
     for (i; i < waitingList.length; i++) {
       _user = users[waitingList[i]];
-
       if (_user.isWaiting && _user.waitingNumber < _min) {
         _min = _user.waitingNumber;
         nextInLine = waitingList[i];
         users[nextInLine].waitingNumber = 0;
-      } else {
-        nextInLine = address(0);
       }
     }
     return true;

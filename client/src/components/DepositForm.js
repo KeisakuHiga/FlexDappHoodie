@@ -15,7 +15,10 @@ class DepositForm extends Component {
     const depositedAmount = await hoodieInstance.methods.users(accounts[0]).call()
       .then(user => { return user.depositedAmount })
       .catch(err => { return false })
-    console.log(isWaiting)
+    const hasDeposited = await hoodieInstance.methods.users(accounts[0]).call()
+      .then(user => { return user.hasDeposited })
+      .catch(err => { return false })
+    console.log(hasDeposited)
     try {
       console.log('start to mint rDai')
       console.log(depositedAmount)
