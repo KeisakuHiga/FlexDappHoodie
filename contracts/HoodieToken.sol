@@ -62,9 +62,7 @@ contract HoodieToken {
       require(_mintRDai(depositAmount), "failed to mint rDAI");
       require(_topUpDAI(depositAmount), "failed to top up DAI");
     }
-    if(user.waitingNumber == 0) {
-      nextInLine = msg.sender;
-    }
+    require(_updateNextInLine(), "failed to update the next in line");
     emit Deposited(msg.sender, user.depositedAmount);
     return true;
   }
@@ -226,7 +224,7 @@ contract HoodieToken {
       nextInLine = address(0);
       return true;
     }
-    
+
     uint256 i = 0;
     User memory _user;
     uint256 _min = waitingList.length;
