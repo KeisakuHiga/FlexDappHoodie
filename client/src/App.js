@@ -92,6 +92,7 @@ class App extends Component {
     const depositedAmount = user.depositedAmount
     
     const recipientNumber = await contract.recipientNumber().call();
+    console.log('recipientNumber=> ', recipientNumber)
     const nextInLineUser = await contract.users(recipientNumber).call()
     const nextInLine = nextInLineUser.userAddress
     

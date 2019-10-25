@@ -157,7 +157,6 @@ contract HoodieToken {
     if(_user.depositedAmount >= minimumDepositAmount && !_user.isWaiting) {
       _user.isWaiting = true;
       require(_updateUserInfo(msg.sender), "failed to update user number");
-      nextUserNumber++;
     }
     return true;
   }
@@ -191,10 +190,7 @@ contract HoodieToken {
     uint256 _userNumber = userNumbers[_userAddress];
     User storage _user = users[_userNumber];
     _user.numOfHoodie++;
-
-    // update user number
     require(_createNewUser(_user.userAddress, _user.depositedAmount, _user.numOfHoodie), "failed to add the user to the waiting list");
-    nextUserNumber++;
     return true;
   }
 
