@@ -80,28 +80,20 @@ class App extends Component {
     const hoodieAddress = hoodieInstance.options.address;
     const owner = await contract.owner().call();
     const hatID = await contract.hatID().call();
-    const nextInLine = await contract.nextInLine().call();
-    console.log(nextInLine)
-    const getWaitingList = await contract.getWaitingList().call();
-    console.log(getWaitingList)
     const hoodieReceivers = await contract.hoodieReceivers().call();
-    const isWaiting = await contract.users(accounts[0]).call()
-      .then(user => { return user.isWaiting })
-      .catch(err => { return false })
-    const depositedAmount = await contract.users(accounts[0]).call()
-      .then(user => { return user.depositedAmount })
-      .catch(err => { return false })
-    const numOfHoodie = await contract.users(accounts[0]).call()
-      .then(user => { return user.numOfHoodie })
-      .catch(err => { return false })
-    const waitingNumber = await contract.users(accounts[0]).call()
-      .then(user => { return user.waitingNumber })
-      .catch(err => { return false })
-    console.log('user waiting number => ', waitingNumber)
-
-    this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, numOfHoodie, 
-                    hoodieReceivers, nextInLine, 
-
+    
+    const userNumber = await contract.userNumbers(accounts[0]).call()
+    const user = await contract.users(userNumber).call()
+    console.log(user);
+    const isWaiting = user.isWaiting
+    const depositedAmount = user.depositedAmount
+    
+    const recipientNumber = await contract.recipientNumber().call();
+    const nextInLineUser = await contract.users(recipientNumber).call()
+    const nextInLine = nextInLineUser.userAddress
+    
+    this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, 
+                    hoodieReceivers, nextInLine
                   })
 
     // dai
@@ -159,7 +151,6 @@ class App extends Component {
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
           <p>Your depositedAmount is {web3.utils.fromWei(`${depositedAmount}`, 'ether')}</p>
           <p>Are you waiting for FDH? => {`${isWaiting}`}</p>
-          <p>You've got {numOfHoodie} hoodie</p>
           <br />
 
           <h4>Allowance is {web3.utils.fromWei(`${allowance}`, 'ether')}</h4>
