@@ -81,8 +81,11 @@ class App extends Component {
     const owner = await contract.owner().call();
     const hatID = await contract.hatID().call();
     const hoodieReceivers = await contract.hoodieReceivers().call();
+    const nextUserNumber = await contract.nextUserNumber().call();
+    console.log('nextUserNumber=> ', nextUserNumber)
     
     const userNumber = await contract.userNumbers(accounts[0]).call()
+    console.log(userNumber)
     const user = await contract.users(userNumber).call()
     console.log(user);
     const isWaiting = user.isWaiting

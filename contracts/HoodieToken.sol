@@ -30,10 +30,10 @@ contract HoodieToken {
   uint256 public hoodieCost = 20 * 10 ** 18;
 
   uint256 public recipientNumber = 0;
-  uint256 public totalUserNumber = 0;
+  uint256 public nextUserNumber = 0;
   mapping(address => uint256) public userNumbers;
   mapping(uint256 => User) public users;
-  address public nextInLine = users[recipientNumber];
+
   event Deposited(address user, uint256 depositedAmount);
   event Redeemed(address user, uint256 newDepositedAmount);
   event IssuedFDH(address recipient);
@@ -52,20 +52,19 @@ contract HoodieToken {
   // }
 
   function depositDAI(uint256 depositAmount) public returns (bool) {
-    uint256 _userNumber = userNumbers[msg.sender];
-    User storage user = users[_userNumber];
-
+    uint256 userNumber = userNumbers[msg.sender];
+    User memory user = users[userNumber];
     if(!user.hasDeposited) {
       // new user
       require(depositAmount >= minimumDepositAmount, "Deposit amount should be equal to / greater than 200DAI");
       require(_mintRDai(depositAmount), "mining rDAI failed");
-      require(_addUserToWaitingList(msg.sender, depositAmount), "failded to add the user again to the waiting list");
+      require(_createNewUser(msg.sender, depositAmount, user.numOfHoodie), "failded to add the user again to the waiting list");
     } else {
       // existing user
       require(_mintRDai(depositAmount), "failed to mint rDAI");
       require(_topUpDAI(depositAmount), "failed to top up DAI");
     }
-    emit Deposited(msg.sender, user.depositedAmount);
+    emit Deposited(msg.sender, depositAmount);
     return true;
   }
 
@@ -90,10 +89,7 @@ contract HoodieToken {
   }
 
   function issueFDH() public returns (bool) {
-    // if(nextInLine == address(0)) {
-    //   require(rDAIContract.payInterest(owner), "failded to pay Interest to the owner");
-    //   return true;
-    // }
+    // check the user is waiting and if not, the next user will become the recipient
     if (_findRecipient() == false) {
       return true;
     }
@@ -103,17 +99,12 @@ contract HoodieToken {
     // check whether or not the generated interest amount reached 20 rDAI
     // require(rDAIContract.interestPayableOf(owner) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
 
-    require(user.isWaiting, "user is not in the waiting list");
-
     require(_checkUserHatAndRDaiBalance(user.userAddress), "user does not have the hoodie hat");
     require(rDAIContract.payInterest(owner), "failded payInterest()");
+    require(_updateUserInfo(user.userAddress), "falied to give hoodie to the nextInLine");
     hoodieReceivers++;
-    emit IssuedFDH(user.userAddress);
-
-    require(_updateUserNumber(user.userAddress), "falied to give hoodie to the nextInLine");
-    // require(_updateNextInLine(), "failded to update the next in line");
-
     recipientNumber++;
+    emit IssuedFDH(user.userAddress);
     return true;
   }
 
@@ -145,15 +136,16 @@ contract HoodieToken {
     return true;
   }
 
-  function _addUserToWaitingList(address _userAddress, uint256 _depositAmount) internal returns (bool) {
-    userNumbers[_userAddress] = totalUserNumber;
-    users[totalUserNumber] = User({
+  function _createNewUser(address _userAddress, uint256 _depositAmount, uint256 _numOfHoodie) internal returns (bool) {
+    userNumbers[_userAddress] = nextUserNumber;
+    users[nextUserNumber] = User({
       userAddress: _userAddress,
       depositedAmount: _depositAmount,
       isWaiting: true,
-      hasDeposited: true
+      hasDeposited: true,
+      numOfHoodie: _numOfHoodie
     });
-    totalUserNumber++;
+    nextUserNumber++;
     return true;
   }
 
@@ -164,8 +156,8 @@ contract HoodieToken {
 
     if(_user.depositedAmount >= minimumDepositAmount && !_user.isWaiting) {
       _user.isWaiting = true;
-      require(_updateUserNumber(msg.sender), "failed to update user number");
-      totalUserNumber++;
+      require(_updateUserInfo(msg.sender), "failed to update user number");
+      nextUserNumber++;
     }
     return true;
   }
@@ -195,67 +187,25 @@ contract HoodieToken {
     return true;
   }
 
-  function _updateUserNumber(address _userAddress) internal returns (bool) {
+  function _updateUserInfo(address _userAddress) internal returns (bool) {
     uint256 _userNumber = userNumbers[_userAddress];
     User storage _user = users[_userNumber];
     _user.numOfHoodie++;
-    users[totalUserNumber] = _user;
 
-    totalUserNumber++;
+    // update user number
+    require(_createNewUser(_user.userAddress, _user.depositedAmount, _user.numOfHoodie), "failed to add the user to the waiting list");
+    nextUserNumber++;
     return true;
   }
 
   function _findRecipient() internal returns (bool) {
     while(!users[recipientNumber].isWaiting) {
-      if(recipientNumber == totalUserNumber) {
+      recipientNumber++;
+      if(recipientNumber == nextUserNumber) {
         require(rDAIContract.payInterest(owner), "failded payInterest()");
         return false;
       }
-      recipientNumber++;
     }
     return true;
   }
-
-  // function _getNumberOfWaitingUsers() internal view returns (uint256) {
-  //   uint256 i = 0;
-  //   User memory _user;
-  //   uint256 _waitingNumber = 0;
-  //   for (i; i < waitingList.length; i++) {
-  //     _user = users[waitingList[i]];
-  //     if (_user.isWaiting) _waitingNumber++;
-  //   }
-  //   return _waitingNumber;
-  // }
-
-  // function _giveTheLastNumber() internal view returns (uint256) {
-  //   uint256 i = 0;
-  //   User memory _user;
-  //   uint256 _last = 0;
-  //   for (i; i < waitingList.length; i++) {
-  //     _user = users[waitingList[i]];
-  //     if (_user.waitingNumber >= _last && _user.isWaiting) {
-  //       _last = _user.waitingNumber.add(1);
-  //     }
-  //   }
-  //   return _last;
-  // }
-
-  // function _updateNextInLine() internal returns (bool) {
-  //   if (_getNumberOfWaitingUsers() == 0) {
-  //     nextInLine = address(0);
-  //     return true;
-  //   }
-
-  //   uint256 i = 0;
-  //   User memory _user;
-  //   uint256 _min = waitingList.length;
-  //   for (i; i < waitingList.length; i++) {
-  //     _user = users[waitingList[i]];
-  //     if (_user.isWaiting && _user.waitingNumber <= _min) {
-  //       _min = _user.waitingNumber;
-  //       nextInLine = waitingList[i];
-  //     }
-  //   }
-  //   return true;
-  // }
 }
