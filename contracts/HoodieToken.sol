@@ -47,10 +47,6 @@ contract HoodieToken {
     hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
   }
 
-  // function getWaitingList() public view returns(address[] memory) {
-  //   return waitingList;
-  // }
-
   function depositDAI(uint256 depositAmount) public returns (bool) {
     uint256 userNumber = userNumbers[msg.sender];
     User memory user = users[userNumber];
