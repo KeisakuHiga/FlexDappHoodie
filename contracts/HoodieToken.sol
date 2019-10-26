@@ -33,6 +33,7 @@ contract HoodieToken {
   uint256 public nextUserNumber = 1;
   mapping(address => uint256) public userNumbers;
   mapping(uint256 => User) public users;
+  address public nextInLine = users[recipientNumber].userAddress;
 
   event Deposited(address user, uint256 depositedAmount);
   event Redeemed(address user, uint256 newDepositedAmount);
