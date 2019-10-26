@@ -85,7 +85,7 @@ class App extends Component {
     console.log('nextUserNumber=> ', nextUserNumber)
     
     const userNumber = await contract.userNumbers(accounts[0]).call()
-    console.log(userNumber)
+    console.log("userNumber=> ", userNumber)
     const user = await contract.users(userNumber).call()
     console.log(user);
     const isWaiting = user.isWaiting

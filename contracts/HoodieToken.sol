@@ -91,7 +91,7 @@ contract HoodieToken {
   function issueFDH() public returns (bool) {
     // check the user is waiting and if not, the next user will become the recipient
     if (_findRecipient() == false) {return true;}
-    User memory user = users[recipientNumber];
+    User storage user = users[recipientNumber];
     // test
     require(rDAIContract.interestPayableOf(owner) > 0, "the interest amount has not reached 20 rDAI yet");
     // check whether or not the generated interest amount reached 20 rDAI
@@ -104,10 +104,10 @@ contract HoodieToken {
     user.numOfHoodie++;
     hoodieReceivers++;
     recipientNumber++;
-    nextUserNumber++;
 
     // update user number and info
     require(_updateUserInfo(user), "failed to update user info");
+    nextUserNumber++;
 
     emit IssuedFDH(user.userAddress);
     return true;
@@ -142,13 +142,15 @@ contract HoodieToken {
   }
 
   function _createNewUser(uint256 _depositAmount) internal returns (bool) {
+    userNumbers[msg.sender] = nextUserNumber;
     users[nextUserNumber] = User({
       userAddress: msg.sender,
-      depositedAmount: _depositedAmount,
+      depositedAmount: _depositAmount,
       isWaiting: true,
       hasDeposited: true,
       numOfHoodie: 0
     });
+    nextUserNumber++;
     return true;
   }
 
