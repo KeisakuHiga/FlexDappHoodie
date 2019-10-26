@@ -14,9 +14,9 @@ class RedeemForm extends Component {
 
   componentDidMount = async e => {
     const { hoodieInstance, accounts } = this.state;
-    const depositedAmount = await hoodieInstance.methods.users(accounts[0]).call()
-      .then(user => { return user.depositedAmount })
-      .catch(err => { return false })
+    const userNumber = await hoodieInstance.methods.userNumbers(accounts[0]).call()
+    const user = await hoodieInstance.methods.users(userNumber).call()
+    const depositedAmount = user.depositedAmount
     this.setState({ depositedAmount })
   }
   handleApprove = async (e) => {
