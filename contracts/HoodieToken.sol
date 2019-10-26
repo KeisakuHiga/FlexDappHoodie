@@ -29,8 +29,8 @@ contract HoodieToken {
   uint256 public minimumDepositAmount = 1 * 10 ** 18; // for test
   uint256 public hoodieCost = 20 * 10 ** 18;
 
-  uint256 public recipientNumber = 0;
-  uint256 public nextUserNumber = 0;
+  uint256 public recipientNumber = 1;
+  uint256 public nextUserNumber = 1;
   mapping(address => uint256) public userNumbers;
   mapping(uint256 => User) public users;
 
@@ -58,7 +58,7 @@ contract HoodieToken {
       // new user
       require(depositAmount >= minimumDepositAmount, "Deposit amount should be equal to / greater than 200DAI");
       require(_mintRDai(depositAmount), "mining rDAI failed");
-      require(_createNewUser(msg.sender, depositAmount, user.numOfHoodie), "failded to add the user again to the waiting list");
+      require(_createNewUser(depositAmount), "failded to add the user again to the waiting list");
     } else {
       // existing user
       require(_mintRDai(depositAmount), "failed to mint rDAI");
@@ -90,9 +90,7 @@ contract HoodieToken {
 
   function issueFDH() public returns (bool) {
     // check the user is waiting and if not, the next user will become the recipient
-    if (_findRecipient() == false) {
-      return true;
-    }
+    if (_findRecipient() == false) {return true;}
     User memory user = users[recipientNumber];
     // test
     require(rDAIContract.interestPayableOf(owner) > 0, "the interest amount has not reached 20 rDAI yet");
@@ -101,9 +99,16 @@ contract HoodieToken {
 
     require(_checkUserHatAndRDaiBalance(user.userAddress), "user does not have the hoodie hat");
     require(rDAIContract.payInterest(owner), "failded payInterest()");
-    require(_updateUserInfo(user.userAddress), "falied to give hoodie to the nextInLine");
+
+    // give a hoodie to the recipient and increment the global variables
+    user.numOfHoodie++;
     hoodieReceivers++;
     recipientNumber++;
+    nextUserNumber++;
+
+    // update user number and info
+    require(_updateUserInfo(user), "failed to update user info");
+
     emit IssuedFDH(user.userAddress);
     return true;
   }
@@ -136,16 +141,14 @@ contract HoodieToken {
     return true;
   }
 
-  function _createNewUser(address _userAddress, uint256 _depositAmount, uint256 _numOfHoodie) internal returns (bool) {
-    userNumbers[_userAddress] = nextUserNumber;
+  function _createNewUser(uint256 _depositAmount) internal returns (bool) {
     users[nextUserNumber] = User({
-      userAddress: _userAddress,
-      depositedAmount: _depositAmount,
+      userAddress: msg.sender,
+      depositedAmount: _depositedAmount,
       isWaiting: true,
       hasDeposited: true,
-      numOfHoodie: _numOfHoodie
+      numOfHoodie: 0
     });
-    nextUserNumber++;
     return true;
   }
 
@@ -155,9 +158,21 @@ contract HoodieToken {
     _user.depositedAmount = _user.depositedAmount.add(_depositAmount);
 
     if(_user.depositedAmount >= minimumDepositAmount && !_user.isWaiting) {
-      _user.isWaiting = true;
-      require(_updateUserInfo(msg.sender), "failed to update user number");
+      require(_updateUserInfo(_user), "failed to update user info");
+      nextUserNumber++;
     }
+    return true;
+  }
+
+  function _updateUserInfo(User memory _user) internal returns (bool) {
+    userNumbers[_user.userAddress] = nextUserNumber;
+    users[nextUserNumber] = User({
+      userAddress: _user.userAddress,
+      depositedAmount: _user.depositedAmount,
+      isWaiting: true,
+      hasDeposited: true,
+      numOfHoodie: _user.numOfHoodie
+    });
     return true;
   }
 
@@ -183,14 +198,6 @@ contract HoodieToken {
     uint256 _rDaiBalance = rDAIContract.balanceOf(_userAddress);
     require(_rDaiBalance >= _user.depositedAmount, "user's rDAI balance is smaller than the hoodie contract's");
 
-    return true;
-  }
-
-  function _updateUserInfo(address _userAddress) internal returns (bool) {
-    uint256 _userNumber = userNumbers[_userAddress];
-    User storage _user = users[_userNumber];
-    _user.numOfHoodie++;
-    require(_createNewUser(_user.userAddress, _user.depositedAmount, _user.numOfHoodie), "failed to add the user to the waiting list");
     return true;
   }
 
