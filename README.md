@@ -1,5 +1,8 @@
-# Swag Deposit Portal
-This dapp utilizes [rToken contract](https://github.com/decentral-ee/rtoken-contracts) and [Compound](https://github.com/compound-finance)
+# Hoodie contract
+This contract utilizes [rToken contract](https://github.com/decentral-ee/rtoken-contracts) and [Compound](https://github.com/compound-finance). Users will deposit their DAI into this dapp and can get an original hoodie from [Flex Dapps](https://flexdapps.com/about) when the generated interest amount reaches the hoodie cost.
+
+## How this dapp works
+![](./docs/dappsImage.png)
 
 ## Spec
 * Users can change their rDAI hat to the dapp’s one before using
@@ -8,7 +11,6 @@ This dapp utilizes [rToken contract](https://github.com/decentral-ee/rtoken-cont
 * Users can redeem their rDAI and the DAI they deposited will be given back to them
 * The generated interest will be redirected to the Flex Dapps’ rDAI account for the hoodie cost
 * Hoodie will be given to the 1st position user automatically when the generated interest amount has reached the cost
-
 
 ## Waiting list
 ### Case1 - When there is no waiting user
