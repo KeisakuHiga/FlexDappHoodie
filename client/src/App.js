@@ -96,7 +96,8 @@ class App extends Component {
     console.log('recipientNumber=> ', recipientNumber)
     const nextInLineUser = await contract.users(recipientNumber).call()
     const nextInLine = nextInLineUser.userAddress
-    
+    const totalDeposited = await contract.totalDeposited().call();
+    console.log('totalDeposited', web3.utils.fromWei(totalDeposited, 'ether'))
     this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, 
                     hoodieReceivers, nextInLine
                   })
@@ -109,10 +110,7 @@ class App extends Component {
     const rDai = rDaiInstance.methods;
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
     const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
-    // const rHat = await rDai.getHatStats(hatID).call();
-    // const rHat = await rDai.getHatStats(hatID).call();
-    // console.log(rHat)
-    // console.log('totalDeposited', web3.utils.fromWei(rHat.totalLoans, 'ether'))
+
 
     // const receivedSavingsOf = await rDai.receivedSavingsOf(owner).call()
     // console.log('receivedSavingsOf', web3.utils.fromWei(receivedSavingsOf, 'ether'))
