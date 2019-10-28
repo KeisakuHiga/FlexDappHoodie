@@ -25,6 +25,7 @@ contract HoodieToken {
   uint32[] public proportions;
   bool public doChangeHat = true;
 
+  uint256 public totalDeposited = 0;
   uint256 public hoodieReceivers = 0;
   uint256 public minimumDepositAmount = 1 * 10 ** 18; // for test
   uint256 public hoodieCost = 20 * 10 ** 18;
@@ -81,6 +82,7 @@ contract HoodieToken {
     require(rDAIContract.redeem(redeemAmount), "redeem() failed");
     require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
     user.depositedAmount = user.depositedAmount.sub(redeemAmount);
+    totalDeposited = totalDeposited.sub(redeemAmount);
 
     // if user's depositedAmount become below than the minimumDepositAmount, it will be removed from the waiting list
     if (user.depositedAmount < minimumDepositAmount) {
@@ -156,6 +158,7 @@ contract HoodieToken {
       hasDeposited: true,
       numOfHoodie: 0
     });
+    totalDeposited = totalDeposited.add(_depositAmount);
     totalWaitingUsers++;
     nextUserNumber++;
     return true;
@@ -170,6 +173,7 @@ contract HoodieToken {
       require(_setLastPosition(_user), "failed to update user info");
       totalWaitingUsers++;
     }
+    totalDeposited = totalDeposited.add(_depositAmount);
     return true;
   }
 
