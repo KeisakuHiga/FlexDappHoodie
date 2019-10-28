@@ -24,6 +24,7 @@ class App extends Component {
     balanceOfDai: 0,
     balanceOfRDai: 0,
     addressOfRDaiContract: null,
+    totalDeposited: 0,
     depositedAmount: 0,
 
     userApproved: null,
@@ -108,7 +109,10 @@ class App extends Component {
     const rDai = rDaiInstance.methods;
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
     const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
-    console.log('generatedInterestAmt', web3.utils.fromWei(generatedInterestAmt, 'ether'))
+    // const rHat = await rDai.getHatStats(hatID).call();
+    // const rHat = await rDai.getHatStats(hatID).call();
+    // console.log(rHat)
+    // console.log('totalDeposited', web3.utils.fromWei(rHat.totalLoans, 'ether'))
 
     // const receivedSavingsOf = await rDai.receivedSavingsOf(owner).call()
     // console.log('receivedSavingsOf', web3.utils.fromWei(receivedSavingsOf, 'ether'))
