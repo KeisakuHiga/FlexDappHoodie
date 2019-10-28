@@ -21,7 +21,7 @@ class RedeemForm extends Component {
   }
   handleApprove = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, daiInstance, accounts, balanceOfDai, redeemAmount }  = this.state
+    const { hoodieInstance, daiInstance, accounts, redeemAmount }  = this.state
     // const BNMax = new BigNumber(2).pow(256).minus(1)
     const hoodieAddress = hoodieInstance.options.address
     try {
