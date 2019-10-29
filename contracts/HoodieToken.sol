@@ -29,7 +29,7 @@ contract HoodieToken {
     uint32[] proportions;
     bool allowChange;
   }
-  Hat rDaiHat;
+  Hat public rDaiHat;
 
   uint256 public totalDaiDeposited = 0;
   uint256 public totalHoodiesIssued = 0;
@@ -50,11 +50,17 @@ contract HoodieToken {
     admin = msg.sender;
     DAIContract = IDai(_daiAddress);
     rDAIContract = IRToken(_rDaiAddress);
-
-    rDaiHat.owner = admin;
-    rDaiHat.recipients.push(admin);
-    rDaiHat.proportions.push(100);
-    rDaiHat.allowChange = false;
+    rDaiHat = Hat({
+      id: 0,
+      owner: admin,
+      recipients: [admin],
+      proportions: [100],
+      allowChange: false
+    });
+    // rDaiHat.owner = admin;
+    // rDaiHat.recipients = [admin];
+    // rDaiHat.proportions = [100];
+    // rDaiHat.allowChange = false;
     rDaiHat.id = rDAIContract.createHat(rDaiHat.recipients, rDaiHat.proportions, rDaiHat.allowChange);
   }
 

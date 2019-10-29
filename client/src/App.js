@@ -18,14 +18,14 @@ class App extends Component {
     daiInstance: null,
     rDaiInstance: null,
 
-    owner: null,
+    admin: null,
     hatID: null,
     numOfHoodie: 0, 
     balanceOfDai: 0,
     balanceOfRDai: 0,
     addressOfRDaiContract: null,
-    totalDeposited: 0,
-    depositedAmount: 0,
+    totalDaiDeposited: 0,
+    daiDeposited: 0,
 
     userApproved: null,
     allowance: 0,
@@ -33,7 +33,7 @@ class App extends Component {
     spender: null,
     generatedInterestAmt: 0,
     waitingUserNumber: 0,
-    hoodieReceivers: 0,
+    totalHoodiesIssued: 0,
     nextInLine: null,
 
   };
@@ -79,27 +79,29 @@ class App extends Component {
     // hoodie
     const contract = hoodieInstance.methods;
     const hoodieAddress = hoodieInstance.options.address;
-    const owner = await contract.owner().call();
-    const hatID = await contract.hatID().call();
-    const hoodieReceivers = await contract.hoodieReceivers().call();
-    const nextUserNumber = await contract.nextUserNumber().call();
-    console.log('nextUserNumber=> ', nextUserNumber)
+    const admin = await contract.admin().call();
+    const hat = await contract.rDaiHat().call();
+    console.log(hat.recipients)
+    const hatID = hat.id;
+    const totalHoodiesIssued = await contract.totalHoodiesIssued().call();
+    const nextQueuePosition = await contract.nextQueuePosition().call();
+    console.log('nextQueuePosition=> ', nextQueuePosition)
     
-    const userNumber = await contract.userNumbers(accounts[0]).call()
-    console.log("userNumber=> ", userNumber)
-    const user = await contract.users(userNumber).call()
+    const userPosition = await contract.userQueuePositions(accounts[0]).call()
+    console.log("userPosition=> ", userPosition)
+    const user = await contract.users(userPosition).call()
     console.log(user);
     const isWaiting = user.isWaiting
-    const depositedAmount = user.depositedAmount
+    const daiDeposited = user.daiDeposited
     
-    const recipientNumber = await contract.recipientNumber().call();
-    console.log('recipientNumber=> ', recipientNumber)
-    const nextInLineUser = await contract.users(recipientNumber).call()
+    const nextRecipientIndex = await contract.nextRecipientIndex().call();
+    console.log('nextRecipientIndex=> ', nextRecipientIndex)
+    const nextInLineUser = await contract.users(nextRecipientIndex).call()
     const nextInLine = nextInLineUser.userAddress
-    const totalDeposited = await contract.totalDeposited().call();
-    console.log('totalDeposited', web3.utils.fromWei(totalDeposited, 'ether'))
-    this.setState({ hoodieAddress, owner, hatID, isWaiting, depositedAmount, 
-                    hoodieReceivers, nextInLine
+    const totalDaiDeposited = await contract.totalDaiDeposited().call();
+    console.log('totalDaiDeposited', web3.utils.fromWei(totalDaiDeposited, 'ether'))
+    this.setState({ hoodieAddress, admin, hatID, isWaiting, daiDeposited, 
+                    totalHoodiesIssued, nextInLine
                   })
 
     // dai
@@ -109,12 +111,12 @@ class App extends Component {
     // rDai
     const rDai = rDaiInstance.methods;
     const balanceOfRDai = await rDai.balanceOf(accounts[0]).call();
-    const generatedInterestAmt = await rDai.interestPayableOf(owner).call();
+    const generatedInterestAmt = await rDai.interestPayableOf(admin).call();
 
 
-    // const receivedSavingsOf = await rDai.receivedSavingsOf(owner).call()
+    // const receivedSavingsOf = await rDai.receivedSavingsOf(admin).call()
     // console.log('receivedSavingsOf', web3.utils.fromWei(receivedSavingsOf, 'ether'))
-    // const receivedLoanOf = await rDai.receivedLoanOf(owner).call();
+    // const receivedLoanOf = await rDai.receivedLoanOf(admin).call();
     // console.log('receivedLoanOf', web3.utils.fromWei(receivedLoanOf, 'ether'))
     // console.log('difference: ', receivedSavingsOf - receivedLoanOf)
     
@@ -123,14 +125,14 @@ class App extends Component {
 
   handleApprove = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, daiInstance, rDaiInstance, accounts, balanceOfDai, hatID, owner }  = this.state
+    const { hoodieInstance, daiInstance, rDaiInstance, accounts, balanceOfDai, hatID, admin }  = this.state
     // const BNMax = new BigNumber(2).pow(256).minus(1)
     const hoodieAddress = hoodieInstance.options.address
     try {
       await daiInstance.methods.approve(hoodieAddress, balanceOfDai).send({ from: accounts[0] });
       this.setState({ userApproved: true })
       await rDaiInstance.methods.changeHat(hatID).send({ from: accounts[0] });
-      // await rDaiInstance.methods.payInterest(owner).send({ from: accounts[0] });
+      // await rDaiInstance.methods.payInterest(admin).send({ from: accounts[0] });
       
       
     } catch (err) {
@@ -139,9 +141,9 @@ class App extends Component {
   }
 
   render() {
-    const { web3, accounts, hoodieInstance, daiInstance, owner, hatID, balanceOfDai, balanceOfRDai, userApproved,
+    const { web3, accounts, hoodieInstance, daiInstance, admin, hatID, balanceOfDai, balanceOfRDai, userApproved,
             rDaiInstance, addressOfRDaiContract, generatedInterestAmt, allowance, hoodieAddress,
-            hoodieReceivers, isWaiting, depositedAmount, numOfHoodie, nextInLine,
+            totalHoodiesIssued, isWaiting, daiDeposited, numOfHoodie, nextInLine,
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -152,10 +154,10 @@ class App extends Component {
         <div>
           <h1>Welcome to Flex Hoodie dapp!</h1>
           <h1>Deposit your DAI and get Hoodie!</h1>
-          <p>Owner is {owner} and the Hat ID is {hatID}</p>
+          <p>admin is {admin} and the Hat ID is {hatID}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
-          <p>Your depositedAmount is {web3.utils.fromWei(`${depositedAmount}`, 'ether')}</p>
+          <p>Your daiDeposited is {web3.utils.fromWei(`${daiDeposited}`, 'ether')}</p>
           <p>Are you waiting for FDH? => {`${isWaiting}`}</p>
           <br />
 
@@ -176,7 +178,7 @@ class App extends Component {
           <br />
 
           <h3>Info of Hoodie DApp --- { hoodieAddress }</h3>
-          <p>Num of hoodie receivers: { hoodieReceivers }</p>
+          <p>Num of hoodie receivers: { totalHoodiesIssued }</p>
           <p>Next receiver >>>> { nextInLine }</p>
         </div>
 
@@ -199,7 +201,7 @@ class App extends Component {
           hoodieInstance={hoodieInstance}
           rDaiInstance={rDaiInstance}
           accounts={accounts}
-          depositedAmount={depositedAmount}
+          daiDeposited={daiDeposited}
         />
 
         <br />

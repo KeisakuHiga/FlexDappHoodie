@@ -10,18 +10,18 @@ class DepositForm extends Component {
     const { hoodieInstance, hatID, accounts } = this.props
     const { depositAmount }  = this.state
     const contract = hoodieInstance.methods;
-    const userNumber = await contract.userNumbers(accounts[0]).call()
+    const userNumber = await contract.userQueuePositions(accounts[0]).call()
     const user = await contract.users(userNumber).call()
     const isWaiting = user.isWaiting
-    const depositedAmount = user.depositedAmount
+    const daiDeposited = user.daiDeposited
     const hasDeposited = user.hasDeposited
     try {
       console.log('start to mint rDai')
-      console.log("depositedAmount=> ",depositedAmount)
+      console.log("daiDeposited=> ",daiDeposited)
       console.log("hatID=> ",hatID)
       console.log("isWaiting=> ",isWaiting)
       console.log("hasDeposited=> ",hasDeposited)
-      await contract.depositDAI(depositAmount).send({ from: accounts[0] } )
+      await contract.depositDai(depositAmount).send({ from: accounts[0] } )
       .on('transactionHash', hash => { console.log('Tx Hash: ' + hash) })
     } catch (err) {
       console.log(err.message);

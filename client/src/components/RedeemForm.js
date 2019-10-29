@@ -6,7 +6,7 @@ class RedeemForm extends Component {
     hoodieInstance: this.props.hoodieInstance,
     rDaiInstance: this.props.rDaiInstance,
     accounts: this.props.accounts,
-    depositedAmount: 0,
+    daiDeposited: 0,
     redeemAmount: 0,
     transactionHash: null,
     approved: false,
@@ -14,10 +14,10 @@ class RedeemForm extends Component {
 
   componentDidMount = async e => {
     const { hoodieInstance, accounts } = this.state;
-    const userNumber = await hoodieInstance.methods.userNumbers(accounts[0]).call()
-    const user = await hoodieInstance.methods.users(userNumber).call()
-    const depositedAmount = user.depositedAmount
-    this.setState({ depositedAmount })
+    const userQueuePosition = await hoodieInstance.methods.userQueuePositions(accounts[0]).call()
+    const user = await hoodieInstance.methods.users(userQueuePosition).call()
+    const daiDeposited = user.daiDeposited
+    this.setState({ daiDeposited })
   }
   handleApprove = async (e) => {
     e.preventDefault()
@@ -34,7 +34,7 @@ class RedeemForm extends Component {
 
   handleRedeemRDai = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, rDaiInstance, depositedAmount, redeemAmount, accounts }  = this.state
+    const { hoodieInstance, rDaiInstance, daiDeposited, redeemAmount, accounts }  = this.state
     const hoodieAddress = hoodieInstance.options.address
     const balanceOfRDai = await rDaiInstance.methods.balanceOf(accounts[0]).call();
     const rDaiAllowance = await rDaiInstance.methods.allowance(accounts[0], hoodieAddress).call();
@@ -44,10 +44,10 @@ class RedeemForm extends Component {
     try {
       console.log('start to redeem rDai')
       console.log('redeemAmount: ', {redeemAmount})
-      console.log({depositedAmount})
+      console.log({daiDeposited})
       console.log({balanceOfRDai})
       console.log({address: hoodieAddress})
-      if(depositedAmount - redeemAmount < 0) {
+      if(daiDeposited - redeemAmount < 0) {
         throw({ message: 'over redeem amount' })
       } else {
         if (rDaiAllowance < redeemAmount) {
