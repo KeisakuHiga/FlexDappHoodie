@@ -48,14 +48,13 @@ contract HoodieToken {
 
   constructor(address _daiAddress, address _rDaiAddress) public {
     admin = msg.sender;
-    rDaiHat = Hat({
-      owner: msg.sender,
-      recipients: [owner],
-      proportions: [100],
-      allowChange: false
-    });
     DAIContract = IDai(_daiAddress);
     rDAIContract = IRToken(_rDaiAddress);
+
+    rDaiHat.owner = admin;
+    rDaiHat.recipients.push(admin);
+    rDaiHat.proportions.push(100);
+    rDaiHat.allowChange = false;
     rDaiHat.id = rDAIContract.createHat(rDaiHat.recipients, rDaiHat.proportions, rDaiHat.allowChange);
   }
 
@@ -102,17 +101,17 @@ contract HoodieToken {
     // check the user is waiting and if not, the next user will become the recipient
     bool nextRecipientExists = _setNextRecipient();
     if (!nextRecipientExists) {
-      require(rDAIContract.payInterest(owner), "failded payInterest()");
+      require(rDAIContract.payInterest(admin), "failded payInterest()");
       return true;
     } else {
       User storage recipient = users[nextRecipientIndex];
       // test
-      require(rDAIContract.interestPayableOf(owner) > 0, "the interest amount has not reached 20 rDAI yet");
+      require(rDAIContract.interestPayableOf(admin) > 0, "the interest amount has not reached 20 rDAI yet");
       // check whether or not the generated interest amount reached 20 rDAI
-      // require(rDAIContract.interestPayableOf(owner) >= interestRequiredForHoodie, "the interest amount has not reached 20 rDAI yet");
+      // require(rDAIContract.interestPayableOf(admin) >= interestRequiredForHoodie, "the interest amount has not reached 20 rDAI yet");
 
       require(_validateUserHatAndRDaiBalance(recipient.userAddress), "user does not have the hoodie hat");
-      require(rDAIContract.payInterest(owner), "failded payInterest()");
+      require(rDAIContract.payInterest(admin), "failded payInterest()");
 
       // give a hoodie to the recipient and increment the global variables
       recipient.hoodiesReceived++;
@@ -153,7 +152,7 @@ contract HoodieToken {
     // dapp approves rDAI contract to transfer dapp's DAI
     require(DAIContract.approve(address(rDAIContract), _depositAmount), "approve() invalid");
     // dapp invoke mint() and get rDAI
-    require(rDAIContract.mintWithSelectedHat(_depositAmount, hatID), "minting failed");
+    require(rDAIContract.mintWithSelectedHat(_depositAmount, rDaiHat.id), "minting failed");
     // dapp transfer rDAI to user
     require(rDAIContract.transferFrom(address(this), msg.sender, _depositAmount), "Transfer rDAI to user failed");
     return true;
