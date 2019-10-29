@@ -22,14 +22,10 @@ contract HoodieToken {
   IRToken public rDAIContract;
 
   // Hat setting (rDAI settings)
-  struct Hat {
-    uint256 id;
-    address owner;
-    address[] recipients;
-    uint32[] proportions;
-    bool allowChange;
-  }
-  Hat public rDaiHat;
+  uint256 public rDaiHatId;
+  address[] public recipients;
+  uint32[] public proportions;
+  bool public allowChange = false;
 
   uint256 public totalDaiDeposited = 0;
   uint256 public totalHoodiesIssued = 0;
@@ -50,18 +46,11 @@ contract HoodieToken {
     admin = msg.sender;
     DAIContract = IDai(_daiAddress);
     rDAIContract = IRToken(_rDaiAddress);
-    rDaiHat = Hat({
-      id: 0,
-      owner: admin,
-      recipients: [admin],
-      proportions: [100],
-      allowChange: false
-    });
-    // rDaiHat.owner = admin;
-    // rDaiHat.recipients = [admin];
-    // rDaiHat.proportions = [100];
-    // rDaiHat.allowChange = false;
-    rDaiHat.id = rDAIContract.createHat(rDaiHat.recipients, rDaiHat.proportions, rDaiHat.allowChange);
+
+    // rDaiHat setting
+    recipients.push(admin);
+    proportions.push(100);
+    rDaiHatId = rDAIContract.createHat(recipients, proportions, allowChange);
   }
 
   function depositDai(uint256 depositAmount) public returns (bool) {
@@ -133,13 +122,13 @@ contract HoodieToken {
   }
 
   function updateDaiContractAddress(address daiContractAddress) public returns (bool) {
-    require(msg.sender == admin, "only owner can invoke this function");
+    require(msg.sender == admin, "only admin can invoke this function");
     DAIContract = IDai(daiContractAddress);
     return true;
   }
 
   function updateRDaiContractAddress(address rDaiContractAddress) public returns (bool) {
-    require(msg.sender == admin, "only owner can invoke this function");
+    require(msg.sender == admin, "only admin can invoke this function");
     rDAIContract = IRToken(rDaiContractAddress);
     return true;
   }
@@ -158,7 +147,7 @@ contract HoodieToken {
     // dapp approves rDAI contract to transfer dapp's DAI
     require(DAIContract.approve(address(rDAIContract), _depositAmount), "approve() invalid");
     // dapp invoke mint() and get rDAI
-    require(rDAIContract.mintWithSelectedHat(_depositAmount, rDaiHat.id), "minting failed");
+    require(rDAIContract.mintWithSelectedHat(_depositAmount, rDaiHatId), "minting failed");
     // dapp transfer rDAI to user
     require(rDAIContract.transferFrom(address(this), msg.sender, _depositAmount), "Transfer rDAI to user failed");
     return true;
@@ -219,8 +208,8 @@ contract HoodieToken {
     address _firstUserHatRecipient = _userHatRecipients[0];
     uint32 _firstUserHatProportion = _userHatProportions[0];
 
-    require(_userHatId == rDaiHat.id, "user does not have the same hat as the hoodie contract's");
-    require(_firstUserHatRecipient == rDaiHat.owner, "No much with the owner address");
+    require(_userHatId == rDaiHatId, "user does not have the same hat as the hoodie contract's");
+    require(_firstUserHatRecipient == admin, "No much with the admin address");
     require(_firstUserHatProportion == 2 ** 32 - 1, "No much with the proportion");
 
     // 2. check whether or not a user's rDAI balance is the same as hoodie contract's

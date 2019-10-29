@@ -19,8 +19,8 @@ class App extends Component {
     rDaiInstance: null,
 
     admin: null,
-    hatID: null,
-    numOfHoodie: 0, 
+    rDaiHatId: null,
+    hoodiesReceived: 0, 
     balanceOfDai: 0,
     balanceOfRDai: 0,
     addressOfRDaiContract: null,
@@ -80,9 +80,10 @@ class App extends Component {
     const contract = hoodieInstance.methods;
     const hoodieAddress = hoodieInstance.options.address;
     const admin = await contract.admin().call();
-    const hat = await contract.rDaiHat().call();
-    console.log(hat.recipients)
-    const hatID = hat.id;
+    const rDaiHatId = await contract.rDaiHatId().call();
+    const proportions = await contract.proportions(0).call();
+    console.log(proportions)
+
     const totalHoodiesIssued = await contract.totalHoodiesIssued().call();
     const nextQueuePosition = await contract.nextQueuePosition().call();
     console.log('nextQueuePosition=> ', nextQueuePosition)
@@ -100,7 +101,7 @@ class App extends Component {
     const nextInLine = nextInLineUser.userAddress
     const totalDaiDeposited = await contract.totalDaiDeposited().call();
     console.log('totalDaiDeposited', web3.utils.fromWei(totalDaiDeposited, 'ether'))
-    this.setState({ hoodieAddress, admin, hatID, isWaiting, daiDeposited, 
+    this.setState({ hoodieAddress, admin, rDaiHatId, isWaiting, daiDeposited, 
                     totalHoodiesIssued, nextInLine
                   })
 
@@ -114,8 +115,8 @@ class App extends Component {
     const generatedInterestAmt = await rDai.interestPayableOf(admin).call();
 
 
-    // const receivedSavingsOf = await rDai.receivedSavingsOf(admin).call()
-    // console.log('receivedSavingsOf', web3.utils.fromWei(receivedSavingsOf, 'ether'))
+    const getHatByID = await rDai.getHatByID(rDaiHatId).call()
+    console.log(getHatByID)
     // const receivedLoanOf = await rDai.receivedLoanOf(admin).call();
     // console.log('receivedLoanOf', web3.utils.fromWei(receivedLoanOf, 'ether'))
     // console.log('difference: ', receivedSavingsOf - receivedLoanOf)
@@ -125,13 +126,13 @@ class App extends Component {
 
   handleApprove = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, daiInstance, rDaiInstance, accounts, balanceOfDai, hatID, admin }  = this.state
+    const { hoodieInstance, daiInstance, rDaiInstance, accounts, balanceOfDai, rDaiHatId, admin }  = this.state
     // const BNMax = new BigNumber(2).pow(256).minus(1)
     const hoodieAddress = hoodieInstance.options.address
     try {
       await daiInstance.methods.approve(hoodieAddress, balanceOfDai).send({ from: accounts[0] });
       this.setState({ userApproved: true })
-      await rDaiInstance.methods.changeHat(hatID).send({ from: accounts[0] });
+      await rDaiInstance.methods.changeHat(rDaiHatId).send({ from: accounts[0] });
       // await rDaiInstance.methods.payInterest(admin).send({ from: accounts[0] });
       
       
@@ -141,9 +142,9 @@ class App extends Component {
   }
 
   render() {
-    const { web3, accounts, hoodieInstance, daiInstance, admin, hatID, balanceOfDai, balanceOfRDai, userApproved,
+    const { web3, accounts, hoodieInstance, daiInstance, admin, rDaiHatId, balanceOfDai, balanceOfRDai, userApproved,
             rDaiInstance, addressOfRDaiContract, generatedInterestAmt, allowance, hoodieAddress,
-            totalHoodiesIssued, isWaiting, daiDeposited, numOfHoodie, nextInLine,
+            totalHoodiesIssued, isWaiting, daiDeposited, hoodiesReceived, nextInLine,
           } = this.state
     if (!web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -154,7 +155,7 @@ class App extends Component {
         <div>
           <h1>Welcome to Flex Hoodie dapp!</h1>
           <h1>Deposit your DAI and get Hoodie!</h1>
-          <p>admin is {admin} and the Hat ID is {hatID}</p>
+          <p>admin is {admin} and the Hat ID is {rDaiHatId}</p>
           <p>Your DAI balance is {web3.utils.fromWei(`${balanceOfDai}`, 'ether')}</p>
           <p>Your rDAI balance is {web3.utils.fromWei(`${balanceOfRDai}`, 'ether')}</p>
           <p>Your daiDeposited is {web3.utils.fromWei(`${daiDeposited}`, 'ether')}</p>
@@ -191,7 +192,7 @@ class App extends Component {
           rDaiInstance={rDaiInstance}
           addressOfRDaiContract={addressOfRDaiContract}
           accounts={accounts}
-          hatID={hatID}
+          rDaiHatId={rDaiHatId}
         />
 
         <br />
