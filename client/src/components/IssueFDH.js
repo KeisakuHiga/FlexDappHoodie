@@ -16,7 +16,7 @@ class IssueFDH extends Component {
     // if(generatedInterestAmt >= 20 * 10 ** 18) {
       if(generatedInterestAmt >= 0) {
         try {
-          await hoodieInstance.methods.issueFDH().send({ from: accounts[0] })
+          await hoodieInstance.methods.issueHoodie().send({ from: accounts[0] })
             .on('transactionHash', hash => {
               this.setState({ txHash: hash })
               console.log('Tx Hash: ' + hash)

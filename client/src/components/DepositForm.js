@@ -7,7 +7,7 @@ class DepositForm extends Component {
 
   handleMintRDai = async (e) => {
     e.preventDefault()
-    const { hoodieInstance, hatID, accounts } = this.props
+    const { hoodieInstance, rDaiHatId, accounts } = this.props
     const { depositAmount }  = this.state
     const contract = hoodieInstance.methods;
     const userNumber = await contract.userQueuePositions(accounts[0]).call()
@@ -18,7 +18,7 @@ class DepositForm extends Component {
     try {
       console.log('start to mint rDai')
       console.log("daiDeposited=> ",daiDeposited)
-      console.log("hatID=> ",hatID)
+      console.log("rDaiHatId=> ",rDaiHatId)
       console.log("isWaiting=> ",isWaiting)
       console.log("hasDeposited=> ",hasDeposited)
       await contract.depositDai(depositAmount).send({ from: accounts[0] } )

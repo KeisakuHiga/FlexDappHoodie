@@ -82,7 +82,7 @@ class App extends Component {
     const admin = await contract.admin().call();
     const rDaiHatId = await contract.rDaiHatId().call();
     const proportions = await contract.proportions(0).call();
-    console.log(proportions)
+    // console.log(proportions)
 
     const totalHoodiesIssued = await contract.totalHoodiesIssued().call();
     const nextQueuePosition = await contract.nextQueuePosition().call();
@@ -116,7 +116,7 @@ class App extends Component {
 
 
     const getHatByID = await rDai.getHatByID(rDaiHatId).call()
-    console.log(getHatByID)
+    // console.log(getHatByID)
     // const receivedLoanOf = await rDai.receivedLoanOf(admin).call();
     // console.log('receivedLoanOf', web3.utils.fromWei(receivedLoanOf, 'ether'))
     // console.log('difference: ', receivedSavingsOf - receivedLoanOf)
