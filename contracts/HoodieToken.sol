@@ -6,131 +6,145 @@ import "./IRToken.sol";
 contract HoodieToken {
   using SafeMath for uint256;
 
+  address public admin;
+
   struct User {
     address userAddress;
-    uint256 depositedAmount;
+    uint256 daiDeposited;
     bool isWaiting;
     bool hasDeposited;
-    uint256 numOfHoodie;
+    uint256 hoodiesReceived;
   }
+
   // Instantiate DAIContract with DAI address on rinkeby
   // Instantiate rDAIContract with rDAI address on rinkeby
   IDai public DAIContract;
   IRToken public rDAIContract;
 
-  // Hat setting
-  uint256 public hatID;
-  address public owner;
-  address[] public recipients;
-  uint32[] public proportions;
-  bool public doChangeHat = true;
+  // Hat setting (rDAI settings)
+  struct Hat {
+    uint256 id;
+    address owner;
+    address[] recipients;
+    uint32[] proportions;
+    bool allowChange;
+  }
+  Hat rDaiHat;
 
-  uint256 public totalDeposited = 0;
-  uint256 public hoodieReceivers = 0;
-  uint256 public minimumDepositAmount = 1 * 10 ** 18; // for test
-  uint256 public hoodieCost = 20 * 10 ** 18;
+  uint256 public totalDaiDeposited = 0;
+  uint256 public totalHoodiesIssued = 0;
+  uint256 public minimumDaiDepositAmount = 1 * 10 ** 18; // for test
+  uint256 public interestRequiredForHoodie = 20 * 10 ** 18;
 
   uint256 public totalWaitingUsers = 0;
-  uint256 public recipientNumber = 1;
-  uint256 public nextUserNumber = 1;
-  mapping(address => uint256) public userNumbers;
+  uint256 public nextRecipientIndex = 1;
+  uint256 public nextQueuePosition = 1;
+  mapping(address => uint256) public userQueuePositions;
   mapping(uint256 => User) public users;
-  address public nextInLine = users[recipientNumber].userAddress;
 
-  event Deposited(address user, uint256 depositedAmount);
-  event Redeemed(address user, uint256 newDepositedAmount);
-  event IssuedFDH(address recipient);
+  event Deposit(address user, uint256 daiDeposited);
+  event Redeem(address user, uint256 newDaiDeposited);
+  event IssueHoodie(address recipient);
 
-  constructor() public {
-    owner = msg.sender;
-    recipients.push(owner);
-    proportions.push(100);
-    DAIContract = IDai(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
-    rDAIContract = IRToken(0x6AA5c6aB94403Bdbbf74f21607D46Be631E6CcC5);
-    hatID = rDAIContract.createHat(recipients, proportions, doChangeHat);
+  constructor(address _daiAddress, address _rDaiAddress) public {
+    admin = msg.sender;
+    rDaiHat = Hat({
+      owner: msg.sender,
+      recipients: [owner],
+      proportions: [100],
+      allowChange: false
+    });
+    DAIContract = IDai(_daiAddress);
+    rDAIContract = IRToken(_rDaiAddress);
+    rDaiHat.id = rDAIContract.createHat(rDaiHat.recipients, rDaiHat.proportions, rDaiHat.allowChange);
   }
 
-  // function getTotalDeposited() public view returns (uint256) {
+  // function getTotalDaiDeposited() public view returns (uint256) {
   //   return rDAIContract.getHatStats(hatID).totalLoans;
   // }
 
-  function depositDAI(uint256 depositAmount) public returns (bool) {
-    uint256 userNumber = userNumbers[msg.sender];
-    User memory user = users[userNumber];
+  function depositDai(uint256 depositAmount) public returns (bool) {
+    uint256 userPosition = userQueuePositions[msg.sender];
+    User memory user = users[userPosition];
     if(!user.hasDeposited) {
       // new user
-      require(depositAmount >= minimumDepositAmount, "Deposit amount should be equal to / greater than 200DAI");
+      require(depositAmount >= minimumDaiDepositAmount, "Deposit amount should be equal to / greater than 200DAI");
       require(_mintRDai(depositAmount), "mining rDAI failed");
-      require(_createNewUser(depositAmount), "failded to add the user again to the waiting list");
+      require(_addNewUserToQueue(depositAmount), "failded to add the user again to the waiting list");
     } else {
       // existing user
       require(_mintRDai(depositAmount), "failed to mint rDAI");
-      require(_topUpDAI(depositAmount), "failed to top up DAI");
+      require(_topUpDai(depositAmount), "failed to top up DAI");
     }
-    emit Deposited(msg.sender, depositAmount);
+    emit Deposit(msg.sender, depositAmount);
     return true;
   }
 
   function redeemRDai(uint256 redeemAmount) public returns (bool) {
-    uint256 userNumber = userNumbers[msg.sender];
-    User storage user = users[userNumber];
+    uint256 userPosition = userQueuePositions[msg.sender];
+    User storage user = users[userPosition];
     // check whether or not the user has enough rDAI to redeem
-    require(user.depositedAmount >= redeemAmount, "insufficient amount of rDAI");
+    require(user.daiDeposited >= redeemAmount, "insufficient amount of rDAI");
     // transfer rDAI from user's account to Hoodie contract
     require(rDAIContract.transferFrom(msg.sender, address(this), redeemAmount), "Transfer rDAI to Hoodie contract failed");
     // use redeem => transfer rDAI to user => update user info
     require(rDAIContract.redeem(redeemAmount), "redeem() failed");
     require(DAIContract.transfer(msg.sender, redeemAmount), "Transfer DAI to user failed");
-    user.depositedAmount = user.depositedAmount.sub(redeemAmount);
-    totalDeposited = totalDeposited.sub(redeemAmount);
+    user.daiDeposited = user.daiDeposited.sub(redeemAmount);
+    totalDaiDeposited = totalDaiDeposited.sub(redeemAmount);
 
-    // if user's depositedAmount become below than the minimumDepositAmount, it will be removed from the waiting list
-    if (user.depositedAmount < minimumDepositAmount) {
+    // if user's daiDeposited become below than the minimumDaiDepositAmount, it will be removed from the waiting list
+    if (user.daiDeposited < minimumDaiDepositAmount) {
       user.isWaiting = false;
       totalWaitingUsers--;
     }
-    emit Redeemed(msg.sender, user.depositedAmount);
+    emit Redeem(msg.sender, user.daiDeposited);
     return true;
   }
 
-  function issueFDH() public returns (bool) {
+  function issueHoodie() public returns (bool) {
     // check the user is waiting and if not, the next user will become the recipient
-    if (_findRecipient() == false) {
+    bool nextRecipientExists = _setNextRecipient();
+    if (!nextRecipientExists) {
       require(rDAIContract.payInterest(owner), "failded payInterest()");
       return true;
     } else {
-      User storage recipient = users[recipientNumber];
+      User storage recipient = users[nextRecipientIndex];
       // test
       require(rDAIContract.interestPayableOf(owner) > 0, "the interest amount has not reached 20 rDAI yet");
       // check whether or not the generated interest amount reached 20 rDAI
-      // require(rDAIContract.interestPayableOf(owner) >= hoodieCost, "the interest amount has not reached 20 rDAI yet");
+      // require(rDAIContract.interestPayableOf(owner) >= interestRequiredForHoodie, "the interest amount has not reached 20 rDAI yet");
 
-      require(_checkUserHatAndRDaiBalance(recipient.userAddress), "user does not have the hoodie hat");
+      require(_validateUserHatAndRDaiBalance(recipient.userAddress), "user does not have the hoodie hat");
       require(rDAIContract.payInterest(owner), "failded payInterest()");
 
       // give a hoodie to the recipient and increment the global variables
-      recipient.numOfHoodie++;
-      hoodieReceivers++;
-      recipientNumber++;
+      recipient.hoodiesReceived++;
+      totalHoodiesIssued++;
+      nextRecipientIndex++;
 
       // set user as the last position of the waiting list
-      require(_setLastPosition(recipient), "failed to update user info");
+      require(_moveUserToBackOfQueue(recipient), "failed to update user info");
 
-      emit IssuedFDH(recipient.userAddress);
+      emit IssueHoodie(recipient.userAddress);
       return true;
     }
   }
 
-  function switchDaiContractAddress(address daiContractAddress) public returns (bool) {
-    require(msg.sender == owner, "only owner can invoke this function");
+  function updateDaiContractAddress(address daiContractAddress) public returns (bool) {
+    require(msg.sender == admin, "only owner can invoke this function");
     DAIContract = IDai(daiContractAddress);
     return true;
   }
 
-  function switchRDaiContractAddress(address rDaiContractAddress) public returns (bool) {
-    require(msg.sender == owner, "only owner can invoke this function");
+  function updateRDaiContractAddress(address rDaiContractAddress) public returns (bool) {
+    require(msg.sender == admin, "only owner can invoke this function");
     rDAIContract = IRToken(rDaiContractAddress);
     return true;
+  }
+
+  function getNextRecipientAddress() public view returns (address) {
+    return users[nextRecipientIndex].userAddress;
   }
 
   ////////////////////////
@@ -149,84 +163,84 @@ contract HoodieToken {
     return true;
   }
 
-  function _createNewUser(uint256 _depositAmount) internal returns (bool) {
-    userNumbers[msg.sender] = nextUserNumber;
-    users[nextUserNumber] = User({
+  function _addNewUserToQueue(uint256 _depositAmount) internal returns (bool) {
+    userQueuePositions[msg.sender] = nextQueuePosition;
+    users[nextQueuePosition] = User({
       userAddress: msg.sender,
-      depositedAmount: _depositAmount,
+      daiDeposited: _depositAmount,
       isWaiting: true,
       hasDeposited: true,
-      numOfHoodie: 0
+      hoodiesReceived: 0
     });
-    totalDeposited = totalDeposited.add(_depositAmount);
+    totalDaiDeposited = totalDaiDeposited.add(_depositAmount);
     totalWaitingUsers++;
-    nextUserNumber++;
+    nextQueuePosition++;
     return true;
   }
 
-  function _topUpDAI(uint256 _depositAmount) internal returns (bool) {
-    uint256 userNumber = userNumbers[msg.sender];
+  function _topUpDai(uint256 _depositAmount) internal returns (bool) {
+    uint256 userNumber = userQueuePositions[msg.sender];
     User storage _user = users[userNumber];
-    _user.depositedAmount = _user.depositedAmount.add(_depositAmount);
+    _user.daiDeposited = _user.daiDeposited.add(_depositAmount);
 
-    if(_user.depositedAmount >= minimumDepositAmount && !_user.isWaiting) {
-      require(_setLastPosition(_user), "failed to update user info");
+    if(_user.daiDeposited >= minimumDaiDepositAmount && !_user.isWaiting) {
+      require(_moveUserToBackOfQueue(_user), "failed to update user info");
       totalWaitingUsers++;
     }
-    totalDeposited = totalDeposited.add(_depositAmount);
+    totalDaiDeposited = totalDaiDeposited.add(_depositAmount);
     return true;
   }
 
-  function _setLastPosition(User memory _user) internal returns (bool) {
-    userNumbers[_user.userAddress] = nextUserNumber;
-    users[nextUserNumber] = User({
+  function _moveUserToBackOfQueue(User memory _user) internal returns (bool) {
+    userQueuePositions[_user.userAddress] = nextQueuePosition;
+    users[nextQueuePosition] = User({
       userAddress: _user.userAddress,
-      depositedAmount: _user.depositedAmount,
+      daiDeposited: _user.daiDeposited,
       isWaiting: true,
       hasDeposited: true,
-      numOfHoodie: _user.numOfHoodie
+      hoodiesReceived: _user.hoodiesReceived
     });
-    nextUserNumber++;
+    nextQueuePosition++;
     return true;
   }
 
-  function _checkUserHatAndRDaiBalance(address _userAddress) internal view returns (bool) {
-    uint256 _userNumber = userNumbers[_userAddress];
-    User memory _user = users[_userNumber];
+  function _validateUserHatAndRDaiBalance(address _userAddress) internal view returns (bool) {
+    uint256 _userPosition = userQueuePositions[_userAddress];
+    User memory _user = users[_userPosition];
 
     // 1. check whether or not a user has the hoodie hat
     uint256 _userHatId;
-    address[] memory _recipientsFromUser;
-    uint32[] memory _proportionsFromUser;
+    address[] memory _userHatRecipients;
+    uint32[] memory _userHatProportions;
 
-    (_userHatId, _recipientsFromUser, _proportionsFromUser) = rDAIContract.getHatByAddress(_userAddress);
-    
-    address _recipientFromUser = _recipientsFromUser[0];
-    uint32 _proportionFromUser = _proportionsFromUser[0];
+    (_userHatId, _userHatRecipients, _userHatProportions) = rDAIContract.getHatByAddress(_userAddress);
 
-    require(_userHatId == hatID, "user does not have the same hat as the hoodie contract's");
-    require(_recipientFromUser == owner, "No much with the owner address");
-    require(_proportionFromUser == 2 ** 32 - 1, "No much with the proportion");
-    
+    address _firstUserHatRecipient = _userHatRecipients[0];
+    uint32 _firstUserHatProportion = _userHatProportions[0];
+
+    require(_userHatId == rDaiHat.id, "user does not have the same hat as the hoodie contract's");
+    require(_firstUserHatRecipient == rDaiHat.owner, "No much with the owner address");
+    require(_firstUserHatProportion == 2 ** 32 - 1, "No much with the proportion");
+
     // 2. check whether or not a user's rDAI balance is the same as hoodie contract's
-    uint256 _rDaiBalance = rDAIContract.balanceOf(_userAddress);
-    require(_rDaiBalance >= _user.depositedAmount, "user's rDAI balance is smaller than the hoodie contract's");
+    uint256 _userRDaiBalance = rDAIContract.balanceOf(_userAddress);
+    require(_userRDaiBalance >= _user.daiDeposited, "user's rDAI balance is smaller than the hoodie contract's");
 
     return true;
   }
 
-  function _findRecipient() internal returns (bool) {
-    uint256 i = recipientNumber;
-    for (i; i <= nextUserNumber; i++) {
+  function _setNextRecipient() internal returns (bool) {
+    uint256 i = nextRecipientIndex;
+    for (i; i <= nextQueuePosition; i++) {
       User memory user = users[i];
-      if (user.isWaiting && i == recipientNumber) {
+      if (user.isWaiting && i == nextRecipientIndex) {
         return true;
-      } else if (user.isWaiting && i != recipientNumber) {
-        recipientNumber = i;
+      } else if (user.isWaiting && i != nextRecipientIndex) {
+        nextRecipientIndex = i;
         return true;
       }
     }
-    recipientNumber = nextUserNumber;
+    nextRecipientIndex = nextQueuePosition;
     return false;
   }
 }
