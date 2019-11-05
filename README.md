@@ -1,6 +1,8 @@
 # Hoodie DApp overview
 This dapp was built by Keisaku Higa while his internship at [Flex Dapps](https://flexdapps.com/about). This dapp's smart contract utilizes [rToken contract](https://github.com/decentral-ee/rtoken-contracts) and [Compound](https://github.com/compound-finance) so that the users can deposit their DAI into this dapp to earn interest from Compound protocol. The generated interest will be transferred to Flex Dapps' account using rTokenContract. After the generated interest amount reaches the certain level, Flex Dapps will issue their original hoodies to users who deposited DAI into this dapp.
 
+* Here is the dapp's prototype: https://frosty-bardeen-857d6e.netlify.com/
+
 ## Smart Contracts' Address on Rinkeby test network (links to rinkeby.etherscan.io)
 * Hoodie contract address: [0x890787cd8ea42C24c09E2c2565e4424429653925](https://rinkeby.etherscan.io/address/0x890787cd8ea42C24c09E2c2565e4424429653925)
 * DAI contract address: [0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa](https://rinkeby.etherscan.io/address/0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa)
