@@ -1,17 +1,8 @@
-# Hoodie contract
-This contract utilizes [rToken contract](https://github.com/decentral-ee/rtoken-contracts) and [Compound](https://github.com/compound-finance). Users will deposit their DAI into this dapp and can get an original hoodie from [Flex Dapps](https://flexdapps.com/about) when the generated interest amount reaches the hoodie cost.
+# Hoodie DApp overview
+This dapp was built by Keisaku Higa for [Flex Dapps](https://flexdapps.com/about) while his internship. This dapp's smart contract utilizes [rToken contract](https://github.com/decentral-ee/rtoken-contracts) and [Compound](https://github.com/compound-finance) so that the users can deposit their DAI into this dapp to earn interest from Compound protocol. The generated interest will be transferred to Flex Dapps' account using rTokenContract. After the generated interest amount reaches the certain level, Flex Dapps will issue their original hoodies to users who deposited DAI into this dapp.
 
 ## How this dapp works
 ![](./docs/dappsImage.png)
-
-## Spec
-* Users can change their rDAI hat to the dapp’s one before using
-* Users can approve of the dapp transferring their DAI to Compound
-* Users can mint rDAI through the dapp
-* Users can redeem their rDAI and the DAI they deposited will be given back to them
-* The generated interest will be redirected to the Flex Dapps’ rDAI account for the hoodie cost
-* Hoodie will be given to the 1st position user automatically when the generated interest amount has reached the cost
-
 ## Waiting list
 ### Case1 - When there is no waiting user
 A user will be given the 1st position in the waiting list
@@ -33,3 +24,21 @@ The 2nd position user will be the next recipient
 
 ### Case7 - When the generated interest amount reaches the hoodie cost but there is no waiting user
 No one receives a hoodie and the generated interest amount will be transferred to Flex Dapps’ rDAI account
+
+## Dapp's functionalities
+* Users can change their rDAI hat to the dapp’s one before using
+* Users can approve of the dapp transferring their DAI to Compound
+* Users can mint rDAI through the dapp
+* Users can redeem their rDAI and the DAI they deposited will be given back to them
+* The generated interest will be redirected to the Flex Dapps’ rDAI account for the hoodie cost
+* Hoodie will be given to the 1st position user automatically when the generated interest amount has reached the cost
+
+## Dapp's tech stack
+* Solidity      -> a smart contract programming language
+* OpenZeppelin  -> a library for writing smart contracts
+* web3.js       -> a collection of libraries to interact with a local or remote ethereum node using a HTTP or IPC connection
+* Truffle       -> a development tool for DApps
+* MetaMask      -> a browser extension that lets you run DApps without being part of the ethereum network as a ethereum node
+* Node.js       -> a Javascript runtime for building server-side or desktop applications
+
+
