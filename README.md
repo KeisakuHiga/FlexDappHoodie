@@ -1,5 +1,5 @@
 # Hoodie DApp overview
-This dapp was built by Keisaku Higa for [Flex Dapps](https://flexdapps.com/about) while his internship. This dapp's smart contract utilizes [rToken contract](https://github.com/decentral-ee/rtoken-contracts) and [Compound](https://github.com/compound-finance) so that the users can deposit their DAI into this dapp to earn interest from Compound protocol. The generated interest will be transferred to Flex Dapps' account using rTokenContract. After the generated interest amount reaches the certain level, Flex Dapps will issue their original hoodies to users who deposited DAI into this dapp.
+This dapp was built by Keisaku Higa while his internship at [Flex Dapps](https://flexdapps.com/about). This dapp's smart contract utilizes [rToken contract](https://github.com/decentral-ee/rtoken-contracts) and [Compound](https://github.com/compound-finance) so that the users can deposit their DAI into this dapp to earn interest from Compound protocol. The generated interest will be transferred to Flex Dapps' account using rTokenContract. After the generated interest amount reaches the certain level, Flex Dapps will issue their original hoodies to users who deposited DAI into this dapp.
 
 ## How this dapp works
 ![](./docs/dappsImage.png)
