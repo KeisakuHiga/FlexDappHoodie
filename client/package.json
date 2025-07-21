@@ -6,8 +6,8 @@
     "big-number": "^2.0.0",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
-    "react-scripts": "2.1.1",
-    "web3": "^1.2.1"
+    "react-scripts": "5.0.1",
+    "web3": "^4.16.0"
   },
   "scripts": {
     "start": "react-scripts start",
